@@ -7,7 +7,7 @@ const flowers = [
   f("Lavender", "Common", 11, 2, 6, 3, 6, ["fragrant", "herb", "calming"], "#9b7ad9"),
   f("Marigold", "Common", 10, 2, 3, 4, 5, ["golden", "hardy", "warm"], "#f28f33"),
   f("Zinnia", "Common", 14, 2, 2, 6, 4, ["colorful", "sturdy", "summer"], "#ff5c9a"),
-  f("Cosmos", "Common", 13, 2, 2, 5, 5, ["airy", "meadow", "delicate"], "#f799c4"),
+  f("Cosmos", "Common", 13, 1, 2, 5, 5, ["airy", "meadow", "delicate"], "#f799c4"),
   f("Black-Eyed Susan", "Uncommon", 24, 3, 2, 5, 6, ["wild", "golden", "pollinator"], "#f4b83f"),
   f("Coneflower", "Uncommon", 26, 3, 3, 5, 7, ["wild", "pollinator", "sturdy"], "#d96cb3"),
   f("Snapdragon", "Uncommon", 28, 3, 3, 7, 4, ["bright", "upright", "playful"], "#f06d7a"),
@@ -65,7 +65,7 @@ const eventPool = [
 
 const startingSeeds = { Daisy: 4, Tulip: 3, Sunflower: 2, Lavender: 2, Marigold: 2, Rose: 1, Cosmos: 1 };
 const plotUpgradeSizes = [12, 16, 20, 24];
-const plotUpgradeCosts = [90, 180, 320];
+const plotUpgradeCosts = [60, 150, 290];
 const qualities = ["Common", "Fine", "Premium", "Masterpiece"];
 const qualityMultipliers = { Common: 1, Fine: 1.35, Premium: 1.8, Masterpiece: 2.5 };
 const strategyOptions = {
@@ -82,12 +82,12 @@ const restorationMilestones = [
   { value: 100, title: "District 1 restored", text: "Bloomhaven Town Square is blooming again." },
 ];
 const taskDefinitions = [
-  { id: "choose-animal", title: "Meet the Farmhand", objective: "Choose an animal character.", reward: { coins: 8 }, complete: () => !!state.species },
-  { id: "plant-3", title: "Wake the Beds", objective: "Plant 3 flowers.", reward: { coins: 12, restoration: 2 }, complete: () => state.stats.planted >= 3 },
-  { id: "harvest-1", title: "First Bloom", objective: "Harvest your first flower.", reward: { coins: 10, note: true }, complete: () => state.stats.harvested >= 1 },
-  { id: "fill-order-1", title: "First Customer", objective: "Fill 1 florist order.", reward: { reputation: 2, restoration: 4 }, complete: () => state.stats.orders >= 1 },
-  { id: "log-steps", title: "A Walk Through Town", objective: "Enter today's steps.", reward: { note: true, seed: "Black-Eyed Susan" }, complete: () => state.stats.stepsLogged >= 1 },
-  { id: "attempt-hybrid", title: "Try a Cross", objective: "Attempt your first hybrid.", reward: { coins: 15, note: true }, complete: () => state.hybridAttempts >= 1 },
+  { id: "choose-animal", title: "Meet the Farmhand", objective: "Choose an animal character.", hint: "Fox helps hybrid discovery, Rabbit speeds growth, Mongoose boosts shop income.", reward: { coins: 8 }, complete: () => !!state.species },
+  { id: "plant-3", title: "Wake the Beds", objective: "Plant 3 flowers.", hint: "Use Starter Mix for Daisy + Cosmos + Tulip. That sets up your first order and first hybrid.", reward: { coins: 12, restoration: 2 }, complete: () => state.stats.planted >= 3 },
+  { id: "harvest-1", title: "First Bloom", objective: "Harvest your first flower.", hint: "End the day once your beds are planted. Ready beds glow darker.", reward: { coins: 10, note: true }, complete: () => state.stats.harvested >= 1 },
+  { id: "fill-order-1", title: "First Customer", objective: "Fill 1 florist order.", hint: "Simple orders accept any quality. Higher-quality requests pay more later.", reward: { reputation: 2, restoration: 4 }, complete: () => state.stats.orders >= 1 },
+  { id: "log-steps", title: "A Walk Through Town", objective: "Enter today's steps.", hint: "Even 0 steps gives an opportunity. Walking adds clues, seeds, and hybrid odds.", reward: { note: true, seed: "Black-Eyed Susan" }, complete: () => state.stats.stepsLogged >= 1 },
+  { id: "attempt-hybrid", title: "Try a Cross", objective: "Attempt your first hybrid.", hint: "Try Daisy + Cosmos in Hybridize. Your first correct hybrid is stabilized.", reward: { coins: 15, note: true }, complete: () => state.hybridAttempts >= 1 },
   { id: "discover-hybrid", title: "A New Bloom", objective: "Discover your first hybrid.", reward: { reputation: 3, restoration: 8, seed: "Iris" }, complete: () => state.stats.hybrids >= 1 },
   { id: "restore-10", title: "First Signs of Bloom", objective: "Reach 10% restoration.", reward: { coins: 20, note: true }, complete: () => state.restoration >= 10 },
   { id: "harvest-fine", title: "A Better Bloom", objective: "Harvest a Fine flower or better.", reward: { coins: 20, reputation: 1 }, complete: () => state.stats.fineHarvests >= 1 },
@@ -153,6 +153,7 @@ function createNewState() {
 function init() {
   state = loadState() || createNewState();
   if (!state.orders.length) state.orders = starterOrders();
+  ensureEarlyOrder();
   render();
   if (!state.hasSeenIntro) {
     state.hasSeenIntro = true;
@@ -200,6 +201,7 @@ function renderTaskCard() {
       <div>
         <strong>${activeTask.title}</strong>
         <p>${activeTask.objective}</p>
+        <p class="task-hint">${activeTask.hint || nextObjectiveHint()}</p>
         <small>Reward: ${rewardText(activeTask.reward)}</small>
       </div>
       <span>${state.completedTasks.length + 1}/${taskDefinitions.length}</span>
@@ -248,6 +250,7 @@ function renderFarm() {
           <div class="quick-actions">
             <button data-action="advance-phase">Advance Time</button>
             <button data-action="next-day">End Day</button>
+            <button data-action="wait-ready">Wait Until Ready</button>
             <button data-action="new-game">New Game</button>
           </div>
         </div>
@@ -260,6 +263,7 @@ function renderFarm() {
             <div class="grid">
               <select id="seed-select">${renderSeedOptions()}</select>
               <button data-action="plant-selected" ${hasSeeds() ? "" : "disabled"}>Plant First Open Plot</button>
+              <button data-action="plant-starter-mix" ${canPlantStarterMix() ? "" : "disabled"}>Plant Starter Mix</button>
             </div>
           </div>
           ${renderPlotExpansion()}
@@ -464,6 +468,11 @@ function renderJournal() {
         <h2>Flower Journal</h2>
         <p><strong>Discovered: ${discoveredCount} / ${flowers.length}</strong></p>
         <div class="progress"><span style="width:${(discoveredCount / flowers.length) * 100}%"></span></div>
+        <div class="journal-stats">
+          <span>${starters.filter((flower) => isDiscovered(flower.name)).length}/${starters.length} seed flowers</span>
+          <span>${hybrids.filter((flower) => isDiscovered(flower.name)).length}/${hybrids.length} hybrids</span>
+          <span>${nextJournalTease()}</span>
+        </div>
       </div>
       <div class="panel">
         <h3>Research Notes</h3>
@@ -480,7 +489,8 @@ function renderFlowerCard(flower) {
     return `
       <div class="flower-card unknown">
         <div class="silhouette"></div>
-        <strong>Undiscovered</strong>
+        <strong>${flower.recipe ? "Mystery Hybrid" : "Undiscovered Seed"}</strong>
+        <span class="rarity-chip">${flower.rarity}</span>
         <p class="muted">${flower.recipe ? clueFor(flower) : "A seed has not reached your farm yet."}</p>
       </div>
     `;
@@ -612,11 +622,13 @@ function handleClick(event) {
   if (action === "new-game") confirmNewGame();
   if (action === "choose-species") chooseSpecies(target.dataset.species);
   if (action === "plant-selected") plantFirstEmpty(document.querySelector("#seed-select")?.value);
+  if (action === "plant-starter-mix") plantStarterMix();
   if (action === "plant-plot") plantAt(Number(target.dataset.index), document.querySelector("#seed-select")?.value);
   if (action === "harvest") harvest(Number(target.dataset.index));
   if (action === "inspect-plot") toast("Still growing. End the day to let the garden rest.");
   if (action === "advance-phase") advancePhase();
   if (action === "next-day") nextDay();
+  if (action === "wait-ready") waitUntilReady();
   if (action === "submit-steps") submitSteps();
   if (action === "fulfill-order") fulfillOrder(Number(target.dataset.index));
   if (action === "sell-flower") sellFlower(target.dataset.flower, target.dataset.quality);
@@ -645,7 +657,16 @@ function plantFirstEmpty(name) {
   plantAt(index, name);
 }
 
-function plantAt(index, name) {
+function plantStarterMix() {
+  ["Daisy", "Cosmos", "Tulip"].forEach((name) => {
+    const index = state.plots.findIndex((plot) => !plot);
+    if (index !== -1 && state.seeds[name] > 0) plantAt(index, name, false);
+  });
+  saveAndRender();
+  toast("Starter Mix planted: Daisy, Cosmos, and Tulip.");
+}
+
+function plantAt(index, name, shouldRender = true) {
   if (!name) return toast("You need seeds before planting.");
   if (!state.species) return toast("Choose an animal character first.");
   if (state.plots[index]) return;
@@ -656,7 +677,11 @@ function plantAt(index, name) {
   state.plots[index] = { name, daysLeft: Math.max(1, Math.ceil(flower.growthDays * (1 - bonus))) };
   state.stats.planted += 1;
   discover(name);
-  saveAndRender();
+  if (shouldRender) saveAndRender();
+}
+
+function canPlantStarterMix() {
+  return !!state.species && ["Daisy", "Cosmos", "Tulip"].every((name) => state.seeds[name] > 0) && state.plots.filter((plot) => !plot).length >= 3;
 }
 
 function harvest(index) {
@@ -666,10 +691,19 @@ function harvest(index) {
   addInventory(plot.name, quality, 1);
   state.plots[index] = null;
   state.stats.harvested += 1;
+  const isFirstHarvest = state.stats.harvested === 1;
   if (qualityRank(quality) >= qualityRank("Fine")) state.stats.fineHarvests += 1;
   state.restoration = clamp(state.restoration + 1, 0, 100);
   saveAndRender();
-  toast(`Harvested a ${quality} ${plot.name}.`);
+  if (isFirstHarvest) {
+    openModal("First Harvest!", `
+      <div class="celebration-flower" style="--bloom:${flowerByName.get(plot.name).color}"><span class="pixel-flower"></span></div>
+      <p>You harvested a <span class="quality-badge quality-${quality}">${quality}</span> <strong>${plot.name}</strong>.</p>
+      <p class="muted">Use it for a customer order, quick sell it, or save it for hybridizing.</p>
+    `);
+  } else {
+    toast(`Harvested a ${quality} ${plot.name}.`);
+  }
 }
 
 function advancePhase() {
@@ -695,8 +729,34 @@ function nextDay() {
   state.stepToday = 0;
   state.events = [];
   state.orders = makeOrders(3);
+  ensureEarlyOrder();
   saveAndRender();
   toast(`Day ${state.day}: ${state.weather}. Check your beds and step events.`);
+}
+
+function waitUntilReady() {
+  if (!state.plots.some(Boolean)) return toast("Plant flowers first, then time can pass.");
+  let daysPassed = 0;
+  while (!state.plots.some((plot) => plot && plot.daysLeft <= 0) && daysPassed < 7) {
+    tickEventEffects();
+    state.day += 1;
+    state.dailyCoinsEarned = 0;
+    state.phase = "Morning";
+    state.weather = random(["Clear", "Drizzle", "Warm Breeze", "Cool Mist"]);
+    state.plots.forEach((plot) => {
+      if (!plot) return;
+      const weatherBoost = state.weather === "Drizzle" || state.growthBoost || activeEffect("growth") ? 1 : 0;
+      plot.daysLeft = Math.max(0, plot.daysLeft - 1 - weatherBoost);
+    });
+    state.growthBoost = false;
+    state.stepToday = 0;
+    state.events = [];
+    state.orders = makeOrders(3);
+    ensureEarlyOrder();
+    daysPassed += 1;
+  }
+  saveAndRender();
+  toast(daysPassed ? `${daysPassed} day${daysPassed === 1 ? "" : "s"} passed. A flower is ready.` : "A flower is already ready.");
 }
 
 function submitSteps() {
@@ -740,7 +800,7 @@ function tryHybrid() {
   const qb = consumeInventory(b, 1, "Common");
   state.hybridAttempts += 1;
   const match = hybrids.find((hybrid) => sameRecipe(hybrid.recipe, [a, b]));
-  const chance = hybridChance(match);
+  const chance = match && !isDiscovered(match.name) && state.stats.hybrids === 0 ? 1 : hybridChance(match);
   state.pollinationBonus = false;
 
   if (match && Math.random() <= chance) {
@@ -792,7 +852,11 @@ function fulfillOrder(index) {
   if (order.type === "Premium" || order.items.some((item) => qualityRank(item.minQuality) >= qualityRank("Premium"))) state.stats.premiumOrders += 1;
   if (state.orders.length < 3) state.orders.push(...makeOrders(2));
   saveAndRender();
-  toast(`${order.type} order filled. Reputation and restoration increased.`);
+  openModal("Order Complete", `
+    <p><strong>${order.customer}</strong> loved the ${order.type.toLowerCase()} order.</p>
+    <p>${earned} coins - ${order.rep} reputation - Bloomhaven looks brighter.</p>
+    <p class="muted">${order.type === "Simple" ? "Simple orders keep the shop moving. Quality orders pay better when you are ready." : "Higher standards mean better rewards."}</p>
+  `);
 }
 
 function sellFlower(name, quality = "Common") {
@@ -917,6 +981,17 @@ function starterOrders() {
     createOrder("Simple", "Mira", [{ name: "Tulip", count: 2, minQuality: "Common" }], "Bright tulips for a windowsill."),
     ...makeOrders(1),
   ];
+}
+
+function ensureEarlyOrder() {
+  if (state.stats.orders > 0) return;
+  const hasEasyOrder = state.orders.some((order) => {
+    const normalized = normalizeOrder(order);
+    return normalized.type === "Simple" && normalized.items.some((item) => ["Daisy", "Tulip", "Cosmos"].includes(item.name) && item.minQuality === "Common");
+  });
+  if (!hasEasyOrder) {
+    state.orders[0] = createOrder("Simple", "Clover Cafe", [{ name: "Daisy", count: 1, minQuality: "Common" }], "A little vase for the breakfast counter.");
+  }
 }
 
 function confirmNewGame() {
@@ -1045,6 +1120,15 @@ function rewardText(reward) {
   if (reward.note) parts.push("research clue");
   if (reward.seed) parts.push(`${reward.seed} seed`);
   return parts.join(", ");
+}
+
+function nextObjectiveHint() {
+  if (!state.species) return "Choose an animal to begin.";
+  if (state.stats.planted < 3) return "Plant a starter mix so orders and hybrid clues line up.";
+  if (state.stats.harvested < 1) return "Advance time until a bed is ready, then harvest.";
+  if (state.stats.orders < 1) return "Open Florist and fill a Simple order.";
+  if (state.stats.hybrids < 1) return "Try Daisy + Cosmos in Hybridize.";
+  return "Keep collecting journal entries and restoration milestones.";
 }
 
 function tickEventEffects() {
@@ -1184,9 +1268,16 @@ function isDiscovered(name) {
 
 function clueFor(flower) {
   if (!flower.recipe) return "Unknown seed source.";
+  if (flower.name === "Meadow Crown" && !isDiscovered("Meadow Crown")) return "First clue: Daisy + Cosmos can create a meadow hybrid.";
   const [a, b] = flower.recipe;
   const traitClue = flower.traits.slice(0, 2).join(" and ");
   return `Clue: ${traitClue} traits may matter. ${state.notes.length > 3 ? `${a} + ${b}?` : "Recipe hidden."}`;
+}
+
+function nextJournalTease() {
+  const nextHybrid = hybrids.find((flower) => !isDiscovered(flower.name));
+  if (!nextHybrid) return "All hybrids found";
+  return `Next mystery: ${nextHybrid.traits[0]} traits`;
 }
 
 function sameRecipe(recipe, pair) {

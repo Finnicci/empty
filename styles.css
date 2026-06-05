@@ -437,6 +437,7 @@ select {
   margin-top: 10px;
 }
 
+.quick-actions button:nth-child(3),
 .quick-actions button:last-child {
   grid-column: 1 / -1;
 }
@@ -471,6 +472,11 @@ select {
 
 .task-card small {
   color: #76522d;
+  font-weight: 700;
+}
+
+.task-hint {
+  color: #5d6b43;
   font-weight: 700;
 }
 
@@ -835,6 +841,30 @@ select {
   margin-bottom: 6px;
   background: #798272;
   clip-path: polygon(50% 0, 62% 32%, 100% 34%, 70% 55%, 82% 100%, 50% 72%, 18% 100%, 30% 55%, 0 34%, 38% 32%);
+}
+
+.journal-stats {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.journal-stats span,
+.rarity-chip {
+  display: inline-block;
+  width: fit-content;
+  padding: 4px 7px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: #fffef8;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.flower-card.unknown .rarity-chip {
+  margin-top: 6px;
+  background: #f8f3dd;
 }
 
 .progress {
