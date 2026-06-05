@@ -620,7 +620,9 @@ select {
 .event-list,
 .journal-grid,
 .district-list,
-.seed-grid {
+.seed-grid,
+.resident-list,
+.story-list {
   display: grid;
   gap: 8px;
 }
@@ -635,6 +637,196 @@ select {
   border-radius: 8px;
   background: #fffef8;
   padding: 10px;
+}
+
+.resident-card,
+.story-card {
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fffef8;
+  padding: 10px;
+}
+
+.resident-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.resident-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.resident-head span {
+  padding: 3px 7px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: #f7f0d2;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.resident-portrait {
+  width: 54px;
+  height: 54px;
+  border: 3px solid #573f2f;
+  border-radius: 8px;
+  background: #e8b06b;
+  position: relative;
+  image-rendering: pixelated;
+  box-shadow: 0 4px 0 rgba(87, 63, 47, 0.18);
+}
+
+.resident-portrait:before,
+.resident-portrait:after {
+  content: "";
+  position: absolute;
+}
+
+.portrait-wren {
+  background: #c88a55;
+}
+
+.portrait-wren:before {
+  width: 22px;
+  height: 14px;
+  left: 15px;
+  top: 8px;
+  background: #7f5136;
+  clip-path: polygon(0 50%, 100% 0, 88% 100%);
+}
+
+.portrait-badger {
+  background: #d6d0c2;
+}
+
+.portrait-badger:before {
+  inset: 7px 19px;
+  background: #3f3a35;
+}
+
+.portrait-badger:after {
+  width: 8px;
+  height: 8px;
+  left: 13px;
+  top: 22px;
+  background: #2e2119;
+  box-shadow: 20px 0 0 #2e2119;
+}
+
+.portrait-finch {
+  background: #9fc9d9;
+}
+
+.portrait-finch:before {
+  width: 18px;
+  height: 12px;
+  right: -5px;
+  top: 20px;
+  background: #f0b84b;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.portrait-fox {
+  background: #d98245;
+}
+
+.portrait-fox:before,
+.portrait-fox:after {
+  width: 14px;
+  height: 18px;
+  top: -11px;
+  background: #d98245;
+  border: 3px solid #573f2f;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.portrait-fox:before {
+  left: 7px;
+}
+
+.portrait-fox:after {
+  right: 7px;
+}
+
+.portrait-rabbit {
+  background: #f2e7d5;
+}
+
+.portrait-rabbit:before,
+.portrait-rabbit:after {
+  width: 11px;
+  height: 25px;
+  top: -19px;
+  background: #f2e7d5;
+  border: 3px solid #573f2f;
+  border-radius: 8px 8px 2px 2px;
+}
+
+.portrait-rabbit:before {
+  left: 10px;
+}
+
+.portrait-rabbit:after {
+  right: 10px;
+}
+
+.friendship-bar {
+  height: 14px;
+  border: 2px solid #573f2f;
+  border-radius: 999px;
+  background: #ede1ba;
+  overflow: hidden;
+}
+
+.friendship-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #8bcf68, #f2c94c, #e86f8c);
+}
+
+.resident-likes {
+  margin: 6px 0;
+  color: #5d6b43;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.resident-perk {
+  margin: 6px 0;
+  padding: 6px;
+  border: 2px solid #efe4bd;
+  border-radius: 8px;
+  background: #fff8df;
+  color: #76522d;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.resident-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.resident-actions button {
+  min-height: 38px;
+  padding: 4px 6px;
+}
+
+.dialogue-row {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.story-card {
+  background: #fff8df;
 }
 
 .event-card {

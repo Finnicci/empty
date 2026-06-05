@@ -73,6 +73,78 @@ const strategyOptions = {
   Boutique: { label: "Boutique Florist", description: "More premium orders, higher rewards, quality matters more." },
   Collector: { label: "Collector's Corner", description: "More hybrid and rare flower requests." },
 };
+const residents = [
+  {
+    id: "wendy",
+    name: "Wendy Wren",
+    portrait: "wren",
+    occupation: "Wedding planner",
+    personality: "Warm, organized, secretly sentimental.",
+    likes: ["romantic", "elegant"],
+    dialogue: {
+      early: "A little color in Town Square changes how people stand. They linger instead of hurrying through.",
+      friend: "Your grandfather used to save the best roses for tiny ceremonies. He said small vows deserved grand flowers.",
+      story: "Some wedding ledgers mention the Five Great Gardens. Couples came here just to be married near them.",
+    },
+    request: "I need flowers for a small wedding. Nothing grand, just something that feels remembered.",
+  },
+  {
+    id: "ben",
+    name: "Ben Badger",
+    portrait: "badger",
+    occupation: "Clover Cafe owner",
+    personality: "Practical, gentle, always thinking in seasonal menus.",
+    likes: ["fragrant"],
+    dialogue: {
+      early: "The cafe smells better when the florist is busy. Funny how hope can have a scent.",
+      friend: "Lavender tea was your grandfather's favorite. He always traded a clue for a cup.",
+      story: "He left notes tucked in cafe books. I thought they were recipes until the sketches started blooming.",
+    },
+    request: "I'm creating a new lavender tea display. Could you bring something fragrant for the counter?",
+  },
+  {
+    id: "finch",
+    name: "Professor Finch",
+    portrait: "finch",
+    occupation: "Botanical Society researcher",
+    personality: "Precise, excitable, prone to whispering at petals.",
+    likes: ["rare", "hybrid"],
+    dialogue: {
+      early: "Bloomhaven's decline is not natural. Rare cultivars vanished from records and gardens at the same time.",
+      friend: "Your grandfather was mapping hybrids that responded to moonlight. Most of those pages are missing.",
+      story: "The Five Great Gardens were not just places. They were living collections, each with a guardian flower.",
+    },
+    request: "Bring me a hybrid flower I haven't studied. Even one petal could confirm a theory.",
+  },
+  {
+    id: "rosewood",
+    name: "Rosewood Fox",
+    portrait: "fox",
+    occupation: "Hotel manager",
+    personality: "Elegant, dryly funny, obsessed with guest impressions.",
+    likes: ["luxury", "lush", "romantic"],
+    dialogue: {
+      early: "Guests ask what Bloomhaven is known for. I would prefer an answer more poetic than 'parking'.",
+      friend: "The old hotel guestbook is full of flower hunters. They checked in with empty cases and left with legends.",
+      story: "One entry says your grandfather found a bloom that opened only when the whole town celebrated.",
+    },
+    request: "A guest suite needs a showpiece bloom. Something lush enough to make people lower their voices.",
+  },
+  {
+    id: "millie",
+    name: "Millie Rabbit",
+    portrait: "rabbit",
+    occupation: "Town gardener",
+    personality: "Earnest, muddy-kneed, protective of native plants.",
+    likes: ["native", "wild", "meadow", "pollinator"],
+    dialogue: {
+      early: "The wild beds remember more than we do. Give them time and they tell on themselves.",
+      friend: "Your grandfather taught me to leave room for volunteers. 'The best flowers arrive uninvited,' he said.",
+      story: "One missing journal page described a garden that grew back overnight after every harvest.",
+    },
+    request: "The town beds need native color. Bring me something wild or meadow-grown.",
+  },
+];
 const restorationMilestones = [
   { value: 10, title: "Town flower beds cleaned", text: "The first public beds are weeded and ready for color." },
   { value: 25, title: "Clover Cafe rumors", text: "Cafe regulars begin sharing flower pairing gossip." },
@@ -122,6 +194,9 @@ function createNewState() {
     seeds: { ...startingSeeds },
     inventory: {},
     discovered: ["Daisy", "Tulip", "Sunflower", "Lavender", "Marigold", "Rose", "Cosmos"],
+    residents: createResidentState(),
+    storyEntries: [],
+    journalPages: 0,
     notes: [researchNotes[0]],
     events: [],
     orders: [],
@@ -148,6 +223,10 @@ function createNewState() {
     },
     hasSeenIntro: false,
   };
+}
+
+function createResidentState() {
+  return Object.fromEntries(residents.map((resident) => [resident.id, { friendship: 0, met: false }]));
 }
 
 function init() {
@@ -355,7 +434,7 @@ function renderPlotExpansion() {
   if (!nextSize) {
     return `<div class="panel"><h2>Farm Expansion</h2><p class="tagline">All 24 beds are unlocked.</p></div>`;
   }
-  const cost = plotUpgradeCosts[plotUpgradeSizes.indexOf(state.maxPlots)];
+  const cost = plotUpgradeCost();
   return `
     <div class="panel">
       <h2>Farm Expansion</h2>
@@ -391,6 +470,11 @@ function renderFlorist() {
           <div class="order-list">${state.orders.map(renderOrder).join("")}</div>
         </div>
         <div class="panel">
+          <h3>Bloomhaven Residents</h3>
+          <p class="tagline">Friendship grows when flowers matter to someone.</p>
+          <div class="resident-list">${residents.map(renderResidentCard).join("")}</div>
+        </div>
+        <div class="panel">
           <h3>Flower Inventory</h3>
           <div class="inventory-list">${renderInventory(true)}</div>
         </div>
@@ -409,13 +493,13 @@ function renderOrder(order, index) {
     <div class="order-card order-${normalized.type}">
       <div class="order-head">
         <strong>${normalized.customer}</strong>
-        <span>${normalized.type}</span>
+        <span>${normalized.residentId ? "Personal" : normalized.type}</span>
       </div>
       <p>${normalized.flavor}</p>
       <div class="order-items">
         ${normalized.items.map((item) => `<span>${item.count} ${item.name}<small>${qualityRequirementText(item.minQuality)}</small></span>`).join("")}
       </div>
-      <p class="muted">${normalized.coins} coins - ${normalized.rep} reputation</p>
+      <p class="muted">${normalized.coins} coins - ${normalized.rep} reputation${normalized.residentId ? ` - friendship +${normalized.friendship || 8}` : ""}</p>
       <button data-action="fulfill-order" data-index="${index}" ${canFulfill(normalized) ? "" : "disabled"}>Fill Order</button>
     </div>
   `;
@@ -478,9 +562,43 @@ function renderJournal() {
         <h3>Research Notes</h3>
         <div class="event-list">${state.notes.map((note) => `<div class="event-card">${note}</div>`).join("")}</div>
       </div>
+      <div class="panel">
+        <h3>Town Journal</h3>
+        <p class="tagline">${residentsMet()} / ${residents.length} residents met - ${state.journalPages} missing journal page${state.journalPages === 1 ? "" : "s"} found</p>
+        <div class="story-list">${renderStoryEntries()}</div>
+        <div class="resident-list">${residents.map(renderResidentCard).join("")}</div>
+      </div>
       <div class="journal-grid">${flowers.map(renderFlowerCard).join("")}</div>
     </section>
   `;
+}
+
+function renderResidentCard(resident) {
+  const friendship = friendshipFor(resident.id);
+  return `
+    <div class="resident-card">
+      <div class="resident-portrait portrait-${resident.portrait}"></div>
+      <div>
+        <div class="resident-head">
+          <strong>${resident.name}</strong>
+          <span>${friendship}/100</span>
+        </div>
+        <p class="muted">${resident.occupation} - ${resident.personality}</p>
+        <div class="friendship-bar"><span style="width:${friendship}%"></span></div>
+        <p class="resident-likes">Likes: ${resident.likes.join(", ")}</p>
+        <p class="resident-perk">${residentPerkText(resident)}</p>
+        <div class="resident-actions">
+          <button data-action="talk-resident" data-resident="${resident.id}">Talk</button>
+          <button data-action="gift-resident" data-resident="${resident.id}" ${canGiftResident(resident) ? "" : "disabled"}>Deliver Favorite</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderStoryEntries() {
+  if (!state.storyEntries.length) return '<p class="muted">Stories unlock through friendship, discoveries, and restoration.</p>';
+  return state.storyEntries.map((entry) => `<div class="story-card"><strong>${entry.title}</strong><p>${entry.text}</p></div>`).join("");
 }
 
 function renderFlowerCard(flower) {
@@ -635,6 +753,8 @@ function handleClick(event) {
   if (action === "buy-seed") buySeed(target.dataset.flower);
   if (action === "buy-plots") buyPlots();
   if (action === "switch-strategy") switchStrategy(target.dataset.strategy);
+  if (action === "talk-resident") talkResident(target.dataset.resident);
+  if (action === "gift-resident") giftResident(target.dataset.resident);
   if (action === "try-hybrid") tryHybrid();
   if (action === "confirm-new-game") newGame();
   if (action === "close-modal") closeModal();
@@ -847,6 +967,10 @@ function fulfillOrder(index) {
   trackCoins(earned);
   state.reputation += order.rep;
   state.restoration = clamp(state.restoration + order.rep * 2, 0, 100);
+  if (order.residentId) {
+    addFriendship(order.residentId, order.friendship || 8);
+    unlockResidentStory(order.residentId);
+  }
   state.orders.splice(index, 1);
   state.stats.orders += 1;
   if (order.type === "Premium" || order.items.some((item) => qualityRank(item.minQuality) >= qualityRank("Premium"))) state.stats.premiumOrders += 1;
@@ -885,7 +1009,7 @@ function switchStrategy(strategy) {
 function buyPlots() {
   const nextSize = nextPlotSize();
   if (!nextSize) return;
-  const cost = plotUpgradeCosts[plotUpgradeSizes.indexOf(state.maxPlots)];
+  const cost = plotUpgradeCost();
   if (state.coins < cost) return;
   state.coins -= cost;
   while (state.plots.length < nextSize) state.plots.push(null);
@@ -907,7 +1031,14 @@ function buySeed(name) {
 }
 
 function seedCost(flower) {
-  return Math.max(6, Math.round(flower.value * 0.65));
+  const discount = friendshipFor("ben") >= 50 ? 0.9 : 1;
+  return Math.max(6, Math.round(flower.value * 0.65 * discount));
+}
+
+function plotUpgradeCost() {
+  const base = plotUpgradeCosts[plotUpgradeSizes.indexOf(state.maxPlots)];
+  const discount = friendshipFor("millie") >= 50 ? 0.9 : 1;
+  return Math.round(base * discount);
 }
 
 function canFulfill(order) {
@@ -934,6 +1065,7 @@ function buildOrder() {
   if (strategy === "Collector") type = roll < 0.25 ? "Bouquet" : roll < 0.5 ? "Premium" : roll < 0.82 ? "Collector" : "Rush";
 
   const customers = ["Mira", "Jun", "Clover Cafe", "Mayor Poppy", "Theo", "Nia", "General Store", "Botanical Society"];
+  if (Math.random() < personalRequestChance()) return buildResidentRequest();
   const customer = random(customers);
   if (type === "Simple") {
     const flower = random(starters.slice(0, 7));
@@ -959,6 +1091,41 @@ function buildOrder() {
   const discoveredHybrids = state.discovered.map((name) => flowerByName.get(name)).filter((flower) => flower?.recipe);
   const flower = discoveredHybrids.length ? random(discoveredHybrids) : random(starters.slice(10, 18));
   return createOrder("Collector", "Botanical Society", [{ name: flower.name, count: 1, minQuality: "Common" }], "A collector wants something unusual for the society shelves.", 1.8, 2);
+}
+
+function personalRequestChance() {
+  if (state.stats.orders < 1) return 0.25;
+  if (state.shopStrategy === "Collector") return 0.55;
+  if (state.restoration >= 25) return 0.45;
+  return 0.35;
+}
+
+function buildResidentRequest() {
+  const pool = state.stats.orders < 1
+    ? residents.filter((resident) => ["wendy", "ben", "millie"].includes(resident.id))
+    : residents.filter((resident) => resident.id !== "finch" || state.stats.hybrids > 0);
+  const resident = random(pool);
+  const favorite = flowerForResident(resident);
+  const minQuality = state.shopStrategy === "Boutique" && state.stats.orders > 0 ? "Fine" : "Common";
+  const type = resident.id === "finch" ? "Collector" : minQuality === "Fine" ? "Bouquet" : "Simple";
+  const order = createOrder(type, resident.name, [{ name: favorite.name, count: 1, minQuality }], resident.request, 1.25, 1);
+  order.residentId = resident.id;
+  order.friendship = 10;
+  return order;
+}
+
+function flowerForResident(resident) {
+  const discoveredFlowers = flowers.filter((flower) => isDiscovered(flower.name));
+  const candidates = discoveredFlowers.filter((flower) => residentLikesFlower(resident, flower));
+  if (candidates.length) return random(candidates);
+  const fallback = {
+    wendy: "Rose",
+    ben: "Lavender",
+    finch: "Meadow Crown",
+    rosewood: "Peony",
+    millie: "Daisy",
+  }[resident.id];
+  return flowerByName.get(fallback) || flowerByName.get("Daisy");
 }
 
 function createOrder(type, customer, items, flavor, rewardBoost = 1, repBoost = 0) {
@@ -1073,6 +1240,7 @@ function addSpecificHybridNote() {
   if (!hidden) return addNote(0);
   const note = `${hidden.recipe[0]} and ${hidden.recipe[1]} may reveal ${hidden.traits[0]} petals.`;
   if (!state.notes.includes(note)) state.notes.push(note);
+  state.journalPages += 1;
 }
 
 function addResearchProgress(match, pair) {
@@ -1082,6 +1250,142 @@ function addResearchProgress(match, pair) {
     return;
   }
   addNote(Math.min(state.notes.length, researchNotes.length - 1));
+}
+
+function residentLikesFlower(resident, flower) {
+  const tags = [flower.rarity.toLowerCase(), ...flower.traits.map((trait) => trait.toLowerCase())];
+  if (flower.recipe) tags.push("hybrid");
+  return resident.likes.some((like) => tags.includes(like.toLowerCase()));
+}
+
+function friendshipFor(id) {
+  ensureResident(id);
+  return state.residents[id].friendship;
+}
+
+function ensureResident(id) {
+  if (!state.residents) state.residents = createResidentState();
+  if (!state.residents[id]) state.residents[id] = { friendship: 0, met: false };
+}
+
+function addFriendship(id, amount) {
+  ensureResident(id);
+  state.residents[id].met = true;
+  state.residents[id].friendship = clamp(state.residents[id].friendship + amount, 0, 100);
+  if (state.residents[id].friendship >= 20) unlockResidentStory(id);
+  if (state.residents[id].friendship >= 50) addResidentClue(id);
+}
+
+function canGiftResident(resident) {
+  return Object.keys(state.inventory).some((name) => {
+    const flower = flowerByName.get(name);
+    return flower && totalFlowerCount(name) > 0 && residentLikesFlower(resident, flower);
+  });
+}
+
+function giftResident(id) {
+  const resident = residents.find((item) => item.id === id);
+  if (!resident) return;
+  const giftName = Object.keys(state.inventory).find((name) => {
+    const flower = flowerByName.get(name);
+    return flower && totalFlowerCount(name) > 0 && residentLikesFlower(resident, flower);
+  });
+  if (!giftName) return toast(`${resident.name} would love a flower with ${resident.likes.join(" or ")} traits.`);
+  const quality = consumeInventory(giftName, 1, "Common");
+  const gained = 6 + qualityRank(quality) * 3 + (flowerByName.get(giftName).recipe ? 4 : 0);
+  addFriendship(id, gained);
+  state.restoration = clamp(state.restoration + 1, 0, 100);
+  saveAndRender();
+  openModal(`${resident.name} Smiles`, `
+    <div class="dialogue-row">
+      <div class="resident-portrait portrait-${resident.portrait}"></div>
+      <p>"${giftDialogue(resident, giftName)}"</p>
+    </div>
+    <p class="muted">Friendship +${gained}. You delivered a ${quality} ${giftName}.</p>
+  `);
+}
+
+function talkResident(id) {
+  const resident = residents.find((item) => item.id === id);
+  if (!resident) return;
+  ensureResident(id);
+  state.residents[id].met = true;
+  const friendship = friendshipFor(id);
+  const line = dialogueFor(resident, friendship);
+  addFriendship(id, friendship ? 1 : 2);
+  saveAndRender();
+  openModal(resident.name, `
+    <div class="dialogue-row">
+      <div class="resident-portrait portrait-${resident.portrait}"></div>
+      <div>
+        <p><strong>${resident.occupation}</strong></p>
+        <p>"${line}"</p>
+      </div>
+    </div>
+  `);
+}
+
+function dialogueFor(resident, friendship) {
+  if (friendship >= 50 || state.journalPages >= 2) return resident.dialogue.story;
+  if (friendship >= 20 || state.restoration >= 25) return resident.dialogue.friend;
+  if (resident.id === "finch" && state.stats.hybrids > 0) return "A living hybrid already? Your grandfather would have pretended not to be impressed, then written six pages.";
+  if (state.restoration >= 40) return "The Botanical Society lights are on again. That alone changes the town's posture.";
+  return resident.dialogue.early;
+}
+
+function giftDialogue(resident, flowerName) {
+  const lines = {
+    wendy: `This ${flowerName} has ceremony in it. I can already see the ribbon color.`,
+    ben: `${flowerName} on the counter will make the whole cafe slow down for a breath.`,
+    finch: `Excellent. I will study this ${flowerName} with entirely normal enthusiasm.`,
+    rosewood: `${flowerName} has presence. The hotel lobby may survive another week.`,
+    millie: `This ${flowerName} belongs in Bloomhaven soil. Thank you for noticing.`,
+  };
+  return lines[resident.id] || `This ${flowerName} feels like Bloomhaven waking up.`;
+}
+
+function unlockResidentStory(id) {
+  const resident = residents.find((item) => item.id === id);
+  if (!resident) return;
+  const key = `${id}-story`;
+  if (state.storyEntries.some((entry) => entry.id === key)) return;
+  const friendship = friendshipFor(id);
+  if (friendship < 20 && state.restoration < 25) return;
+  state.storyEntries.push({
+    id: key,
+    title: `${resident.name}'s Memory`,
+    text: resident.dialogue.friend,
+  });
+  if (friendship >= 50 || id === "finch") {
+    state.journalPages += 1;
+  }
+}
+
+function addResidentClue(id) {
+  const clue = {
+    wendy: "Wendy's note: Romantic and elegant flowers were once grown near the wedding arbor.",
+    ben: "Ben's note: Fragrant blooms were pressed between missing cafe recipe pages.",
+    finch: "Professor Finch's note: Hybrid specimens match your grandfather's coded journal marks.",
+    rosewood: "Rosewood's note: Luxury blooms drew flower hunters to the old hotel.",
+    millie: "Millie's note: Wild native flowers may know where the first garden slept.",
+  }[id];
+  if (clue && !state.notes.includes(clue)) state.notes.push(clue);
+}
+
+function residentsMet() {
+  return residents.filter((resident) => state.residents?.[resident.id]?.met).length;
+}
+
+function residentPerkText(resident) {
+  const unlocked = friendshipFor(resident.id) >= 50;
+  const perks = {
+    wendy: "50 friendship: romantic hybrid clue.",
+    ben: `50 friendship: seed prices ${unlocked ? "discounted" : "discount"}.`,
+    finch: "50 friendship: rare hybrid research clue.",
+    rosewood: "50 friendship: luxury customer rumor.",
+    millie: `50 friendship: bed expansion ${unlocked ? "discounted" : "discount"}.`,
+  };
+  return perks[resident.id] || "Friendship unlocks clues and stories.";
 }
 
 function failedPairHint(a, b) {
@@ -1259,6 +1563,10 @@ function hybridFlavor(flower) {
 function discover(name) {
   if (state.discovered.includes(name)) return false;
   state.discovered.push(name);
+  const flower = flowerByName.get(name);
+  residents.forEach((resident) => {
+    if (flower && residentLikesFlower(resident, flower)) addFriendship(resident.id, flower.recipe ? 4 : 2);
+  });
   return true;
 }
 
@@ -1323,6 +1631,9 @@ function loadState() {
     if (!Array.isArray(migrated.events)) migrated.events = [];
     if (!Array.isArray(migrated.orders)) migrated.orders = starterOrders();
     if (!Array.isArray(migrated.plots)) migrated.plots = createNewState().plots;
+    migrated.residents = migrateResidents(parsed.residents);
+    migrated.storyEntries = Array.isArray(parsed.storyEntries) ? parsed.storyEntries : [];
+    migrated.journalPages = Number(parsed.journalPages || 0);
     migrated.stats = { ...createNewState().stats, ...(parsed.stats || {}) };
     migrated.eventEffects = { ...(parsed.eventEffects || {}) };
     migrated.completedTasks = parsed.completedTasks || [];
@@ -1350,6 +1661,23 @@ function migrateInventory(inventory) {
     qualities.forEach((quality) => {
       migrated[name][quality] = Number(value?.[quality] || 0);
     });
+  });
+  return migrated;
+}
+
+function migrateResidents(saved) {
+  const migrated = createResidentState();
+  if (!saved) return migrated;
+  residents.forEach((resident) => {
+    const value = saved[resident.id];
+    if (typeof value === "number") {
+      migrated[resident.id] = { friendship: value, met: value > 0 };
+      return;
+    }
+    migrated[resident.id] = {
+      friendship: clamp(Number(value?.friendship || 0), 0, 100),
+      met: !!value?.met,
+    };
   });
   return migrated;
 }
