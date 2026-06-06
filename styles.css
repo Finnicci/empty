@@ -1,19 +1,22 @@
 :root {
-  --ink: #27313a;
-  --muted: #66737d;
-  --paper: #fff8df;
-  --panel: #fffdf2;
-  --line: #d9cfa7;
-  --leaf: #5fb45e;
-  --leaf-dark: #3d884c;
-  --sky: #8bd7ff;
-  --water: #4fb7d5;
-  --rose: #e86f8c;
-  --gold: #f4b83f;
-  --violet: #8470d1;
-  --soil: #8a5a3c;
-  --night: #26384f;
-  --shadow: 0 8px 0 rgba(76, 58, 38, 0.16);
+  --ink: #2f362f;
+  --muted: #6f7767;
+  --paper: #fff7dc;
+  --panel: #fffaf0;
+  --panel-soft: #fbf1d0;
+  --line: #d8c99d;
+  --wood: #6d4b34;
+  --wood-soft: #b98957;
+  --leaf: #71b86b;
+  --leaf-dark: #4c8d50;
+  --sky: #9edcf5;
+  --water: #69b9cf;
+  --rose: #df7892;
+  --gold: #edbf53;
+  --violet: #9181c9;
+  --soil: #8d6348;
+  --night: #334158;
+  --shadow: 0 5px 0 rgba(109, 75, 52, 0.16);
 }
 
 * {
@@ -22,7 +25,11 @@
 
 body {
   margin: 0;
-  background: #e7f7d4;
+  background:
+    linear-gradient(90deg, rgba(216, 201, 157, 0.13) 1px, transparent 1px),
+    linear-gradient(rgba(216, 201, 157, 0.13) 1px, transparent 1px),
+    #edf7dd;
+  background-size: 18px 18px;
   color: var(--ink);
   font-family: "Trebuchet MS", Verdana, sans-serif;
   letter-spacing: 0;
@@ -35,12 +42,12 @@ select {
 }
 
 button {
-  border: 2px solid #573f2f;
-  background: #fff3b5;
+  border: 2px solid var(--wood);
+  background: #fff1b8;
   color: var(--ink);
   min-height: 48px;
   border-radius: 8px;
-  box-shadow: 0 4px 0 #b98e48;
+  box-shadow: 0 3px 0 var(--wood-soft);
   cursor: pointer;
   font-weight: 700;
   padding: 8px 10px;
@@ -48,7 +55,7 @@ button {
 
 button:active {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 #b98e48;
+  box-shadow: 0 1px 0 var(--wood-soft);
 }
 
 button:disabled {
@@ -63,7 +70,7 @@ select {
   border-radius: 8px;
   min-height: 48px;
   padding: 0 10px;
-  background: #fffef8;
+  background: #fffdf5;
   color: var(--ink);
 }
 
@@ -80,7 +87,9 @@ select {
   grid-template-columns: 1fr auto;
   gap: 8px;
   padding: 10px;
-  background: rgba(255, 248, 223, 0.96);
+  background:
+    linear-gradient(90deg, rgba(113, 184, 107, 0.12), transparent 45%),
+    rgba(255, 247, 220, 0.97);
   border-bottom: 2px solid var(--line);
 }
 
@@ -94,9 +103,9 @@ select {
 .logo {
   width: 34px;
   height: 34px;
-  border: 2px solid #573f2f;
+  border: 2px solid var(--wood);
   background:
-    linear-gradient(90deg, transparent 40%, #573f2f 40% 60%, transparent 60%),
+    linear-gradient(90deg, transparent 40%, var(--wood) 40% 60%, transparent 60%),
     radial-gradient(circle at 50% 38%, #ff7ea8 0 23%, transparent 24%),
     radial-gradient(circle at 35% 52%, #ffcf4d 0 20%, transparent 21%),
     radial-gradient(circle at 65% 54%, #75cb71 0 20%, transparent 21%),
@@ -130,7 +139,7 @@ select {
   padding: 4px 7px;
   border: 2px solid var(--line);
   border-radius: 999px;
-  background: #fffdf2;
+  background: #fffdf5;
   white-space: nowrap;
 }
 
@@ -158,7 +167,9 @@ select {
   grid-template-columns: repeat(5, 1fr);
   gap: 4px;
   padding: 8px;
-  background: rgba(255, 253, 242, 0.98);
+  background:
+    linear-gradient(0deg, rgba(216, 201, 157, 0.2), transparent),
+    rgba(255, 250, 240, 0.98);
   border-top: 2px solid var(--line);
 }
 
@@ -166,28 +177,29 @@ select {
   min-height: 58px;
   box-shadow: none;
   border-color: var(--line);
-  background: #f7f0d2;
+  background: #f8edc9;
   font-size: 0.72rem;
   padding: 6px 3px;
 }
 
 .nav-button.active {
-  background: #b8e986;
-  border-color: #4f8b45;
+  background: #cce9ad;
+  border-color: var(--leaf-dark);
 }
 
 .hero-scene {
   position: relative;
   overflow: hidden;
   min-height: 500px;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   border-radius: 8px;
-  background: linear-gradient(var(--sky) 0 42%, #bce88d 42% 100%);
+  background:
+    linear-gradient(var(--sky) 0 42%, #cce9ad 42% 100%);
   box-shadow: var(--shadow);
 }
 
 .hero-scene.evening {
-  background: linear-gradient(#ffad79 0 38%, #f8d07b 38% 44%, #a8d879 44% 100%);
+  background: linear-gradient(#f2b384 0 38%, #efd179 38% 44%, #b7d886 44% 100%);
 }
 
 .hero-scene.night {
@@ -261,8 +273,8 @@ select {
 .building {
   width: 68px;
   height: 58px;
-  border: 3px solid #573f2f;
-  background: #d0a36b;
+  border: 3px solid var(--wood);
+  background: #d2a56f;
   image-rendering: pixelated;
   position: relative;
 }
@@ -274,13 +286,13 @@ select {
   right: -5px;
   top: -18px;
   height: 18px;
-  background: #d95e55;
-  border: 3px solid #573f2f;
+  background: #d97867;
+  border: 3px solid var(--wood);
   clip-path: polygon(0 100%, 50% 0, 100% 100%);
 }
 
 .building.colorful {
-  background: #f2c46d;
+  background: #efc777;
 }
 
 .building.locked {
@@ -297,7 +309,7 @@ select {
   padding: 54px 12px 14px;
   background:
     repeating-linear-gradient(90deg, transparent 0 18px, rgba(255, 255, 255, 0.08) 18px 20px),
-    linear-gradient(#8bd36b, #6fbd5e);
+    linear-gradient(#9ad47d, #79bd65);
 }
 
 .grass {
@@ -337,7 +349,7 @@ select {
   position: absolute;
   inset: 4px 7px 16px;
   background: var(--player-color, #d98245);
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   border-radius: 9px 9px 6px 6px;
 }
 
@@ -349,7 +361,7 @@ select {
   bottom: 5px;
   height: 18px;
   background: #74b4e1;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
 }
 
 .plots {
@@ -362,7 +374,7 @@ select {
 
 .plot {
   min-height: 64px;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   border-radius: 6px;
   background:
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 8px, transparent 8px 16px),
@@ -443,7 +455,11 @@ select {
 }
 
 .panel {
-  background: var(--panel);
+  background:
+    linear-gradient(90deg, rgba(216, 201, 157, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(216, 201, 157, 0.1) 1px, transparent 1px),
+    var(--panel);
+  background-size: 16px 16px;
   border: 2px solid var(--line);
   border-radius: 8px;
   padding: 12px;
@@ -458,11 +474,11 @@ select {
   align-items: center;
   margin-bottom: 10px;
   padding: 12px;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   border-radius: 8px;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.34), transparent),
-    #fff0a8;
+    #fff0b7;
   box-shadow: var(--shadow);
 }
 
@@ -485,9 +501,9 @@ select {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 2px solid #573f2f;
+  border: 2px solid var(--wood);
   border-radius: 8px;
-  background: #b8e986;
+  background: #cce9ad;
   font-weight: 700;
 }
 
@@ -635,7 +651,7 @@ select {
 .seed-card {
   border: 2px solid var(--line);
   border-radius: 8px;
-  background: #fffef8;
+  background: #fffdf5;
   padding: 10px;
 }
 
@@ -643,7 +659,7 @@ select {
 .story-card {
   border: 2px solid var(--line);
   border-radius: 8px;
-  background: #fffef8;
+  background: #fffdf5;
   padding: 10px;
 }
 
@@ -831,6 +847,9 @@ select {
 
 .event-card {
   border-left-width: 8px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.44), transparent),
+    #fffdf5;
 }
 
 .event-card small {
@@ -924,7 +943,7 @@ select {
   padding: 4px 7px;
   border: 2px solid var(--line);
   border-radius: 999px;
-  background: #f7f0d2;
+  background: #f8edc9;
   font-size: 0.74rem;
   font-weight: 700;
 }
@@ -941,7 +960,7 @@ select {
   padding: 7px;
   border: 2px solid #efe4bd;
   border-radius: 8px;
-  background: #fffaf0;
+  background: #fff9e8;
   font-weight: 700;
 }
 
@@ -957,7 +976,7 @@ select {
 }
 
 .order-Bouquet {
-  background: #f6fff1;
+  background: #f4ffef;
   border-color: #9bd37b;
 }
 
@@ -987,7 +1006,7 @@ select {
 .quality-badge {
   display: inline-block;
   padding: 4px 7px;
-  border: 2px solid #573f2f;
+  border: 2px solid var(--wood);
   border-radius: 999px;
   background: #eee8d1;
   font-size: 0.74rem;
@@ -1020,18 +1039,46 @@ select {
 
 .flower-card {
   min-height: 116px;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(113, 184, 107, 0.08), transparent 46%),
+    #fffdf5;
 }
 
 .flower-card.unknown {
-  background: #edf0e7;
-  color: #6d746b;
+  background:
+    linear-gradient(90deg, rgba(145, 129, 201, 0.08), transparent 50%),
+    #eef1e8;
+  color: #68705f;
+}
+
+.card-bloom {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 8px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0 8px, transparent 8px 16px),
+    #edf7dd;
+}
+
+.card-bloom .pixel-flower {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  transform: scale(1.1);
 }
 
 .silhouette {
   width: 44px;
   height: 44px;
   margin-bottom: 6px;
-  background: #798272;
+  background: #7f896f;
   clip-path: polygon(50% 0, 62% 32%, 100% 34%, 70% 55%, 82% 100%, 50% 72%, 18% 100%, 30% 55%, 0 34%, 38% 32%);
 }
 
@@ -1076,7 +1123,7 @@ select {
 
 .restoration-panel {
   background:
-    linear-gradient(90deg, rgba(184, 233, 134, 0.38), rgba(255, 243, 181, 0.6)),
+    linear-gradient(90deg, rgba(204, 233, 173, 0.42), rgba(255, 241, 184, 0.58)),
     var(--panel);
 }
 
@@ -1099,19 +1146,19 @@ select {
   border: 2px dashed var(--line);
   border-radius: 8px;
   padding: 8px;
-  background: #f6f1dc;
+  background: #f8efd0;
   color: var(--muted);
 }
 
 .milestone.unlocked {
   border-style: solid;
   border-color: #4f8b45;
-  background: #e8ffd8;
+  background: #ecf9d7;
   color: var(--ink);
 }
 
 .district-card.restored {
-  background: #f1ffe7;
+  background: #f3fee9;
   border-color: #8bcf68;
 }
 

@@ -615,6 +615,7 @@ function renderFlowerCard(flower) {
   }
   return `
     <div class="flower-card">
+      <div class="card-bloom" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
       <strong>${flower.name}</strong>
       <p class="muted">${flower.rarity} - ${flower.value} coins - ${flower.growthDays} days</p>
       <p>Fragrance ${flower.fragrance} - Beauty ${flower.beauty} - Pollinators ${flower.pollinator}</p>
