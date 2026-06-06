@@ -391,17 +391,38 @@ function renderGrass() {
 
 function renderPlot(plot, index) {
   if (!plot) {
-    return `<button class="plot" data-action="plant-plot" data-index="${index}"><span class="plot-name">Empty Bed</span><span class="plot-meta">Tap to plant</span></button>`;
+    return `<button class="plot empty" data-action="plant-plot" data-index="${index}"><span class="plot-name">Empty Bed</span><span class="plot-meta">Fresh soil</span><span class="plot-stage stage-empty"></span></button>`;
   }
   const flower = flowerByName.get(plot.name);
   const ready = plot.daysLeft <= 0;
+  const stage = plotStage(plot, flower);
   return `
-    <button class="plot ${ready ? "ready" : ""}" data-action="${ready ? "harvest" : "inspect-plot"}" data-index="${index}">
+    <button class="plot ${ready ? "ready" : ""} stage-${stage}" data-action="${ready ? "harvest" : "inspect-plot"}" data-index="${index}">
       <span class="plot-name">${plot.name}</span>
-      <span class="plot-meta">${ready ? "Ready to harvest" : `${plot.daysLeft} day${plot.daysLeft === 1 ? "" : "s"} left`}</span>
-      <span class="pixel-flower" style="--bloom:${flower.color};transform:translateX(-50%) scale(${ready ? 1 : 0.68})"></span>
+      <span class="plot-meta">${ready ? "Bloom" : `${stageLabel(stage)} - ${plot.daysLeft} day${plot.daysLeft === 1 ? "" : "s"}`}</span>
+      ${renderPlotStage(stage, flower)}
     </button>
   `;
+}
+
+function plotStage(plot, flower) {
+  if (plot.daysLeft <= 0) return "bloom";
+  const total = Math.max(1, flower.growthDays);
+  const progress = 1 - plot.daysLeft / total;
+  if (progress < 0.34) return "seed";
+  if (progress < 0.67) return "sprout";
+  return "bud";
+}
+
+function stageLabel(stage) {
+  return { seed: "Seed", sprout: "Sprout", bud: "Bud", bloom: "Bloom" }[stage] || "Growing";
+}
+
+function renderPlotStage(stage, flower) {
+  if (stage === "seed") return '<span class="plot-stage stage-seed"></span>';
+  if (stage === "sprout") return '<span class="plot-stage stage-sprout"></span>';
+  if (stage === "bud") return `<span class="plot-stage stage-bud" style="--bloom:${flower.color}"></span>`;
+  return `<span class="pixel-flower" style="--bloom:${flower.color}"></span>`;
 }
 
 function renderSpeciesPicker() {
@@ -1192,20 +1213,31 @@ function showEventModal(events, steps) {
 
 function showHybridModal(flower, isNew, quality = "Fine") {
   openModal(isNew ? "New Hybrid Discovered!" : "Hybrid Bloomed Again", `
-    <div class="celebration-flower" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
+    <div class="celebration-flower petal-burst" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
     <p><strong>${flower.name}</strong> ${isNew ? "joined your journal" : "bloomed again"}.</p>
-    <p><span class="quality-badge quality-${quality}">${quality}</span> <strong>${flower.rarity}</strong> - ${Math.round(flower.value * qualityMultipliers[quality])} coin value - ${flower.traits.join(", ")}</p>
-    <p>Parents: ${flower.recipe.join(" + ")}</p>
+    <p><span class="quality-badge quality-${quality}">${quality}</span> <span class="rarity-chip">${flower.rarity}</span> ${Math.round(flower.value * qualityMultipliers[quality])} coin value</p>
+    <div class="parent-card-row">${flower.recipe.map((name) => renderParentCard(name)).join("")}</div>
+    <p class="muted">Traits: ${flower.traits.join(", ")}</p>
     <p class="flavor">${hybridFlavor(flower)}</p>
     <p class="muted">Bloomhaven restoration increased. New hybrids point toward stranger pairings.</p>
-  `);
+  `, "Added to Journal");
 }
 
-function openModal(title, body) {
+function renderParentCard(name) {
+  const flower = flowerByName.get(name);
+  return `
+    <div class="parent-card">
+      <div class="card-bloom" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
+      <strong>${name}</strong>
+    </div>
+  `;
+}
+
+function openModal(title, body, closeLabel = "Close") {
   const modal = document.querySelector("#modal");
   if (!modal) return;
   modal.classList.remove("hidden");
-  modal.innerHTML = `<div class="modal-card"><h2>${title}</h2>${body}<button data-action="close-modal">Close</button></div>`;
+  modal.innerHTML = `<div class="modal-card"><h2>${title}</h2>${body}<button data-action="close-modal">${closeLabel}</button></div>`;
 }
 
 function closeModal() {

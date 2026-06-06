@@ -178,8 +178,8 @@ select {
   box-shadow: none;
   border-color: var(--line);
   background: #f8edc9;
-  font-size: 0.72rem;
-  padding: 6px 3px;
+  font-size: 0.76rem;
+  padding: 7px 3px;
 }
 
 .nav-button.active {
@@ -390,10 +390,17 @@ select {
   text-align: left;
 }
 
+.plot.empty {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 8px, transparent 8px 16px),
+    #9a7050;
+}
+
 .plot.ready {
   background:
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 8px, transparent 8px 16px),
     #7a4b31;
+  box-shadow: inset 0 0 0 3px rgba(255, 241, 184, 0.22);
 }
 
 .plot-name {
@@ -408,6 +415,75 @@ select {
   font-size: 0.62rem;
   position: relative;
   z-index: 2;
+}
+
+.plot-stage {
+  position: absolute;
+  left: 50%;
+  bottom: 15px;
+  image-rendering: pixelated;
+  transform: translateX(-50%);
+}
+
+.stage-empty {
+  width: 30px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(80, 48, 31, 0.32);
+}
+
+.stage-seed {
+  width: 18px;
+  height: 12px;
+  border: 2px solid var(--wood);
+  border-radius: 50%;
+  background: #d9a35f;
+}
+
+.stage-sprout {
+  width: 8px;
+  height: 24px;
+  background: var(--leaf-dark);
+}
+
+.stage-sprout:before,
+.stage-sprout:after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  width: 16px;
+  height: 10px;
+  background: var(--leaf);
+  border: 2px solid var(--wood);
+  border-radius: 9px 9px 3px 9px;
+}
+
+.stage-sprout:before {
+  right: 5px;
+  transform: rotate(-18deg);
+}
+
+.stage-sprout:after {
+  left: 5px;
+  transform: scaleX(-1) rotate(-18deg);
+}
+
+.stage-bud {
+  width: 9px;
+  height: 30px;
+  background: var(--leaf-dark);
+}
+
+.stage-bud:before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: -8px;
+  width: 23px;
+  height: 18px;
+  border: 2px solid var(--wood);
+  border-radius: 12px 12px 8px 8px;
+  background: var(--bloom, var(--rose));
 }
 
 .pixel-flower {
@@ -565,7 +641,7 @@ select {
 .animal-badge {
   width: 52px;
   height: 52px;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   border-radius: 8px;
   background: var(--player-color);
   image-rendering: pixelated;
@@ -578,7 +654,7 @@ select {
   content: "";
   position: absolute;
   background: inherit;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
 }
 
 .portrait-Fox:before {
@@ -689,12 +765,12 @@ select {
 .resident-portrait {
   width: 54px;
   height: 54px;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   border-radius: 8px;
   background: #e8b06b;
   position: relative;
   image-rendering: pixelated;
-  box-shadow: 0 4px 0 rgba(87, 63, 47, 0.18);
+  box-shadow: 0 3px 0 rgba(109, 75, 52, 0.16);
 }
 
 .resident-portrait:before,
@@ -757,7 +833,7 @@ select {
   height: 18px;
   top: -11px;
   background: #d98245;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
@@ -779,7 +855,7 @@ select {
   height: 25px;
   top: -19px;
   background: #f2e7d5;
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   border-radius: 8px 8px 2px 2px;
 }
 
@@ -793,7 +869,7 @@ select {
 
 .friendship-bar {
   height: 14px;
-  border: 2px solid #573f2f;
+  border: 2px solid var(--wood);
   border-radius: 999px;
   background: #ede1ba;
   overflow: hidden;
@@ -1109,7 +1185,7 @@ select {
 .progress {
   width: 100%;
   height: 20px;
-  border: 2px solid #573f2f;
+  border: 2px solid var(--wood);
   border-radius: 999px;
   background: #ede1ba;
   overflow: hidden;
@@ -1162,6 +1238,25 @@ select {
   border-color: #8bcf68;
 }
 
+.district-card:not(.restored) {
+  background:
+    linear-gradient(90deg, rgba(127, 137, 111, 0.08), transparent),
+    #f4efd8;
+  color: #68705f;
+}
+
+.district-card.restored:after {
+  content: "";
+  display: block;
+  width: 46px;
+  height: 10px;
+  margin-top: 8px;
+  background:
+    radial-gradient(circle at 15% 50%, var(--gold) 0 25%, transparent 26%),
+    radial-gradient(circle at 50% 50%, var(--rose) 0 25%, transparent 26%),
+    radial-gradient(circle at 85% 50%, var(--violet) 0 25%, transparent 26%);
+}
+
 .modal {
   position: fixed;
   inset: 0;
@@ -1181,10 +1276,10 @@ select {
   max-height: 90vh;
   overflow: auto;
   background: var(--paper);
-  border: 3px solid #573f2f;
+  border: 3px solid var(--wood);
   border-radius: 8px;
   padding: 14px;
-  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 0 rgba(109, 75, 52, 0.18);
 }
 
 .celebration-flower {
@@ -1193,10 +1288,12 @@ select {
   place-items: center;
   background:
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 12px, transparent 12px 24px),
-    #c9efaa;
+    #d9efb8;
   border: 2px solid var(--line);
   border-radius: 8px;
   margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
 .celebration-flower .pixel-flower {
@@ -1204,6 +1301,44 @@ select {
   left: auto;
   bottom: auto;
   transform: scale(1.8);
+  z-index: 2;
+}
+
+.petal-burst:before,
+.petal-burst:after {
+  content: "";
+  position: absolute;
+  width: 128px;
+  height: 128px;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(223, 120, 146, 0.34) 0 7%, transparent 8%),
+    radial-gradient(circle at 92% 50%, rgba(237, 191, 83, 0.32) 0 7%, transparent 8%),
+    radial-gradient(circle at 50% 92%, rgba(145, 129, 201, 0.3) 0 7%, transparent 8%),
+    radial-gradient(circle at 8% 50%, rgba(113, 184, 107, 0.3) 0 7%, transparent 8%);
+  animation: slowspin 14s linear infinite;
+}
+
+.petal-burst:after {
+  transform: rotate(45deg);
+  opacity: 0.62;
+}
+
+.parent-card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.parent-card {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf5;
+  padding: 8px;
+  text-align: center;
 }
 
 .flavor {
@@ -1227,7 +1362,7 @@ select {
 
 .toast {
   background: #fff8df;
-  border: 2px solid #573f2f;
+  border: 2px solid var(--wood);
   border-radius: 8px;
   padding: 10px;
   box-shadow: var(--shadow);
@@ -1257,6 +1392,11 @@ select {
   25% { transform: translate(30px, -14px); }
   50% { transform: translate(72px, 4px); }
   75% { transform: translate(32px, 18px); }
+}
+
+@keyframes slowspin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (min-width: 720px) {

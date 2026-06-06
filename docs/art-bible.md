@@ -49,6 +49,14 @@ Avoid:
 
 Flowers should receive the most visual attention.
 
+## Chosen Prototype Style
+
+Bloomhaven's prototype visual style is Soft Pixel / Simplified Cozy Pixel Art with Flat Illustration readability.
+
+The style should prioritize mobile readability, flower clarity, and cozy atmosphere over visual density.
+
+Use detailed cozy pixel art only as warmth and charm inspiration, not as the density target. Use storybook watercolor lightly for journal and lore surfaces only. Use clean line art for NPC and character readability. Reserve whimsical pastel magic for rare hybrid discoveries and future magical garden content.
+
 ## 3. Style Rules
 
 Use:
