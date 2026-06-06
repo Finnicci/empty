@@ -55,6 +55,84 @@ const researchNotes = [
   "Hydrangea and Lily both remember the rain.",
 ];
 
+const journalTabs = [
+  { id: "flowers", label: "Flowers" },
+  { id: "research", label: "Research" },
+  { id: "grandfather", label: "Grandfather" },
+  { id: "facts", label: "Facts" },
+  { id: "town", label: "Town" },
+];
+
+const grandfatherNotes = [
+  {
+    id: "morning-rain",
+    title: "Morning Rain",
+    text: "The old beds always looked best after a morning rain. Your grandmother said the flowers liked being spoken to. I suspect she simply paid closer attention than I did.",
+  },
+  {
+    id: "seed-before-coins",
+    title: "Seeds Before Coins",
+    text: "Bloomhaven was not built by merchants. It was built by gardeners who traded seeds before they traded coins.",
+  },
+  {
+    id: "moon-garden-ledgers",
+    title: "The Moon Garden",
+    text: "The Moon Garden appears in three ledgers, but never on any map. Either it was hidden, or someone wanted it forgotten.",
+  },
+  {
+    id: "lavender-bees",
+    title: "Lavender and Bees",
+    text: "The bees favored lavender even when the roses were in full bloom. There is a lesson there, I think.",
+  },
+  {
+    id: "right-neighbor",
+    title: "The Right Neighbor",
+    text: "Some flowers seem ordinary until paired with the right neighbor.",
+  },
+];
+
+const gardeningFacts = [
+  {
+    id: "deadheading",
+    title: "Deadheading",
+    text: "Deadheading spent flowers can encourage some plants to produce more blooms.",
+  },
+  {
+    id: "pollinator-cues",
+    title: "Pollinator Cues",
+    text: "Many pollinators are attracted by scent, color, and flower shape.",
+  },
+  {
+    id: "lavender-soil",
+    title: "Lavender Care",
+    text: "Lavender generally prefers well-drained soil and plenty of sunlight.",
+  },
+  {
+    id: "native-support",
+    title: "Native Flowers",
+    text: "Native flowers often support local bees, butterflies, and other pollinators.",
+  },
+  {
+    id: "cold-germination",
+    title: "Cold Conditions",
+    text: "Some seeds germinate better after exposure to cold conditions.",
+  },
+  {
+    id: "florist-balance",
+    title: "Bouquet Balance",
+    text: "Florists often use focal flowers, filler flowers, and greenery to create balanced arrangements.",
+  },
+];
+
+const townRecords = [
+  { id: "restoration-10", value: 10, title: "Town Square Beds Cleared", text: "Town Square flower beds cleared for the first time in years." },
+  { id: "restoration-25", value: 25, title: "Clover Cafe Growers", text: "Clover Cafe has begun hosting morning growers again." },
+  { id: "restoration-40", value: 40, title: "Society Front Room", text: "The Botanical Society reopened its front room." },
+  { id: "restoration-60", value: 60, title: "Market Board", text: "The market board now accepts florist contracts." },
+  { id: "restoration-80", value: 80, title: "Festival Banners", text: "Festival banners have been found in storage." },
+  { id: "restoration-100", value: 100, title: "District 1 Restored", text: "Bloomhaven Town Square has been restored." },
+];
+
 const eventPool = [
   { name: "Bee Swarm", rarity: "Common", min: 0, duration: 2, note: "A gentle swarm settles near fragrant blooms.", effect: "+15% hybrid success for 2 days.", reward: "pollination" },
   { name: "Weather Forecast", rarity: "Common", min: 0, duration: 1, note: "A cool drizzle is expected overnight.", effect: "Growing flowers rest faster tomorrow.", reward: "growth" },
@@ -173,6 +251,7 @@ const starters = flowers.filter((flower) => !flower.recipe);
 const hybrids = flowers.filter((flower) => flower.recipe);
 const app = document.querySelector("#app");
 const memoryStorage = {};
+let pendingJournalUnlocks = [];
 let state = createNewState();
 
 function f(name, rarity, value, growthDays, fragrance, beauty, pollinator, traits, color, recipe = null) {
@@ -197,6 +276,7 @@ function createNewState() {
     residents: createResidentState(),
     storyEntries: [],
     journalPages: 0,
+    journal: createJournalState(),
     notes: [researchNotes[0]],
     events: [],
     orders: [],
@@ -225,6 +305,15 @@ function createNewState() {
   };
 }
 
+function createJournalState() {
+  return {
+    activeTab: "flowers",
+    grandfather: ["morning-rain"],
+    facts: ["pollinator-cues"],
+    townRecords: [],
+  };
+}
+
 function createResidentState() {
   return Object.fromEntries(residents.map((resident) => [resident.id, { friendship: 0, met: false }]));
 }
@@ -233,7 +322,9 @@ function init() {
   state = loadState() || createNewState();
   if (!state.orders.length) state.orders = starterOrders();
   ensureEarlyOrder();
+  syncJournalUnlocks();
   render();
+  pendingJournalUnlocks = [];
   if (!state.hasSeenIntro) {
     state.hasSeenIntro = true;
     saveState();
@@ -567,30 +658,127 @@ function renderSeedMarket() {
 
 function renderJournal() {
   const discoveredCount = state.discovered.length;
+  const activeTab = state.journal?.activeTab || "flowers";
   return `
     <section class="screen ${isActive("journal")}" data-screen="journal">
       <div class="panel">
-        <h2>Flower Journal</h2>
+        <h2>Grandfather's Journal</h2>
+        <p class="tagline">A field guide, florist ledger, and trail of missing memories.</p>
         <p><strong>Discovered: ${discoveredCount} / ${flowers.length}</strong></p>
         <div class="progress"><span style="width:${(discoveredCount / flowers.length) * 100}%"></span></div>
         <div class="journal-stats">
           <span>${starters.filter((flower) => isDiscovered(flower.name)).length}/${starters.length} seed flowers</span>
           <span>${hybrids.filter((flower) => isDiscovered(flower.name)).length}/${hybrids.length} hybrids</span>
-          <span>${nextJournalTease()}</span>
+          <span>${journalEntryCount()} journal entries</span>
         </div>
       </div>
-      <div class="panel">
-        <h3>Research Notes</h3>
-        <div class="event-list">${state.notes.map((note) => `<div class="event-card">${note}</div>`).join("")}</div>
+      <div class="journal-tabs">
+        ${journalTabs.map((tab) => `<button class="journal-tab ${activeTab === tab.id ? "active" : ""}" data-action="journal-tab" data-tab="${tab.id}">${tab.label}</button>`).join("")}
       </div>
-      <div class="panel">
-        <h3>Town Journal</h3>
-        <p class="tagline">${residentsMet()} / ${residents.length} residents met - ${state.journalPages} missing journal page${state.journalPages === 1 ? "" : "s"} found</p>
-        <div class="story-list">${renderStoryEntries()}</div>
-        <div class="resident-list">${residents.map(renderResidentCard).join("")}</div>
-      </div>
-      <div class="journal-grid">${flowers.map(renderFlowerCard).join("")}</div>
+      ${renderJournalTab(activeTab)}
     </section>
+  `;
+}
+
+function renderJournalTab(tab) {
+  if (tab === "research") return renderResearchJournal();
+  if (tab === "grandfather") return renderGrandfatherJournal();
+  if (tab === "facts") return renderFactsJournal();
+  if (tab === "town") return renderTownJournal();
+  return renderFlowerJournal();
+}
+
+function renderFlowerJournal() {
+  return `
+    <div class="panel journal-note-panel">
+      <h3>Flower Journal</h3>
+      <p class="tagline">${nextJournalTease()} Silhouettes hide names until a seed, bloom, or hybrid is discovered.</p>
+    </div>
+    <div class="journal-grid">${flowers.map(renderFlowerCard).join("")}</div>
+  `;
+}
+
+function renderResearchJournal() {
+  const notes = [...new Set(state.notes || [])];
+  return `
+    <div class="panel journal-note-panel">
+      <h3>Research Notes</h3>
+      <p class="tagline">Hybrid clues are permanent once found. Use them to reason about traits instead of guessing blindly.</p>
+      <div class="journal-entry-list">
+        ${notes.map((note, index) => renderJournalEntry({ title: `Clue ${index + 1}`, text: note }, "research")).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderGrandfatherJournal() {
+  return `
+    <div class="panel journal-note-panel">
+      <h3>Grandfather's Notes</h3>
+      <p class="tagline">${unlockedCount("grandfather", grandfatherNotes)} / ${grandfatherNotes.length} notes recovered through harvests, hybrids, steps, and restoration.</p>
+      <div class="journal-entry-list">${grandfatherNotes.map((entry) => renderLockedJournalEntry(entry, "grandfather")).join("")}</div>
+    </div>
+  `;
+}
+
+function renderFactsJournal() {
+  return `
+    <div class="panel journal-note-panel">
+      <h3>Gardening Facts</h3>
+      <p class="tagline">Field-guide facts unlock as you farm, sell, walk, and discover. They are educational flavor for curious growers.</p>
+      <div class="journal-entry-list">${gardeningFacts.map((entry) => renderLockedJournalEntry(entry, "facts")).join("")}</div>
+    </div>
+  `;
+}
+
+function renderTownJournal() {
+  return `
+    <div class="panel journal-note-panel">
+      <h3>Town Records</h3>
+      <p class="tagline">${residentsMet()} / ${residents.length} residents met - ${state.journalPages} missing journal page${state.journalPages === 1 ? "" : "s"} found</p>
+      <div class="journal-entry-list">${townRecords.map((entry) => renderTownRecord(entry)).join("")}</div>
+      <h3>Residents</h3>
+      <div class="story-list">${renderStoryEntries()}</div>
+      <div class="resident-list">${residents.map(renderResidentCard).join("")}</div>
+    </div>
+  `;
+}
+
+function renderLockedJournalEntry(entry, section) {
+  if (isJournalUnlocked(section, entry.id)) return renderJournalEntry(entry, section);
+  return `
+    <div class="journal-entry locked">
+      <div class="journal-sketch"></div>
+      <div>
+        <strong>Undiscovered Page</strong>
+        <p class="muted">${journalLockedHint(section, entry)}</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderTownRecord(entry) {
+  if (isJournalUnlocked("townRecords", entry.id)) return renderJournalEntry(entry, "town");
+  return `
+    <div class="journal-entry locked">
+      <div class="journal-sketch"></div>
+      <div>
+        <strong>${entry.value}% Restoration Record</strong>
+        <p class="muted">Restore Bloomhaven further to recover this town record.</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderJournalEntry(entry, section) {
+  return `
+    <div class="journal-entry journal-${section}">
+      <div class="journal-sketch"></div>
+      <div>
+        <strong>${entry.title}</strong>
+        <p>${entry.text}</p>
+      </div>
+    </div>
   `;
 }
 
@@ -759,6 +947,7 @@ function handleClick(event) {
   if (!target) return;
   const { action } = target.dataset;
   if (action === "nav") setActive(target.dataset.target);
+  if (action === "journal-tab") setJournalTab(target.dataset.tab);
   if (action === "new-game") confirmNewGame();
   if (action === "choose-species") chooseSpecies(target.dataset.species);
   if (action === "plant-selected") plantFirstEmpty(document.querySelector("#seed-select")?.value);
@@ -784,6 +973,13 @@ function handleClick(event) {
 
 function setActive(screen) {
   state.active = screen;
+  saveAndRender();
+}
+
+function setJournalTab(tab) {
+  if (!journalTabs.some((item) => item.id === tab)) return;
+  ensureJournalState();
+  state.journal.activeTab = tab;
   saveAndRender();
 }
 
@@ -1265,24 +1461,113 @@ function addSeed(name, count) {
 
 function addNote(startIndex = 0) {
   const unknown = researchNotes.slice(startIndex).find((note) => !state.notes.includes(note));
-  if (unknown) state.notes.push(unknown);
+  if (unknown) {
+    state.notes.push(unknown);
+    queueJournalUnlock("Research note added");
+  }
 }
 
 function addSpecificHybridNote() {
   const hidden = hybrids.find((hybrid) => !isDiscovered(hybrid.name));
   if (!hidden) return addNote(0);
   const note = `${hidden.recipe[0]} and ${hidden.recipe[1]} may reveal ${hidden.traits[0]} petals.`;
-  if (!state.notes.includes(note)) state.notes.push(note);
-  state.journalPages += 1;
+  if (!state.notes.includes(note)) {
+    state.notes.push(note);
+    state.journalPages += 1;
+    unlockJournalEntry("grandfather", "moon-garden-ledgers", "Grandfather's note recovered");
+    queueJournalUnlock("Specific hybrid clue added");
+  }
 }
 
 function addResearchProgress(match, pair) {
   if (match) {
     const note = `${pair[0]} + ${pair[1]} produced unstable pollen. Try again after a step event.`;
-    if (!state.notes.includes(note)) state.notes.push(note);
+    if (!state.notes.includes(note)) {
+      state.notes.push(note);
+      queueJournalUnlock("Research note added");
+    }
     return;
   }
   addNote(Math.min(state.notes.length, researchNotes.length - 1));
+}
+
+function ensureJournalState() {
+  if (!state.journal || typeof state.journal !== "object") state.journal = createJournalState();
+  if (!journalTabs.some((tab) => tab.id === state.journal.activeTab)) state.journal.activeTab = "flowers";
+  ["grandfather", "facts", "townRecords"].forEach((section) => {
+    if (!Array.isArray(state.journal[section])) state.journal[section] = [];
+  });
+}
+
+function unlockJournalEntry(section, id, message = "Journal entry added") {
+  ensureJournalState();
+  if (state.journal[section].includes(id)) return false;
+  state.journal[section].push(id);
+  queueJournalUnlock(message);
+  return true;
+}
+
+function queueJournalUnlock(message) {
+  if (!pendingJournalUnlocks.includes(message)) pendingJournalUnlocks.push(message);
+}
+
+function flushJournalUnlocks() {
+  if (!pendingJournalUnlocks.length) return;
+  const messages = [...pendingJournalUnlocks];
+  pendingJournalUnlocks = [];
+  messages.slice(0, 2).forEach((message) => toast(message));
+}
+
+function syncJournalUnlocks() {
+  ensureJournalState();
+  if (state.stats.harvested >= 1) {
+    unlockJournalEntry("grandfather", "morning-rain", "Grandfather's note recovered");
+    unlockJournalEntry("facts", "deadheading", "Gardening fact added");
+  }
+  if (state.stats.orders >= 1) {
+    unlockJournalEntry("grandfather", "seed-before-coins", "Grandfather's note recovered");
+    unlockJournalEntry("facts", "florist-balance", "Gardening fact added");
+  }
+  if (state.stats.stepsLogged >= 1) {
+    unlockJournalEntry("grandfather", "lavender-bees", "Grandfather's note recovered");
+    unlockJournalEntry("facts", "native-support", "Gardening fact added");
+  }
+  if (state.stats.hybrids >= 1 || state.hybridAttempts >= 1) {
+    unlockJournalEntry("grandfather", "right-neighbor", "Grandfather's note recovered");
+    unlockJournalEntry("facts", "lavender-soil", "Gardening fact added");
+  }
+  if (state.journalPages >= 1 || state.restoration >= 40) {
+    unlockJournalEntry("grandfather", "moon-garden-ledgers", "Grandfather's note recovered");
+  }
+  if (state.weather === "Cool Mist" || activeEffect("growth")) unlockJournalEntry("facts", "cold-germination", "Gardening fact added");
+  townRecords.forEach((record) => {
+    if (state.restoration >= record.value) unlockJournalEntry("townRecords", record.id, "Town record added");
+  });
+}
+
+function isJournalUnlocked(section, id) {
+  ensureJournalState();
+  return state.journal[section]?.includes(id);
+}
+
+function unlockedCount(section, entries) {
+  return entries.filter((entry) => isJournalUnlocked(section, entry.id)).length;
+}
+
+function journalEntryCount() {
+  ensureJournalState();
+  return (state.notes?.length || 0) + state.journal.grandfather.length + state.journal.facts.length + state.journal.townRecords.length + state.storyEntries.length;
+}
+
+function journalLockedHint(section, entry) {
+  if (section === "grandfather") {
+    if (entry.id === "moon-garden-ledgers") return "Find an old page or restore the Botanical Society.";
+    if (entry.id === "right-neighbor") return "Attempt a hybrid pairing.";
+    if (entry.id === "lavender-bees") return "Log a walk or discover a step event.";
+    return "Keep farming, selling, and restoring Bloomhaven.";
+  }
+  if (section === "facts") return "Unlock by harvesting, filling orders, walking, or studying hybrids.";
+  return "Keep exploring Bloomhaven.";
 }
 
 function residentLikesFlower(resident, flower) {
@@ -1402,7 +1687,10 @@ function addResidentClue(id) {
     rosewood: "Rosewood's note: Luxury blooms drew flower hunters to the old hotel.",
     millie: "Millie's note: Wild native flowers may know where the first garden slept.",
   }[id];
-  if (clue && !state.notes.includes(clue)) state.notes.push(clue);
+  if (clue && !state.notes.includes(clue)) {
+    state.notes.push(clue);
+    queueJournalUnlock("Resident clue added");
+  }
 }
 
 function residentsMet() {
@@ -1644,9 +1932,11 @@ function isActive(screen) {
 
 function saveAndRender() {
   const completed = completeTasks();
+  syncJournalUnlocks();
   saveState();
   render();
   if (completed) toast("Task complete. Reward added.");
+  flushJournalUnlocks();
 }
 
 function saveState() {
@@ -1667,6 +1957,7 @@ function loadState() {
     migrated.residents = migrateResidents(parsed.residents);
     migrated.storyEntries = Array.isArray(parsed.storyEntries) ? parsed.storyEntries : [];
     migrated.journalPages = Number(parsed.journalPages || 0);
+    migrated.journal = migrateJournal(parsed.journal);
     migrated.stats = { ...createNewState().stats, ...(parsed.stats || {}) };
     migrated.eventEffects = { ...(parsed.eventEffects || {}) };
     migrated.completedTasks = parsed.completedTasks || [];
@@ -1677,10 +1968,31 @@ function loadState() {
     while (migrated.plots.length < migrated.maxPlots) migrated.plots.push(null);
     migrated.inventory = migrateInventory(parsed.inventory || {});
     migrated.orders = migrated.orders.map(normalizeSavedOrder);
+    syncJournalUnlocksFor(migrated);
     return migrated;
   } catch {
     return null;
   }
+}
+
+function migrateJournal(saved) {
+  const base = createJournalState();
+  const migrated = { ...base, ...(saved || {}) };
+  if (!journalTabs.some((tab) => tab.id === migrated.activeTab)) migrated.activeTab = "flowers";
+  ["grandfather", "facts", "townRecords"].forEach((section) => {
+    migrated[section] = Array.isArray(migrated[section]) ? [...new Set(migrated[section])] : base[section];
+  });
+  return migrated;
+}
+
+function syncJournalUnlocksFor(targetState) {
+  const previousState = state;
+  const previousPending = pendingJournalUnlocks;
+  state = targetState;
+  pendingJournalUnlocks = [];
+  syncJournalUnlocks();
+  pendingJournalUnlocks = previousPending;
+  state = previousState;
 }
 
 function migrateInventory(inventory) {

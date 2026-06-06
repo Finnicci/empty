@@ -1164,6 +1164,130 @@ select {
   margin-top: 8px;
 }
 
+.journal-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, rgba(109, 75, 52, 0.08), transparent),
+    #e8d7a9;
+}
+
+.journal-tab {
+  min-height: 42px;
+  padding: 6px 3px;
+  border-color: rgba(109, 75, 52, 0.42);
+  background: #fff8df;
+  color: var(--muted);
+  font-size: 0.74rem;
+  box-shadow: none;
+}
+
+.journal-tab.active {
+  background: var(--leaf);
+  color: #fffdf5;
+  border-color: var(--wood);
+}
+
+.journal-note-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.journal-note-panel:before {
+  content: "";
+  display: block;
+  height: 8px;
+  margin: -2px 0 10px;
+  background:
+    radial-gradient(circle at 7% 50%, var(--rose) 0 22%, transparent 24%),
+    radial-gradient(circle at 17% 50%, var(--gold) 0 22%, transparent 24%),
+    linear-gradient(90deg, var(--leaf), transparent);
+  opacity: 0.58;
+}
+
+.journal-entry-list {
+  display: grid;
+  gap: 8px;
+}
+
+.journal-entry {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.48), transparent),
+    #fffdf5;
+  padding: 10px;
+}
+
+.journal-entry p {
+  margin: 4px 0 0;
+  line-height: 1.35;
+}
+
+.journal-entry.locked {
+  background: #f2ecd4;
+  color: #728066;
+  border-style: dashed;
+}
+
+.journal-sketch {
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 50% 20%, var(--rose) 0 12%, transparent 13%),
+    radial-gradient(circle at 34% 36%, var(--gold) 0 10%, transparent 11%),
+    radial-gradient(circle at 66% 36%, var(--violet) 0 10%, transparent 11%),
+    linear-gradient(var(--leaf-dark) 0 0) 50% 72% / 4px 18px no-repeat,
+    #edf7dd;
+  image-rendering: pixelated;
+}
+
+.journal-research .journal-sketch {
+  background:
+    linear-gradient(var(--wood) 0 0) 11px 10px / 18px 3px no-repeat,
+    linear-gradient(var(--wood) 0 0) 11px 18px / 14px 3px no-repeat,
+    linear-gradient(var(--wood) 0 0) 11px 26px / 20px 3px no-repeat,
+    #fff8df;
+}
+
+.journal-grandfather .journal-sketch {
+  background:
+    radial-gradient(circle at 55% 34%, var(--gold) 0 14%, transparent 15%),
+    linear-gradient(var(--wood) 0 0) 50% 72% / 4px 18px no-repeat,
+    #f6e8bc;
+}
+
+.journal-facts .journal-sketch {
+  background:
+    radial-gradient(circle at 30% 44%, var(--leaf) 0 16%, transparent 17%),
+    radial-gradient(circle at 64% 28%, var(--sky) 0 13%, transparent 14%),
+    linear-gradient(var(--leaf-dark) 0 0) 50% 72% / 4px 18px no-repeat,
+    #edf7dd;
+}
+
+.journal-town .journal-sketch {
+  background:
+    linear-gradient(var(--wood) 0 0) 50% 64% / 24px 18px no-repeat,
+    linear-gradient(var(--rose) 0 0) 50% 34% / 30px 10px no-repeat,
+    #f7f0d2;
+}
+
+.journal-entry.locked .journal-sketch {
+  filter: grayscale(1);
+  opacity: 0.58;
+}
+
 .journal-stats span,
 .rarity-chip {
   display: inline-block;
@@ -1397,6 +1521,16 @@ select {
 @keyframes slowspin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 430px) {
+  .journal-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .journal-tab {
+    font-size: 0.72rem;
+  }
 }
 
 @media (min-width: 720px) {
