@@ -39,6 +39,37 @@ const species = {
   Mongoose: { color: "#ba855b", icon: "mongoose", passive: "+10% shop revenue", revenueBonus: 0.1 },
 };
 
+const flowerFamilies = [
+  { id: "wildflower", name: "Wildflowers", flowers: ["Daisy", "Black-Eyed Susan", "Coneflower", "Cosmos", "Meadow Crown"], breakthrough: "Wildflower Expert", note: "Wildflower Expert: cheerful meadow blooms often lead toward crown-shaped hybrids." },
+  { id: "fragrant", name: "Fragrant Flowers", flowers: ["Lavender", "Rose", "Lily", "Lavender Rose", "Woodland Bell", "Moon Blossom"], breakthrough: "Fragrance Research", note: "Fragrance Research: Rose and Lavender share a useful trait when pollinators are active." },
+  { id: "water", name: "Water Flowers", flowers: ["Iris", "Hydrangea", "Lily", "Royal Iris", "Crystal Lily"], breakthrough: "Water Studies", note: "Water Studies: rain-loving flowers can reveal glassy petals when paired carefully." },
+  { id: "luxury", name: "Luxury Flowers", flowers: ["Peony", "Dahlia", "Orchid", "Ranunculus", "Velvet Peony", "Starlight Orchid"], breakthrough: "Luxury Collection", note: "Luxury Collection: layered luxury blooms attract richer customer rumors and rarer hybrid leads." },
+  { id: "exotic", name: "Exotic Flowers", flowers: ["Orchid", "Starlight Orchid", "Moon Blossom"], breakthrough: "Exotic Studies", note: "Exotic Studies: moonlit and exotic flowers may connect to Grandfather's missing garden records." },
+];
+
+const discoveryLinks = [
+  { from: "Daisy", to: "Meadow Crown", hint: ["A meadow flower may crown another.", "Daisy and Cosmos share a meadow path.", "Daisy + Cosmos may reveal something special."] },
+  { from: "Cosmos", to: "Meadow Crown", hint: ["Airy wildflowers sometimes hide royal shapes.", "Cosmos and Daisy point toward a meadow hybrid.", "Cosmos + Daisy may reveal something special."] },
+  { from: "Lavender", to: "Lavender Rose", hint: ["Fragrant flowers often work well together.", "Rose and Lavender share a useful trait.", "Rose + Lavender may reveal something special."] },
+  { from: "Rose", to: "Lavender Rose", hint: ["A romantic flower needs a calming neighbor.", "Rose and Lavender share a useful trait.", "Rose + Lavender may reveal something special."] },
+  { from: "Iris", to: "Royal Iris", hint: ["Elegant flowers may become more formal.", "Iris and Tulip both carry strong silhouettes.", "Iris + Tulip may reveal something special."] },
+  { from: "Tulip", to: "Royal Iris", hint: ["Cup-shaped spring flowers can refine elegant blooms.", "Tulip and Iris both suggest ceremony.", "Tulip + Iris may reveal something special."] },
+  { from: "Marigold", to: "Sunset Bloom", hint: ["Warm flowers hold onto evening light.", "Marigold and Dahlia share dramatic warmth.", "Marigold + Dahlia may reveal something special."] },
+  { from: "Dahlia", to: "Sunset Bloom", hint: ["Layered petals can catch a sunset.", "Dahlia and Marigold share dramatic warmth.", "Dahlia + Marigold may reveal something special."] },
+  { from: "Sunflower", to: "Golden Star", hint: ["Sunny flowers sometimes look upward.", "Sunflower and Aster connect gold with starlight.", "Sunflower + Aster may reveal something special."] },
+  { from: "Aster", to: "Golden Star", hint: ["Starlight traits may brighten golden blooms.", "Aster and Sunflower connect stars with sun.", "Aster + Sunflower may reveal something special."] },
+  { from: "Foxglove", to: "Woodland Bell", hint: ["Bell-shaped woodland flowers like calming herbs.", "Foxglove and Lavender echo in the same breeze.", "Foxglove + Lavender may reveal something special."] },
+  { from: "Lavender", to: "Woodland Bell", hint: ["Calming herbs sometimes answer woodland bells.", "Lavender and Foxglove echo in the same breeze.", "Lavender + Foxglove may reveal something special."] },
+  { from: "Peony", to: "Velvet Peony", hint: ["Lush petals can become luxurious.", "Peony and Ranunculus both carry soft layered traits.", "Peony + Ranunculus may reveal something special."] },
+  { from: "Ranunculus", to: "Velvet Peony", hint: ["Luxury flowers may deepen familiar blooms.", "Ranunculus and Peony both carry soft layered traits.", "Ranunculus + Peony may reveal something special."] },
+  { from: "Lily", to: "Crystal Lily", hint: ["Water-loving flowers can reveal crystal-like petals.", "Lily and Hydrangea both remember the rain.", "Lily + Hydrangea may reveal something special."] },
+  { from: "Hydrangea", to: "Crystal Lily", hint: ["Clustered water flowers may clarify graceful blooms.", "Hydrangea and Lily both remember the rain.", "Hydrangea + Lily may reveal something special."] },
+  { from: "Orchid", to: "Starlight Orchid", hint: ["Exotic flowers may need unusual conditions.", "Orchid and Aster connect moonlit delicacy with stars.", "Orchid + Aster may reveal something special."] },
+  { from: "Aster", to: "Starlight Orchid", hint: ["Starlight traits may awaken exotic petals.", "Aster and Orchid connect stars with moonlit delicacy.", "Aster + Orchid may reveal something special."] },
+  { from: "Starlight Orchid", to: "Moon Blossom", hint: ["A rare hybrid points beyond ordinary gardens.", "Starlight Orchid and Crystal Lily share moonlit clarity.", "Starlight Orchid + Crystal Lily may reveal something special."] },
+  { from: "Crystal Lily", to: "Moon Blossom", hint: ["A crystal bloom points toward the Moon Garden.", "Crystal Lily and Starlight Orchid share moonlit clarity.", "Crystal Lily + Starlight Orchid may reveal something special."] },
+];
+
 const researchNotes = [
   "Fragrant flowers often produce refined hybrids.",
   "Sunny flowers pair well with cheerful wild blooms.",
@@ -57,6 +88,7 @@ const researchNotes = [
 
 const journalTabs = [
   { id: "flowers", label: "Flowers" },
+  { id: "network", label: "Network" },
   { id: "research", label: "Research" },
   { id: "grandfather", label: "Grandfather" },
   { id: "facts", label: "Facts" },
@@ -277,6 +309,7 @@ function createNewState() {
     storyEntries: [],
     journalPages: 0,
     journal: createJournalState(),
+    familyBreakthroughs: [],
     notes: [researchNotes[0]],
     events: [],
     orders: [],
@@ -681,6 +714,7 @@ function renderJournal() {
 }
 
 function renderJournalTab(tab) {
+  if (tab === "network") return renderDiscoveryNetwork();
   if (tab === "research") return renderResearchJournal();
   if (tab === "grandfather") return renderGrandfatherJournal();
   if (tab === "facts") return renderFactsJournal();
@@ -695,6 +729,70 @@ function renderFlowerJournal() {
       <p class="tagline">${nextJournalTease()} Silhouettes hide names until a seed, bloom, or hybrid is discovered.</p>
     </div>
     <div class="journal-grid">${flowers.map(renderFlowerCard).join("")}</div>
+  `;
+}
+
+function renderDiscoveryNetwork() {
+  const knownFlowers = state.discovered.map((name) => flowerByName.get(name)).filter(Boolean);
+  const connected = knownFlowers.filter((flower) => connectedDiscoveries(flower.name).length).slice(0, 10);
+  return `
+    <div class="panel journal-note-panel discovery-board">
+      <h3>Discovery Network</h3>
+      <p class="tagline">Every new bloom can point toward another. The board only shows known flowers, nearby mysteries, and clues you have earned.</p>
+      <div class="family-progress-grid">${flowerFamilies.map(renderFamilyProgress).join("")}</div>
+    </div>
+    <div class="network-list">
+      ${connected.length ? connected.map(renderNetworkNode).join("") : '<div class="journal-entry locked"><div class="journal-sketch"></div><div><strong>No links mapped yet</strong><p class="muted">Discover more flowers or try your first hybrid to sketch connections.</p></div></div>'}
+    </div>
+  `;
+}
+
+function renderFamilyProgress(family) {
+  const total = family.flowers.length;
+  const count = family.flowers.filter((name) => isDiscovered(name)).length;
+  const unlocked = state.familyBreakthroughs?.includes(family.id);
+  return `
+    <div class="family-card ${unlocked ? "unlocked" : ""}">
+      <div class="family-card-head">
+        <strong>${family.name}</strong>
+        <span>${count}/${total}</span>
+      </div>
+      <div class="mini-progress"><span style="width:${(count / total) * 100}%"></span></div>
+      <p class="muted">${unlocked ? family.breakthrough : nextFamilyHint(family, count)}</p>
+    </div>
+  `;
+}
+
+function renderNetworkNode(flower) {
+  const links = connectedDiscoveries(flower.name);
+  return `
+    <div class="network-node">
+      <div class="network-source">
+        <div class="card-bloom" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
+        <div>
+          <strong>${flower.name}</strong>
+          <div class="family-tags">${renderFamilyTags(flower)}</div>
+        </div>
+      </div>
+      <div class="network-links">${links.map((link) => renderNetworkLink(link, flower.name)).join("")}</div>
+    </div>
+  `;
+}
+
+function renderNetworkLink(link, sourceName) {
+  const target = flowerByName.get(link.to);
+  const known = isDiscovered(link.to);
+  const hint = progressiveHint(link, sourceName);
+  return `
+    <div class="network-link ${known ? "known" : "mystery"}">
+      <div class="network-line"></div>
+      ${known ? `<div class="card-bloom" style="--bloom:${target.color}"><span class="pixel-flower"></span></div>` : '<div class="silhouette"></div>'}
+      <div>
+        <strong>${known ? target.name : `Mystery ${target.rarity}`}</strong>
+        <p class="muted">${hint}</p>
+        <div class="family-tags">${known ? renderFamilyTags(target) : targetFamilies(target).slice(0, 2).map((family) => `<span class="family-badge muted-badge">${family.name}</span>`).join("")}</div>
+      </div>
+    </div>
   `;
 }
 
@@ -818,6 +916,7 @@ function renderFlowerCard(flower) {
         <div class="silhouette"></div>
         <strong>${flower.recipe ? "Mystery Hybrid" : "Undiscovered Seed"}</strong>
         <span class="rarity-chip">${flower.rarity}</span>
+        <div class="family-tags">${targetFamilies(flower).slice(0, 2).map((family) => `<span class="family-badge muted-badge">${family.name}</span>`).join("")}</div>
         <p class="muted">${flower.recipe ? clueFor(flower) : "A seed has not reached your farm yet."}</p>
       </div>
     `;
@@ -826,6 +925,7 @@ function renderFlowerCard(flower) {
     <div class="flower-card">
       <div class="card-bloom" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
       <strong>${flower.name}</strong>
+      <div class="family-tags">${renderFamilyTags(flower)}</div>
       <p class="muted">${flower.rarity} - ${flower.value} coins - ${flower.growthDays} days</p>
       <p>Fragrance ${flower.fragrance} - Beauty ${flower.beauty} - Pollinators ${flower.pollinator}</p>
       <p class="muted">${flower.traits.join(", ")}</p>
@@ -1412,6 +1512,7 @@ function showHybridModal(flower, isNew, quality = "Fine") {
     <div class="celebration-flower petal-burst" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
     <p><strong>${flower.name}</strong> ${isNew ? "joined your journal" : "bloomed again"}.</p>
     <p><span class="quality-badge quality-${quality}">${quality}</span> <span class="rarity-chip">${flower.rarity}</span> ${Math.round(flower.value * qualityMultipliers[quality])} coin value</p>
+    <div class="family-tags modal-family-tags">${renderFamilyTags(flower)}</div>
     <div class="parent-card-row">${flower.recipe.map((name) => renderParentCard(name)).join("")}</div>
     <p class="muted">Traits: ${flower.traits.join(", ")}</p>
     <p class="flavor">${hybridFlavor(flower)}</p>
@@ -1425,6 +1526,7 @@ function renderParentCard(name) {
     <div class="parent-card">
       <div class="card-bloom" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
       <strong>${name}</strong>
+      <div class="family-tags">${renderFamilyTags(flower)}</div>
     </div>
   `;
 }
@@ -1520,6 +1622,7 @@ function flushJournalUnlocks() {
 
 function syncJournalUnlocks() {
   ensureJournalState();
+  syncFamilyBreakthroughs();
   if (state.stats.harvested >= 1) {
     unlockJournalEntry("grandfather", "morning-rain", "Grandfather's note recovered");
     unlockJournalEntry("facts", "deadheading", "Gardening fact added");
@@ -1865,6 +1968,53 @@ function currentMilestoneText() {
   return "Next: Town flower beds cleaned at 10%.";
 }
 
+function targetFamilies(flower) {
+  return flowerFamilies.filter((family) => family.flowers.includes(flower.name));
+}
+
+function renderFamilyTags(flower) {
+  const families = targetFamilies(flower);
+  if (!families.length) return "";
+  return families.map((family) => `<span class="family-badge">${family.name}</span>`).join("");
+}
+
+function connectedDiscoveries(name) {
+  return discoveryLinks.filter((link) => link.from === name && (isDiscovered(link.from) || isDiscovered(link.to)));
+}
+
+function progressiveHint(link, sourceName) {
+  if (isDiscovered(link.to)) return `${sourceName} helped reveal ${link.to}.`;
+  const target = flowerByName.get(link.to);
+  const parentsKnown = target.recipe?.every((name) => isDiscovered(name));
+  const hasSpecific = state.notes.some((note) => note.includes(link.from) && note.includes(link.to));
+  const familyUnlocked = targetFamilies(target).some((family) => state.familyBreakthroughs?.includes(family.id));
+  const level = parentsKnown && (hasSpecific || familyUnlocked || state.notes.length >= 7) ? 2 : parentsKnown || familyUnlocked || state.notes.length >= 4 ? 1 : 0;
+  return link.hint[level];
+}
+
+function nextFamilyHint(family, count) {
+  const needed = familyBreakthroughRequirement(family);
+  if (count >= needed) return "Breakthrough ready.";
+  return `${Math.max(needed - count, 0)} more discovery${needed - count === 1 ? "" : "ies"} for a breakthrough.`;
+}
+
+function familyBreakthroughRequirement(family) {
+  return Math.min(3, Math.max(2, Math.ceil(family.flowers.length * 0.45)));
+}
+
+function syncFamilyBreakthroughs() {
+  if (!Array.isArray(state.familyBreakthroughs)) state.familyBreakthroughs = [];
+  flowerFamilies.forEach((family) => {
+    const count = family.flowers.filter((name) => isDiscovered(name)).length;
+    if (count < familyBreakthroughRequirement(family) || state.familyBreakthroughs.includes(family.id)) return;
+    state.familyBreakthroughs.push(family.id);
+    if (!state.notes.includes(family.note)) state.notes.push(family.note);
+    if (family.id === "water") unlockJournalEntry("facts", "cold-germination", "Water Studies added a gardening fact");
+    if (family.id === "exotic") unlockJournalEntry("grandfather", "moon-garden-ledgers", "Exotic Studies recovered a note");
+    queueJournalUnlock(`${family.breakthrough} unlocked`);
+  });
+}
+
 function hybridFlavor(flower) {
   const lines = {
     "Lavender Rose": "The bloom smells like a quiet evening after rain.",
@@ -1885,10 +2035,35 @@ function discover(name) {
   if (state.discovered.includes(name)) return false;
   state.discovered.push(name);
   const flower = flowerByName.get(name);
+  applyDiscoveryReward(flower);
   residents.forEach((resident) => {
     if (flower && residentLikesFlower(resident, flower)) addFriendship(resident.id, flower.recipe ? 4 : 2);
   });
+  syncFamilyBreakthroughs();
   return true;
+}
+
+function applyDiscoveryReward(flower) {
+  if (!flower) return;
+  const rarityCoins = { Common: 3, Uncommon: 6, Rare: 10, Epic: 16, Hybrid: 18 };
+  const earned = rarityCoins[flower.rarity] || 5;
+  state.coins += earned;
+  state.restoration = clamp(state.restoration + (flower.recipe ? 2 : 1), 0, 100);
+  queueJournalUnlock(`${flower.name} added to the discovery network`);
+  const linked = discoveryLinks.find((link) => link.from === flower.name || link.to === flower.name);
+  if (flower.recipe || linked) addNote(Math.max(0, Math.min(state.notes.length, researchNotes.length - 1)));
+  if (Math.random() < (flower.recipe ? 0.45 : 0.25)) unlockDiscoveryJournalChance(flower);
+  if (flower.rarity === "Rare" || flower.rarity === "Epic") unlockJournalEntry("grandfather", "right-neighbor", "Grandfather's note recovered");
+}
+
+function unlockDiscoveryJournalChance(flower) {
+  const lockedGrandfather = grandfatherNotes.find((entry) => !isJournalUnlocked("grandfather", entry.id));
+  const lockedFact = gardeningFacts.find((entry) => !isJournalUnlocked("facts", entry.id));
+  if (flower.recipe && lockedGrandfather) {
+    unlockJournalEntry("grandfather", lockedGrandfather.id, "Grandfather's note recovered");
+    return;
+  }
+  if (lockedFact) unlockJournalEntry("facts", lockedFact.id, "Gardening fact added");
 }
 
 function isDiscovered(name) {
@@ -1958,6 +2133,7 @@ function loadState() {
     migrated.storyEntries = Array.isArray(parsed.storyEntries) ? parsed.storyEntries : [];
     migrated.journalPages = Number(parsed.journalPages || 0);
     migrated.journal = migrateJournal(parsed.journal);
+    migrated.familyBreakthroughs = Array.isArray(parsed.familyBreakthroughs) ? parsed.familyBreakthroughs : [];
     migrated.stats = { ...createNewState().stats, ...(parsed.stats || {}) };
     migrated.eventEffects = { ...(parsed.eventEffects || {}) };
     migrated.completedTasks = parsed.completedTasks || [];
