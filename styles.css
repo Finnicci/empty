@@ -1295,6 +1295,53 @@ select {
   margin: 8px 0;
 }
 
+.provider-panel {
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(139, 207, 104, 0.1), transparent),
+    #fffdf5;
+  padding: 8px;
+  margin: 8px 0;
+}
+
+.provider-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.provider-option {
+  display: grid;
+  gap: 2px;
+  min-height: 50px;
+  padding: 6px;
+  background: #fff8df;
+  border-color: rgba(109, 75, 52, 0.38);
+  color: var(--muted);
+  box-shadow: none;
+  line-height: 1.1;
+}
+
+.provider-option.active {
+  background: var(--leaf);
+  border-color: var(--wood);
+  color: #fffdf5;
+}
+
+.provider-option span {
+  font-size: 0.68rem;
+  font-weight: 800;
+  opacity: 0.86;
+}
+
+.provider-status {
+  margin: 8px 0 4px;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .resource-grid span {
   display: grid;
   gap: 2px;
