@@ -173,6 +173,23 @@ const eventPool = [
   { name: "Ancient Journal Page", rarity: "Epic", min: 12000, duration: 0, note: "A loose page names a forgotten pairing.", effect: "Adds a specific hybrid clue.", reward: "specific-note" },
 ];
 
+const natureEncounters = [
+  { name: "Bee Swarm", rarity: "Common", min: 0, duration: 2, note: "A gentle swarm follows you back to the beds.", effect: "+15% hybrid success for 2 days and +2 Pollination Points.", reward: "pollination" },
+  { name: "Monarch Butterfly", rarity: "Uncommon", min: 5000, duration: 0, note: "A monarch circles a flower sketch in the journal.", effect: "Adds a family clue and 1 Discovery Energy.", reward: "family-clue" },
+  { name: "Golden Bee", rarity: "Rare", min: 8000, duration: 1, note: "A golden bee dusts the greenhouse latch with pollen.", effect: "Improves the next hybrid attempt.", reward: "hybrid-focus" },
+  { name: "Rare Pollinator", rarity: "Rare", min: 8000, duration: 0, note: "An unfamiliar pollinator favors the strongest scent trail.", effect: "Adds an advanced research clue.", reward: "advanced-note" },
+  { name: "Traveling Botanist", rarity: "Rare", min: 8000, duration: 0, note: "A botanist trades a roadside observation for a seed.", effect: "Adds one uncommon or rare seed.", reward: "seed" },
+  { name: "Migrating Butterflies", rarity: "Epic", min: 12000, duration: 2, note: "A ribbon of butterflies crosses Town Square at dusk.", effect: "Adds a journal investigation and lasting pollination.", reward: "journal-fragment" },
+  { name: "Ancient Journal Fragment", rarity: "Epic", min: 12000, duration: 0, note: "A torn page names weather, scent, and moonlight in the same margin.", effect: "Adds a specific hybrid clue and journal page.", reward: "specific-note" },
+];
+
+const expeditionOptions = [
+  { id: "meadow", name: "Meadow Survey", cost: 4, reward: "Wildflower clue, journal progress, and a meadow seed chance.", action: () => { addFamilyInsight("wildflower"); if (Math.random() < 0.45) addSeed(random(["Cosmos", "Black-Eyed Susan", "Coneflower"]), 1); } },
+  { id: "pollinator", name: "Pollinator Watch", cost: 5, reward: "Pollination Points and stronger hybrid odds.", action: () => { state.pollinationPoints += 3; state.eventEffects.pollination = Math.max(state.eventEffects.pollination || 0, 1); } },
+  { id: "wildflower", name: "Wildflower Hunt", cost: 6, reward: "Rare seed chance and Discovery Network clue.", action: () => { addFamilyInsight("wildflower"); addSeed(random(["Black-Eyed Susan", "Coneflower", "Snapdragon"]), 1); } },
+  { id: "research", name: "Botanical Research Walk", cost: 7, reward: "Research note, journal page chance, and family insight.", action: () => { addNote(3); if (Math.random() < 0.55) addSpecificHybridNote(); addFamilyInsight(random(flowerFamilies).id); } },
+];
+
 const startingSeeds = { Daisy: 4, Tulip: 3, Sunflower: 2, Lavender: 2, Marigold: 2, Rose: 1, Cosmos: 1 };
 const plotUpgradeSizes = [12, 16, 20, 24];
 const plotUpgradeCosts = [60, 150, 290];
@@ -317,6 +334,12 @@ function createNewState() {
     strategyChangedDay: 0,
     dailyCoinsEarned: 0,
     stepToday: 0,
+    discoveryEnergy: 0,
+    pollinationPoints: 0,
+    discoveryTokens: 0,
+    nextHybridBoost: false,
+    lastStepSummary: null,
+    lastStepDay: 0,
     pollinationBonus: false,
     eventEffects: {},
     growthBoost: false,
@@ -428,6 +451,9 @@ function renderTopbar() {
         <span class="pill">${state.phase}</span>
         <span class="pill">${state.coins} coins</span>
         <span class="pill">${state.reputation} rep</span>
+        <span class="pill">${state.discoveryEnergy} energy</span>
+        <span class="pill">${state.pollinationPoints} pollen</span>
+        <span class="pill">${state.discoveryTokens} token${state.discoveryTokens === 1 ? "" : "s"}</span>
       </div>
     </header>
   `;
@@ -472,12 +498,20 @@ function renderFarm() {
           ${renderPlotExpansion()}
           <div class="panel">
             <h2>Today's Walk</h2>
-            <p class="tagline">Steps unlock clues, visitors, weather, and better hybrid chances.</p>
+            <p class="tagline">Steps create opportunities: energy, pollination, clues, encounters, and journal observations.</p>
+            <div class="resource-grid">
+              <span><strong>${state.discoveryEnergy}</strong> Discovery Energy</span>
+              <span><strong>${state.pollinationPoints}</strong> Pollination Points</span>
+              <span><strong>${state.discoveryTokens}</strong> Discovery Tokens</span>
+            </div>
             <div class="grid">
               <input id="step-input" aria-label="Today's steps" type="number" min="0" step="100" value="${state.stepToday}" />
               <button data-action="submit-steps">Log Steps</button>
             </div>
+            ${renderStepSummary()}
           </div>
+          ${renderDiscoveryActions()}
+          ${renderExpeditions()}
           <div class="panel">
             <h2>Active Events</h2>
             <div class="event-list">${renderActiveEvents()}</div>
@@ -1035,11 +1069,56 @@ function renderEvent(event) {
 function renderActiveEvents() {
   const eventCards = state.events.map(renderEvent).join("");
   const effectCards = Object.entries(state.eventEffects).map(([key, days]) => {
-    const label = key === "pollination" ? "Bee Swarm Lingering" : "Helpful Weather";
-    const effect = key === "pollination" ? "+15% hybrid success and better quality odds." : "Flowers grow faster overnight.";
+    const label = key === "pollination" ? "Bee Swarm Lingering" : key === "hybridFocus" ? "Focused Pollinator Trail" : "Helpful Weather";
+    const effect = key === "pollination" ? "+15% hybrid success and better quality odds." : key === "hybridFocus" ? "The next hybrid attempt has improved odds." : "Flowers grow faster overnight.";
     return `<div class="event-card rarity-Common"><strong>${label}</strong><p>${effect}</p><small>${days} day${days === 1 ? "" : "s"} remaining</small></div>`;
   }).join("");
   return eventCards || effectCards ? eventCards + effectCards : '<p class="muted">Log steps to invite discoveries.</p>';
+}
+
+function renderStepSummary() {
+  if (!state.lastStepSummary) return '<p class="muted">Today has not been logged yet.</p>';
+  const summary = state.lastStepSummary;
+  return `
+    <div class="step-summary">
+      <strong>${summary.tier}</strong>
+      <p>${summary.steps.toLocaleString()} steps became ${summary.energy} energy, ${summary.pollination} pollination, and ${summary.tokens} token${summary.tokens === 1 ? "" : "s"}.</p>
+      <div class="reward-tags">${summary.rewards.map((reward) => `<span>${reward}</span>`).join("")}</div>
+    </div>
+  `;
+}
+
+function renderDiscoveryActions() {
+  return `
+    <div class="panel">
+      <h2>Discovery Tools</h2>
+      <p class="tagline">Spend walking inspiration on clues and investigation. These never buy coins or skip farming.</p>
+      <div class="discovery-actions">
+        <button data-action="spend-energy-research" ${state.discoveryEnergy >= 3 ? "" : "disabled"}>Research Clue<br><small>3 energy</small></button>
+        <button data-action="spend-energy-family" ${state.discoveryEnergy >= 4 ? "" : "disabled"}>Family Insight<br><small>4 energy</small></button>
+        <button data-action="use-token-connection" ${state.discoveryTokens >= 1 ? "" : "disabled"}>Reveal Connection<br><small>1 token</small></button>
+        <button data-action="use-token-hybrid" ${state.discoveryTokens >= 1 ? "" : "disabled"}>Focus Hybrid<br><small>1 token</small></button>
+      </div>
+    </div>
+  `;
+}
+
+function renderExpeditions() {
+  return `
+    <div class="panel">
+      <h2>Discovery Expeditions</h2>
+      <p class="tagline">Use Discovery Energy for a short research outing. No extra minigame, just a useful lead.</p>
+      <div class="expedition-list">
+        ${expeditionOptions.map((expedition) => `
+          <div class="expedition-card">
+            <strong>${expedition.name}</strong>
+            <p class="muted">${expedition.reward}</p>
+            <button data-action="run-expedition" data-expedition="${expedition.id}" ${state.discoveryEnergy >= expedition.cost ? "" : "disabled"}>${expedition.cost} energy</button>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
 }
 
 function handleClick(event) {
@@ -1059,6 +1138,11 @@ function handleClick(event) {
   if (action === "next-day") nextDay();
   if (action === "wait-ready") waitUntilReady();
   if (action === "submit-steps") submitSteps();
+  if (action === "spend-energy-research") spendEnergyResearch();
+  if (action === "spend-energy-family") spendEnergyFamily();
+  if (action === "use-token-connection") useTokenConnection();
+  if (action === "use-token-hybrid") useTokenHybrid();
+  if (action === "run-expedition") runExpedition(target.dataset.expedition);
   if (action === "fulfill-order") fulfillOrder(Number(target.dataset.index));
   if (action === "sell-flower") sellFlower(target.dataset.flower, target.dataset.quality);
   if (action === "buy-seed") buySeed(target.dataset.flower);
@@ -1200,31 +1284,157 @@ function waitUntilReady() {
 function submitSteps() {
   const input = document.querySelector("#step-input");
   const steps = Math.max(0, Number(input?.value || 0));
+  if (state.lastStepDay === state.day) return toast("Today's walk is already logged. New opportunities arrive tomorrow.");
   state.stepToday = steps;
+  state.lastStepDay = state.day;
   state.stats.stepsLogged += 1;
+  const reward = stepRewardFor(steps);
+  state.discoveryEnergy += reward.energy;
+  state.pollinationPoints += reward.pollination;
+  state.discoveryTokens += reward.tokens;
+  state.lastStepSummary = reward;
+  reward.rewards.forEach((rewardName) => {
+    if (rewardName === "Research clue") addNote(2);
+    if (rewardName === "Journal page") addSpecificHybridNote();
+    if (rewardName === "Discovery Network hint") addFamilyInsight();
+  });
   state.events = generateEvents(steps);
   state.events.forEach(applyEventReward);
   saveAndRender();
-  showEventModal(state.events, steps);
+  showEventModal(state.events, reward);
 }
 
 function generateEvents(steps) {
-  const guaranteed = steps >= 12000 ? 3 : steps >= 8000 ? 2 : 1;
-  return shuffle(eventPool.filter((event) => steps >= event.min)).slice(0, guaranteed);
+  const guaranteed = steps >= 12000 ? 3 : steps >= 8000 ? 2 : steps >= 5000 ? 2 : 1;
+  return shuffle(natureEncounters.filter((event) => steps >= event.min)).slice(0, guaranteed);
 }
 
 function applyEventReward(event) {
   if (event.reward === "pollination") {
     state.pollinationBonus = true;
+    state.pollinationPoints += 2;
     state.eventEffects.pollination = Math.max(state.eventEffects.pollination || 0, event.duration || 2);
   }
   if (event.reward === "seed") addSeed(random(starters.slice(7, 18)).name, 1);
   if (event.reward === "advanced-note") addNote(5);
   if (event.reward === "specific-note") addSpecificHybridNote();
+  if (event.reward === "family-clue") {
+    state.discoveryEnergy += 1;
+    addFamilyInsight();
+  }
+  if (event.reward === "hybrid-focus") {
+    state.nextHybridBoost = true;
+    state.eventEffects.hybridFocus = Math.max(state.eventEffects.hybridFocus || 0, event.duration || 1);
+  }
+  if (event.reward === "journal-fragment") {
+    addSpecificHybridNote();
+    state.eventEffects.pollination = Math.max(state.eventEffects.pollination || 0, event.duration || 2);
+  }
   if (event.reward === "growth") {
     state.growthBoost = true;
     state.eventEffects.growth = Math.max(state.eventEffects.growth || 0, event.duration || 1);
   }
+}
+
+function stepRewardFor(steps) {
+  const reward = { steps, tier: "Garden Stroll", energy: 1, pollination: 1, tokens: 0, rewards: ["Small pollination"] };
+  if (steps >= 2000) {
+    reward.tier = "Town Walk";
+    reward.energy = 2;
+    reward.pollination = 2;
+    if (Math.random() < 0.55) reward.rewards.push("Research clue");
+  }
+  if (steps >= 5000) {
+    reward.tier = "Nature Encounter";
+    reward.energy = 3;
+    reward.pollination = 3;
+    reward.rewards.push("Nature encounter");
+    if (Math.random() < 0.55) reward.rewards.push("Discovery Network hint");
+  }
+  if (steps >= 8000) {
+    reward.tier = "Rare Encounter";
+    reward.energy = 5;
+    reward.pollination = 4;
+    reward.rewards.push("Rare encounter");
+    if (Math.random() < 0.45) reward.rewards.push("Journal page");
+  }
+  if (steps >= 12000) {
+    reward.tier = "Legendary Trail";
+    reward.energy = 7;
+    reward.pollination = 5;
+    reward.tokens = Math.random() < 0.65 ? 1 : 0;
+    reward.rewards.push("Legendary encounter");
+    if (reward.tokens) reward.rewards.push("Discovery Token");
+  }
+  return reward;
+}
+
+function spendEnergyResearch() {
+  if (state.discoveryEnergy < 3) return;
+  state.discoveryEnergy -= 3;
+  addNote(Math.min(state.notes.length, researchNotes.length - 1));
+  saveAndRender();
+  toast("Discovery Energy became a stronger research clue.");
+}
+
+function spendEnergyFamily() {
+  if (state.discoveryEnergy < 4) return;
+  state.discoveryEnergy -= 4;
+  addFamilyInsight();
+  saveAndRender();
+  toast("A flower family insight was added to the journal.");
+}
+
+function useTokenConnection() {
+  if (state.discoveryTokens < 1) return;
+  state.discoveryTokens -= 1;
+  revealNetworkConnection();
+  saveAndRender();
+  toast("A hidden Discovery Network connection became clearer.");
+}
+
+function useTokenHybrid() {
+  if (state.discoveryTokens < 1) return;
+  state.discoveryTokens -= 1;
+  state.nextHybridBoost = true;
+  state.eventEffects.hybridFocus = Math.max(state.eventEffects.hybridFocus || 0, 1);
+  saveAndRender();
+  toast("The next hybrid attempt has a focused pollinator trail.");
+}
+
+function runExpedition(id) {
+  const expedition = expeditionOptions.find((item) => item.id === id);
+  if (!expedition || state.discoveryEnergy < expedition.cost) return;
+  state.discoveryEnergy -= expedition.cost;
+  expedition.action();
+  state.journalPages += Math.random() < 0.25 ? 1 : 0;
+  saveAndRender();
+  openModal(expedition.name, `
+    <p>${expedition.reward}</p>
+    <p class="muted">Discovery Energy spent: ${expedition.cost}. The journal board has a new lead.</p>
+  `);
+}
+
+function addFamilyInsight(id = null) {
+  const family = id ? flowerFamilies.find((item) => item.id === id) : familyNeedingInsight();
+  if (!family) return addNote(0);
+  if (!state.notes.includes(family.note)) {
+    state.notes.push(family.note);
+    queueJournalUnlock(`${family.name} insight added`);
+    return;
+  }
+  addNote(0);
+}
+
+function familyNeedingInsight() {
+  return flowerFamilies.find((family) => !state.familyBreakthroughs?.includes(family.id)) || random(flowerFamilies);
+}
+
+function revealNetworkConnection() {
+  const hiddenLink = discoveryLinks.find((link) => isDiscovered(link.from) && !isDiscovered(link.to));
+  if (!hiddenLink) return addSpecificHybridNote();
+  const note = `${hiddenLink.from} has a sketched line toward a ${flowerByName.get(hiddenLink.to).rarity.toLowerCase()} mystery in the Discovery Network. ${hiddenLink.hint[1]}`;
+  if (!state.notes.includes(note)) state.notes.push(note);
 }
 
 function tryHybrid() {
@@ -1239,7 +1449,9 @@ function tryHybrid() {
   state.hybridAttempts += 1;
   const match = hybrids.find((hybrid) => sameRecipe(hybrid.recipe, [a, b]));
   const chance = match && !isDiscovered(match.name) && state.stats.hybrids === 0 ? 1 : hybridChance(match);
+  if (state.pollinationPoints > 0) state.pollinationPoints -= 1;
   state.pollinationBonus = false;
+  state.nextHybridBoost = false;
 
   if (match && Math.random() <= chance) {
     const hybridQuality = promoteQuality(bestQuality([qa, qb]), match);
@@ -1263,14 +1475,18 @@ function tryHybrid() {
 }
 
 function hybridChance(match) {
-  if (!match) return 0.12 + (state.pollinationBonus ? 0.12 : 0);
-  return clamp(0.58 + (state.pollinationBonus ? 0.15 : 0) + (activeEffect("pollination") ? 0.15 : 0) + (species[state.species]?.hybridBonus || 0), 0, 0.92);
+  const pointBonus = state.pollinationPoints > 0 ? 0.06 : 0;
+  const tokenBonus = state.nextHybridBoost || activeEffect("hybridFocus") ? 0.14 : 0;
+  if (!match) return clamp(0.12 + (state.pollinationBonus ? 0.12 : 0) + pointBonus + tokenBonus, 0, 0.45);
+  return clamp(0.58 + (state.pollinationBonus ? 0.15 : 0) + (activeEffect("pollination") ? 0.15 : 0) + pointBonus + tokenBonus + (species[state.species]?.hybridBonus || 0), 0, 0.94);
 }
 
 function hybridChanceText() {
   const bonus = state.pollinationBonus ? "Bee Swarm active: improved odds." : "No pollination event active.";
   const lasting = activeEffect("pollination") ? ` Pollination lasts ${state.eventEffects.pollination} day${state.eventEffects.pollination === 1 ? "" : "s"}.` : "";
-  return `${bonus}${lasting} Attempts: ${state.hybridAttempts}.`;
+  const points = state.pollinationPoints > 0 ? ` ${state.pollinationPoints} Pollination Point${state.pollinationPoints === 1 ? "" : "s"} ready.` : "";
+  const focus = state.nextHybridBoost || activeEffect("hybridFocus") ? " Focused pollinator trail active." : "";
+  return `${bonus}${lasting}${points}${focus} Attempts: ${state.hybridAttempts}.`;
 }
 
 function fulfillOrder(index) {
@@ -1502,9 +1718,15 @@ function showWelcome() {
   `);
 }
 
-function showEventModal(events, steps) {
-  const tier = steps >= 12000 ? "Legendary discovery chance" : steps >= 8000 ? "Traveling botanist chance" : steps >= 5000 ? "Rare butterfly chance" : steps >= 2000 ? "Pollination bonus chance" : "Basic rewards";
-  openModal("Discovery Walk", `<p><strong>${steps.toLocaleString()} steps:</strong> ${tier}</p>${events.map(renderEvent).join("")}`);
+function showEventModal(events, reward) {
+  openModal("Discovery Walk", `
+    <p><strong>${reward.steps.toLocaleString()} steps:</strong> ${reward.tier}</p>
+    <div class="step-summary modal-step-summary">
+      <p>${reward.energy} Discovery Energy - ${reward.pollination} Pollination Point${reward.pollination === 1 ? "" : "s"} - ${reward.tokens} Discovery Token${reward.tokens === 1 ? "" : "s"}</p>
+      <div class="reward-tags">${reward.rewards.map((item) => `<span>${item}</span>`).join("")}</div>
+    </div>
+    ${events.map(renderEvent).join("")}
+  `);
 }
 
 function showHybridModal(flower, isNew, quality = "Fine") {
@@ -2140,6 +2362,12 @@ function loadState() {
     migrated.shopStrategy = strategyOptions[parsed.shopStrategy] ? parsed.shopStrategy : "Budget";
     migrated.strategyChangedDay = parsed.strategyChangedDay || 0;
     migrated.dailyCoinsEarned = parsed.dailyCoinsEarned || 0;
+    migrated.discoveryEnergy = Number(parsed.discoveryEnergy || 0);
+    migrated.pollinationPoints = Number(parsed.pollinationPoints || 0);
+    migrated.discoveryTokens = Number(parsed.discoveryTokens || 0);
+    migrated.nextHybridBoost = !!parsed.nextHybridBoost;
+    migrated.lastStepSummary = parsed.lastStepSummary || null;
+    migrated.lastStepDay = Number(parsed.lastStepDay || 0);
     migrated.maxPlots = parsed.maxPlots || Math.max(12, parsed.plots?.length || 12);
     while (migrated.plots.length < migrated.maxPlots) migrated.plots.push(null);
     migrated.inventory = migrateInventory(parsed.inventory || {});

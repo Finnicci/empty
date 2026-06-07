@@ -1288,6 +1288,104 @@ select {
   opacity: 0.58;
 }
 
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.resource-grid span {
+  display: grid;
+  gap: 2px;
+  min-height: 48px;
+  align-content: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fff8df;
+  padding: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.resource-grid strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.step-summary {
+  margin-top: 8px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(113, 184, 107, 0.1), transparent),
+    #fffdf5;
+  padding: 9px;
+}
+
+.step-summary p {
+  margin: 4px 0;
+}
+
+.modal-step-summary {
+  margin-bottom: 10px;
+}
+
+.reward-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.reward-tags span {
+  display: inline-block;
+  border: 2px solid rgba(109, 75, 52, 0.34);
+  border-radius: 999px;
+  background: #edf7dd;
+  color: #4f6f3f;
+  padding: 3px 7px;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.discovery-actions,
+.expedition-list {
+  display: grid;
+  gap: 8px;
+}
+
+.discovery-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.discovery-actions button {
+  min-height: 54px;
+  line-height: 1.15;
+}
+
+.discovery-actions small {
+  color: inherit;
+  opacity: 0.78;
+}
+
+.expedition-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf5;
+  padding: 9px;
+}
+
+.expedition-card p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .family-tags {
   display: flex;
   flex-wrap: wrap;
