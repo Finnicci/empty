@@ -4,22 +4,33 @@ Bloomhaven treats movement as a discovery input, not a fitness score. Step data 
 
 ## Current Prototype
 
-The static prototype supports these providers:
+The static prototype supports one real data source:
 
-- Manual: player-entered steps.
-- Mock Provider: sample step values for testing the discovery engine.
-- Health Connect: integration target for a future Android mobile shell.
-- WHOOP: integration target for a future backend OAuth flow.
+- Manual Daily Steps: player-entered steps.
 
-All providers should call the same step adapter path in `app.js` so the balance rules stay consistent.
+Manual entry is the MVP placeholder. No live wearable, Health Connect, Apple Health, Google Fit, Samsung Health, Strava, WHOOP, Fitbit, or other fitness-app sync is active in this static web prototype.
 
-## Health Connect Path
+The code is structured so future providers can replace `getDailySteps()` while continuing to use `processStepRewards()` and `generateStepEvents()`. This keeps the balance rules consistent.
+
+## Future Integration Roadmap
+
+Future supported integrations may include:
+
+- Apple Health
+- Health Connect
+- Google Fit
+- Samsung Health
+- Fitbit
+- WHOOP
+- Strava
+
+## Future Health Connect Path
 
 Use Health Connect for Android/mobile-first step tracking. The mobile shell should request the user's step permission, read today's aggregated steps, then pass the number into Bloomhaven's step adapter.
 
 Do not make Health Connect mandatory. Manual entry should remain available.
 
-## WHOOP Path
+## Future WHOOP Path
 
 WHOOP requires OAuth and a client secret. The client secret, refresh tokens, and token exchange must live server-side.
 

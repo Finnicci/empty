@@ -192,26 +192,13 @@ const expeditionOptions = [
 
 const stepProviders = {
   manual: {
-    label: "Manual",
-    status: "Ready",
-    description: "Type today's steps yourself. This remains the fallback for every player.",
-  },
-  mock: {
-    label: "Mock Provider",
-    status: "Prototype",
-    description: "Generates sample step data so the discovery engine can be tested without a wearable.",
-  },
-  healthConnect: {
-    label: "Health Connect",
-    status: "Mobile setup",
-    description: "Android step sync target. Requires a mobile wrapper and Health Connect permissions.",
-  },
-  whoop: {
-    label: "WHOOP",
-    status: "Backend setup",
-    description: "OAuth target. Requires a server-side token exchange so client secrets stay private.",
+    label: "Manual Entry",
+    status: "Prototype Source",
+    description: "Manual entry is used for this prototype. Future versions may connect to fitness apps and wearables.",
   },
 };
+
+const futureStepIntegrations = ["Apple Health", "Health Connect", "Google Fit", "Samsung Health", "Fitbit", "WHOOP", "Strava"];
 
 const startingSeeds = { Daisy: 4, Tulip: 3, Sunflower: 2, Lavender: 2, Marigold: 2, Rose: 1, Cosmos: 1 };
 const plotUpgradeSizes = [12, 16, 20, 24];
@@ -357,10 +344,7 @@ function createNewState() {
     strategyChangedDay: 0,
     dailyCoinsEarned: 0,
     stepToday: 0,
-    stepProvider: "manual",
-    stepProviderStatus: "Manual entry ready.",
     lastProviderSync: null,
-    mockStepCursor: 0,
     discoveryEnergy: 0,
     pollinationPoints: 0,
     discoveryTokens: 0,
@@ -524,9 +508,9 @@ function renderFarm() {
           </div>
           ${renderPlotExpansion()}
           <div class="panel">
-            <h2>Today's Walk</h2>
-            <p class="tagline">Steps create opportunities: energy, pollination, clues, encounters, and journal observations.</p>
-            ${renderStepProviderPanel()}
+            <h2>Daily Steps</h2>
+            <p class="tagline">Manual entry is used for this prototype. Future versions may connect to fitness apps and wearables.</p>
+            ${renderStepSourcePanel()}
             <div class="resource-grid">
               <span><strong>${state.discoveryEnergy}</strong> Discovery Energy</span>
               <span><strong>${state.pollinationPoints}</strong> Pollination Points</span>
@@ -534,8 +518,7 @@ function renderFarm() {
             </div>
             <div class="grid">
               <input id="step-input" aria-label="Today's steps" type="number" min="0" step="100" value="${state.stepToday}" />
-              <button data-action="submit-steps">${state.stepProvider === "manual" ? "Log Steps" : "Use Entered Steps"}</button>
-              <button data-action="sync-step-provider" ${canSyncStepProvider() ? "" : "disabled"}>Sync Provider</button>
+              <button data-action="submit-steps">Log Daily Steps</button>
             </div>
             ${renderStepSummary()}
           </div>
@@ -1105,25 +1088,19 @@ function renderActiveEvents() {
   return eventCards || effectCards ? eventCards + effectCards : '<p class="muted">Log steps to invite discoveries.</p>';
 }
 
-function renderStepProviderPanel() {
+function renderStepSourcePanel() {
   return `
     <div class="provider-panel">
-      <div class="provider-options">
-        ${Object.entries(stepProviders).map(([id, provider]) => `
-          <button class="provider-option ${state.stepProvider === id ? "active" : ""}" data-action="select-step-provider" data-provider="${id}">
-            <strong>${provider.label}</strong>
-            <span>${provider.status}</span>
-          </button>
-        `).join("")}
+      <div class="provider-current">
+        <strong>${stepProviders.manual.label}</strong>
+        <span>${stepProviders.manual.status}</span>
       </div>
-      <p class="provider-status">${stepProviders[state.stepProvider]?.description || stepProviders.manual.description}</p>
-      <p class="muted">${state.stepProviderStatus}${state.lastProviderSync ? ` Last sync: ${state.lastProviderSync}.` : ""}</p>
+      <p class="provider-status">${stepProviders.manual.description}</p>
+      <div class="integration-roadmap">
+        ${futureStepIntegrations.map((name) => `<span>${name} - Coming Later</span>`).join("")}
+      </div>
     </div>
   `;
-}
-
-function canSyncStepProvider() {
-  return state.stepProvider === "mock";
 }
 
 function renderStepSummary() {
@@ -1188,8 +1165,6 @@ function handleClick(event) {
   if (action === "next-day") nextDay();
   if (action === "wait-ready") waitUntilReady();
   if (action === "submit-steps") submitSteps();
-  if (action === "select-step-provider") selectStepProvider(target.dataset.provider);
-  if (action === "sync-step-provider") syncStepProvider();
   if (action === "spend-energy-research") spendEnergyResearch();
   if (action === "spend-energy-family") spendEnergyFamily();
   if (action === "use-token-connection") useTokenConnection();
@@ -1334,9 +1309,16 @@ function waitUntilReady() {
 }
 
 function submitSteps() {
+  // Manual input is the current MVP data source. Future integrations should replace
+  // getDailySteps(), then continue using processStepRewards() and generateStepEvents().
+  const steps = getDailySteps();
+  applyStepCount(steps, "Manual daily steps");
+}
+
+function getDailySteps() {
+  // Prototype placeholder: read the player's manually entered daily step count.
   const input = document.querySelector("#step-input");
-  const steps = Math.max(0, Number(input?.value || 0));
-  applyStepCount(steps, "Manual entry");
+  return Math.max(0, Number(input?.value || 0));
 }
 
 function applyStepCount(steps, sourceLabel) {
@@ -1345,7 +1327,7 @@ function applyStepCount(steps, sourceLabel) {
   state.lastStepDay = state.day;
   state.lastProviderSync = sourceLabel;
   state.stats.stepsLogged += 1;
-  const reward = stepRewardFor(steps);
+  const reward = processStepRewards(steps);
   state.discoveryEnergy += reward.energy;
   state.pollinationPoints += reward.pollination;
   state.discoveryTokens += reward.tokens;
@@ -1355,60 +1337,13 @@ function applyStepCount(steps, sourceLabel) {
     if (rewardName === "Journal page") addSpecificHybridNote();
     if (rewardName === "Discovery Network hint") addFamilyInsight();
   });
-  state.events = generateEvents(steps);
+  state.events = generateStepEvents(steps);
   state.events.forEach(applyEventReward);
   saveAndRender();
   showEventModal(state.events, reward);
 }
 
-function selectStepProvider(provider) {
-  if (!stepProviders[provider]) return;
-  state.stepProvider = provider;
-  state.stepProviderStatus = providerStatusText(provider);
-  saveAndRender();
-  if (provider === "healthConnect" || provider === "whoop") showProviderSetup(provider);
-}
-
-function syncStepProvider() {
-  if (state.stepProvider === "mock") {
-    const steps = mockProviderSteps();
-    state.stepProviderStatus = `Mock Provider returned ${steps.toLocaleString()} steps for today.`;
-    applyStepCount(steps, "Mock Provider");
-    return;
-  }
-  showProviderSetup(state.stepProvider);
-}
-
-function providerStatusText(provider) {
-  if (provider === "manual") return "Manual entry ready.";
-  if (provider === "mock") return "Mock Provider ready for prototype sync.";
-  if (provider === "healthConnect") return "Health Connect requires an Android mobile wrapper and runtime permissions.";
-  if (provider === "whoop") return "WHOOP requires server-side OAuth before step sync can be enabled.";
-  return "Manual entry ready.";
-}
-
-function mockProviderSteps() {
-  const samples = [1800, 4200, 6800, 8400, 12600, 5200, 9700];
-  const steps = samples[state.mockStepCursor % samples.length];
-  state.mockStepCursor += 1;
-  return steps;
-}
-
-function showProviderSetup(provider) {
-  const providerInfo = stepProviders[provider] || stepProviders.manual;
-  const details = provider === "healthConnect"
-    ? "Health Connect should be implemented in the eventual Android shell, then pass today's aggregated steps into Bloomhaven's step adapter."
-    : provider === "whoop"
-      ? "WHOOP should be implemented through a backend OAuth flow. The static client must never store the client secret or refresh token."
-      : "Manual and Mock Provider work inside this prototype.";
-  openModal(`${providerInfo.label} Setup`, `
-    <p><strong>${providerInfo.status}</strong></p>
-    <p>${providerInfo.description}</p>
-    <p class="muted">${details}</p>
-  `);
-}
-
-function generateEvents(steps) {
+function generateStepEvents(steps) {
   const guaranteed = steps >= 12000 ? 3 : steps >= 8000 ? 2 : steps >= 5000 ? 2 : 1;
   return shuffle(natureEncounters.filter((event) => steps >= event.min)).slice(0, guaranteed);
 }
@@ -1440,7 +1375,7 @@ function applyEventReward(event) {
   }
 }
 
-function stepRewardFor(steps) {
+function processStepRewards(steps) {
   const reward = { steps, tier: "Garden Stroll", energy: 1, pollination: 1, tokens: 0, rewards: ["Small pollination"] };
   if (steps >= 2000) {
     reward.tier = "Town Walk";
@@ -2466,10 +2401,7 @@ function loadState() {
     migrated.shopStrategy = strategyOptions[parsed.shopStrategy] ? parsed.shopStrategy : "Budget";
     migrated.strategyChangedDay = parsed.strategyChangedDay || 0;
     migrated.dailyCoinsEarned = parsed.dailyCoinsEarned || 0;
-    migrated.stepProvider = stepProviders[parsed.stepProvider] ? parsed.stepProvider : "manual";
-    migrated.stepProviderStatus = parsed.stepProviderStatus || providerStatusText(migrated.stepProvider);
     migrated.lastProviderSync = parsed.lastProviderSync || null;
-    migrated.mockStepCursor = Number(parsed.mockStepCursor || 0);
     migrated.discoveryEnergy = Number(parsed.discoveryEnergy || 0);
     migrated.pollinationPoints = Number(parsed.pollinationPoints || 0);
     migrated.discoveryTokens = Number(parsed.discoveryTokens || 0);

@@ -1305,34 +1305,21 @@ select {
   margin: 8px 0;
 }
 
-.provider-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.provider-option {
-  display: grid;
-  gap: 2px;
-  min-height: 50px;
-  padding: 6px;
+.provider-current {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  border: 2px solid rgba(109, 75, 52, 0.38);
+  border-radius: 8px;
   background: #fff8df;
-  border-color: rgba(109, 75, 52, 0.38);
+  padding: 8px;
+}
+
+.provider-current span {
   color: var(--muted);
-  box-shadow: none;
-  line-height: 1.1;
-}
-
-.provider-option.active {
-  background: var(--leaf);
-  border-color: var(--wood);
-  color: #fffdf5;
-}
-
-.provider-option span {
   font-size: 0.68rem;
   font-weight: 800;
-  opacity: 0.86;
 }
 
 .provider-status {
@@ -1340,6 +1327,24 @@ select {
   color: var(--ink);
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.integration-roadmap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.integration-roadmap span {
+  display: inline-block;
+  border: 2px dashed rgba(109, 75, 52, 0.32);
+  border-radius: 999px;
+  background: #f8f3dd;
+  color: var(--muted);
+  padding: 3px 7px;
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 
 .resource-grid span {
