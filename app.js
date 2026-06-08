@@ -291,7 +291,7 @@ const restorationMilestones = [
   { value: 100, title: "District 1 restored", text: "Bloomhaven Town Square is blooming again." },
 ];
 const taskDefinitions = [
-  { id: "choose-animal", title: "Meet the Farmhand", objective: "Choose an animal character.", hint: "Fox helps hybrid discovery, Rabbit speeds growth, Mongoose boosts shop income.", reward: { coins: 8 }, complete: () => !!state.species },
+  { id: "choose-animal", title: "Meet the Farmhand", objective: "Choose an animal and presentation.", hint: "Fox helps hybrid discovery, Rabbit speeds growth, Mongoose boosts shop income. Male/female changes the farmhand portrait style only.", reward: { coins: 8 }, complete: () => !!state.species && !!state.gender },
   { id: "plant-3", title: "Wake the Beds", objective: "Plant 3 flowers.", hint: "Use Starter Mix for Daisy + Cosmos + Tulip. That sets up your first order and first hybrid.", reward: { coins: 12, restoration: 2 }, complete: () => state.stats.planted >= 3 },
   { id: "harvest-1", title: "First Bloom", objective: "Harvest your first flower.", hint: "End the day once your beds are planted. Ready beds glow darker.", reward: { coins: 10, note: true }, complete: () => state.stats.harvested >= 1 },
   { id: "fill-order-1", title: "First Customer", objective: "Fill 1 florist order.", hint: "Simple orders accept any quality. Higher-quality requests pay more later.", reward: { reputation: 2, restoration: 4 }, complete: () => state.stats.orders >= 1 },
@@ -326,6 +326,7 @@ function createNewState() {
     restoration: 8,
     weather: "Clear",
     species: "",
+    gender: "",
     active: "farm",
     plots: Array.from({ length: 12 }, () => null),
     maxPlots: 12,
@@ -448,13 +449,14 @@ function renderTaskCard() {
 
 function renderTopbar() {
   const passive = species[state.species]?.passive || "Choose an animal to begin";
+  const farmhand = state.species ? `${state.gender ? `${state.gender} ` : ""}${state.species}` : "New farmhand";
   return `
     <header class="topbar">
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>Bloomhaven</h1>
-          <small>${state.species || "New farmhand"} - ${passive}</small>
+          <small>${farmhand} - ${passive}</small>
         </div>
       </div>
       <div class="stats">
@@ -535,8 +537,8 @@ function renderFarm() {
 }
 
 function renderCharacter() {
-  const label = state.species || "?";
-  return `<div class="character species-${state.species || "none"}" title="${label}"></div>`;
+  const label = state.species ? `${state.gender || ""} ${state.species}`.trim() : "?";
+  return `<div class="character species-${state.species || "none"} presentation-${state.gender || "none"}" title="${label}"></div>`;
 }
 
 function renderTownStrip() {
@@ -596,25 +598,30 @@ function renderPlotStage(stage, flower) {
 }
 
 function renderSpeciesPicker() {
-  if (state.species) {
+  if (state.species && state.gender) {
     return `
       <div class="panel player-panel">
-        <div class="animal-badge portrait-${state.species}"></div>
-        <div><h2>${state.species} Farmhand</h2><p class="tagline">${species[state.species].passive}</p></div>
+        <div class="animal-badge portrait-${state.species} presentation-${state.gender}"></div>
+        <div><h2>${state.gender} ${state.species} Farmhand</h2><p class="tagline">${species[state.species].passive}</p></div>
       </div>
     `;
   }
   return `
-    <div class="panel">
-      <h2>Choose Animal</h2>
+    <div class="panel starter-panel">
+      <h2>Choose Your Farmhand</h2>
+      <p class="tagline">Pick one of three animal backgrounds, then choose male or female portrait styling.</p>
       <div class="species-grid">
         ${Object.entries(species).map(([name, data]) => `
-          <button class="species-card" data-action="choose-species" data-species="${name}">
+          <button class="species-card ${state.species === name ? "selected" : ""}" data-action="choose-species" data-species="${name}">
             <span class="animal-badge portrait-${name}"></span>
             <strong>${name}</strong>
             <span class="muted">${data.passive}</span>
           </button>
         `).join("")}
+      </div>
+      <div class="presentation-picker">
+        <button class="${state.gender === "Male" ? "active" : ""}" data-action="choose-gender" data-gender="Male">Male</button>
+        <button class="${state.gender === "Female" ? "active" : ""}" data-action="choose-gender" data-gender="Female">Female</button>
       </div>
     </div>
   `;
@@ -1156,6 +1163,7 @@ function handleClick(event) {
   if (action === "journal-tab") setJournalTab(target.dataset.tab);
   if (action === "new-game") confirmNewGame();
   if (action === "choose-species") chooseSpecies(target.dataset.species);
+  if (action === "choose-gender") chooseGender(target.dataset.gender);
   if (action === "plant-selected") plantFirstEmpty(document.querySelector("#seed-select")?.value);
   if (action === "plant-starter-mix") plantStarterMix();
   if (action === "plant-plot") plantAt(Number(target.dataset.index), document.querySelector("#seed-select")?.value);
@@ -1198,6 +1206,13 @@ function chooseSpecies(name) {
   state.species = name;
   saveAndRender();
   toast(`${name} selected: ${species[name].passive}`);
+}
+
+function chooseGender(gender) {
+  if (!["Male", "Female"].includes(gender)) return;
+  state.gender = gender;
+  saveAndRender();
+  toast(`${gender} farmhand style selected.`);
 }
 
 function plantFirstEmpty(name) {
@@ -1753,7 +1768,7 @@ function newGame() {
 function showWelcome() {
   openModal("Grandfather's Farm", `
     <p>You inherited a quiet flower farm and a fading florist shop in Bloomhaven Town Square.</p>
-    <p>Choose an animal, plant seeds, harvest blooms, fill orders, log steps, and try hybrids to restore the town.</p>
+    <p>Choose an animal farmhand, pick a male or female portrait style, plant seeds, harvest blooms, fill orders, log steps, and try hybrids to restore the town.</p>
   `);
 }
 
@@ -2112,7 +2127,7 @@ function rewardText(reward) {
 }
 
 function nextObjectiveHint() {
-  if (!state.species) return "Choose an animal to begin.";
+  if (!state.species || !state.gender) return "Choose one animal and a male or female portrait style to begin.";
   if (state.stats.planted < 3) return "Plant a starter mix so orders and hybrid clues line up.";
   if (state.stats.harvested < 1) return "Advance time until a bed is ready, then harvest.";
   if (state.stats.orders < 1) return "Open Florist and fill a Simple order.";
@@ -2391,6 +2406,7 @@ function loadState() {
     if (!Array.isArray(migrated.orders)) migrated.orders = starterOrders();
     if (!Array.isArray(migrated.plots)) migrated.plots = createNewState().plots;
     migrated.residents = migrateResidents(parsed.residents);
+    migrated.gender = ["Male", "Female"].includes(parsed.gender) ? parsed.gender : "";
     migrated.storyEntries = Array.isArray(parsed.storyEntries) ? parsed.storyEntries : [];
     migrated.journalPages = Number(parsed.journalPages || 0);
     migrated.journal = migrateJournal(parsed.journal);
