@@ -2271,7 +2271,8 @@ function progressiveHint(link, sourceName) {
 function nextFamilyHint(family, count) {
   const needed = familyBreakthroughRequirement(family);
   if (count >= needed) return "Breakthrough ready.";
-  return `${Math.max(needed - count, 0)} more discovery${needed - count === 1 ? "" : "ies"} for a breakthrough.`;
+  const remaining = Math.max(needed - count, 0);
+  return `${remaining} more ${remaining === 1 ? "discovery" : "discoveries"} for a breakthrough.`;
 }
 
 function familyBreakthroughRequirement(family) {
