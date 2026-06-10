@@ -2006,3 +2006,913 @@ select {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* Living world visual pass */
+body {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 241, 184, 0.62), transparent 22%),
+    radial-gradient(circle at 88% 8%, rgba(157, 220, 245, 0.42), transparent 24%),
+    linear-gradient(180deg, #e9f8df 0%, #f8f0d2 62%, #e6d0a9 100%);
+}
+
+.app {
+  background:
+    linear-gradient(90deg, rgba(109, 75, 52, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(109, 75, 52, 0.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.topbar {
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  align-items: center;
+  padding: 8px 10px;
+  background:
+    linear-gradient(90deg, rgba(255, 250, 240, 0.96), rgba(237, 247, 221, 0.9)),
+    rgba(255, 250, 240, 0.92);
+  border-bottom: 3px solid rgba(109, 75, 52, 0.34);
+  box-shadow: 0 5px 0 rgba(109, 75, 52, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.world-brand {
+  padding: 4px 8px 4px 4px;
+  border: 2px solid rgba(216, 201, 157, 0.78);
+  border-radius: 14px;
+  background: rgba(255, 253, 245, 0.78);
+}
+
+.mini-portrait {
+  width: 42px;
+  height: 42px;
+  border-width: 2px;
+  box-shadow: 0 3px 0 rgba(109, 75, 52, 0.18);
+}
+
+.brand h1 {
+  font-size: 1rem;
+  max-width: 34vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.stats {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  min-height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 2px solid rgba(109, 75, 52, 0.24);
+  background: #fffdf5;
+  box-shadow: 0 2px 0 rgba(109, 75, 52, 0.1);
+}
+
+.stained-pill {
+  color: #fffaf0;
+  background:
+    linear-gradient(135deg, rgba(255, 241, 184, 0.4), transparent),
+    var(--violet);
+  border-color: #695aa0;
+}
+
+.bottom-nav {
+  gap: 7px;
+  padding: 8px 10px 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.84), rgba(232, 207, 165, 0.96));
+  border-top: 3px solid rgba(109, 75, 52, 0.42);
+}
+
+.nav-button {
+  position: relative;
+  min-height: 60px;
+  padding: 7px 4px 6px;
+  border: 2px solid #8b6244;
+  border-radius: 8px 8px 12px 12px;
+  background:
+    linear-gradient(180deg, #fff5c8, #d7a96f);
+  box-shadow: 0 4px 0 #8b6244;
+  color: #3f2f25;
+}
+
+.nav-button:before,
+.nav-button:after {
+  content: "";
+  position: absolute;
+  bottom: -11px;
+  width: 5px;
+  height: 14px;
+  border-radius: 0 0 3px 3px;
+  background: #6d4b34;
+}
+
+.nav-button:before {
+  left: 18%;
+}
+
+.nav-button:after {
+  right: 18%;
+}
+
+.nav-button.active {
+  background:
+    linear-gradient(180deg, #fffbdc, #a6d984);
+  border-color: var(--leaf-dark);
+  color: #24462c;
+}
+
+.nav-icon {
+  display: block;
+  width: 24px;
+  height: 20px;
+  margin: 0 auto 3px;
+  image-rendering: pixelated;
+}
+
+.sign-seedling .nav-icon {
+  background:
+    radial-gradient(circle at 50% 78%, var(--soil) 0 20%, transparent 22%),
+    radial-gradient(ellipse at 36% 46%, var(--leaf) 0 25%, transparent 27%),
+    radial-gradient(ellipse at 64% 42%, var(--leaf-dark) 0 25%, transparent 27%);
+}
+
+.sign-bouquet .nav-icon {
+  background:
+    radial-gradient(circle at 32% 34%, var(--rose) 0 20%, transparent 22%),
+    radial-gradient(circle at 55% 24%, var(--gold) 0 20%, transparent 22%),
+    radial-gradient(circle at 70% 44%, var(--violet) 0 20%, transparent 22%),
+    linear-gradient(90deg, transparent 44%, var(--leaf-dark) 45% 55%, transparent 56%);
+}
+
+.sign-book .nav-icon {
+  border: 2px solid var(--wood);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, transparent 46%, rgba(109, 75, 52, 0.45) 47% 53%, transparent 54%),
+    #fff7dc;
+}
+
+.sign-spark .nav-icon {
+  background:
+    radial-gradient(circle at 50% 50%, #fff7b7 0 17%, transparent 18%),
+    conic-gradient(from 45deg, transparent 0 12%, var(--violet) 13% 24%, transparent 25% 37%, var(--rose) 38% 49%, transparent 50% 62%, var(--gold) 63% 74%, transparent 75%);
+}
+
+.sign-map .nav-icon {
+  border: 2px solid var(--wood);
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at 28% 66%, var(--rose) 0 10%, transparent 11%),
+    radial-gradient(circle at 68% 36%, var(--leaf) 0 12%, transparent 13%),
+    linear-gradient(135deg, #bde7fb 0 42%, #cfe9a5 43% 100%);
+}
+
+.hero-scene {
+  min-height: min(66vh, 620px);
+  border: 0;
+  border-radius: 0 0 18px 18px;
+  box-shadow: inset 0 -8px 0 rgba(109, 75, 52, 0.13), 0 8px 0 rgba(109, 75, 52, 0.1);
+  background:
+    linear-gradient(#9edcf5 0 36%, #d9f0a8 36% 42%, #a8d36f 42% 100%);
+}
+
+.hero-scene.evening {
+  background:
+    linear-gradient(#edae91 0 30%, #f4d37b 31% 42%, #97c56c 43% 100%);
+}
+
+.hero-scene.night {
+  background:
+    linear-gradient(#334158 0 34%, #596983 35% 41%, #47664d 42% 100%);
+}
+
+.hero-scene.rainy .weather-atmosphere {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(105deg, rgba(255, 255, 255, 0.32) 0 2px, transparent 2px 18px);
+  opacity: 0.42;
+  animation: rainDrift 0.6s linear infinite;
+  pointer-events: none;
+  z-index: 7;
+}
+
+.hero-scene.breezy .cloud {
+  animation-duration: 18s;
+}
+
+.sun,
+.moon {
+  top: 22px;
+  right: 34px;
+  width: 56px;
+  height: 56px;
+  z-index: 2;
+}
+
+.cloud {
+  top: 46px;
+  left: 14%;
+  z-index: 2;
+  opacity: 0.82;
+}
+
+.cloud-two {
+  top: 78px;
+  left: auto;
+  right: 12%;
+  width: 76px;
+  opacity: 0.7;
+  animation-delay: -6s;
+}
+
+.sky-hills {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 30%;
+  height: 90px;
+  background:
+    radial-gradient(ellipse at 18% 100%, #8fc66d 0 34%, transparent 35%),
+    radial-gradient(ellipse at 52% 100%, #9fce78 0 40%, transparent 41%),
+    radial-gradient(ellipse at 86% 100%, #80b964 0 33%, transparent 34%);
+  opacity: 0.88;
+}
+
+.tree-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  height: 58px;
+  background:
+    radial-gradient(circle at 5% 80%, #4c8d50 0 16px, transparent 17px),
+    radial-gradient(circle at 13% 72%, #5da45b 0 19px, transparent 20px),
+    radial-gradient(circle at 23% 78%, #477d48 0 18px, transparent 19px),
+    radial-gradient(circle at 77% 74%, #5da45b 0 18px, transparent 19px),
+    radial-gradient(circle at 88% 80%, #477d48 0 22px, transparent 23px),
+    radial-gradient(circle at 96% 74%, #4c8d50 0 17px, transparent 18px);
+  z-index: 1;
+}
+
+.town-strip {
+  top: 32%;
+  z-index: 3;
+  opacity: 0.95;
+}
+
+.building {
+  border-width: 2px;
+  box-shadow: 0 5px 0 rgba(109, 75, 52, 0.18);
+}
+
+.building:after {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.farmhouse {
+  position: absolute;
+  left: 6%;
+  top: 34%;
+  width: 118px;
+  height: 88px;
+  border: 3px solid var(--wood);
+  border-radius: 8px 8px 5px 5px;
+  background:
+    linear-gradient(90deg, transparent 45%, rgba(109, 75, 52, 0.08) 46% 54%, transparent 55%),
+    #f3d2a4;
+  box-shadow: 0 6px 0 rgba(109, 75, 52, 0.16);
+  z-index: 6;
+}
+
+.farmhouse:before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  top: -32px;
+  height: 38px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: #b9684f;
+  border: 3px solid var(--wood);
+}
+
+.farmhouse .window {
+  position: absolute;
+  left: 16px;
+  top: 22px;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--wood);
+  border-radius: 5px;
+  background:
+    linear-gradient(90deg, transparent 43%, rgba(109, 75, 52, 0.5) 44% 56%, transparent 57%),
+    linear-gradient(0deg, transparent 43%, rgba(109, 75, 52, 0.5) 44% 56%, transparent 57%),
+    conic-gradient(from 45deg, #fff176, #9edcf5, #df7892, #91d47b, #fff176);
+}
+
+.farmhouse .door {
+  position: absolute;
+  right: 18px;
+  bottom: 0;
+  width: 30px;
+  height: 46px;
+  border: 3px solid var(--wood);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: #8a5a3b;
+}
+
+.mailbox,
+.watering-can,
+.garden-sign {
+  position: absolute;
+  z-index: 8;
+}
+
+.mailbox {
+  left: 21%;
+  top: 51%;
+  width: 34px;
+  height: 25px;
+  border: 3px solid var(--wood);
+  border-radius: 14px 14px 4px 4px;
+  background: #e88180;
+}
+
+.mailbox:after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 22px;
+  width: 5px;
+  height: 34px;
+  background: var(--wood);
+}
+
+.watering-can {
+  right: 10%;
+  bottom: 116px;
+  width: 42px;
+  height: 28px;
+  border: 3px solid var(--wood);
+  border-radius: 8px 8px 12px 12px;
+  background: #69b9cf;
+}
+
+.watering-can:before {
+  content: "";
+  position: absolute;
+  right: -20px;
+  top: 4px;
+  width: 22px;
+  height: 8px;
+  border: 3px solid var(--wood);
+  border-left: 0;
+  transform: rotate(-16deg);
+  background: #69b9cf;
+}
+
+.garden-sign {
+  left: 50%;
+  top: 46%;
+  transform: translateX(-50%);
+  padding: 5px 12px;
+  border: 2px solid var(--wood);
+  border-radius: 7px;
+  background: #f7d58d;
+  box-shadow: 0 4px 0 rgba(109, 75, 52, 0.18);
+  font-weight: 800;
+  color: #4a3425;
+}
+
+.garden-sign:after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 3px);
+  top: 100%;
+  width: 6px;
+  height: 24px;
+  background: var(--wood);
+}
+
+.farm-ground {
+  min-height: 52%;
+  padding: 74px 12px 18px;
+  background:
+    radial-gradient(ellipse at 50% 110%, rgba(93, 124, 59, 0.24), transparent 45%),
+    repeating-linear-gradient(90deg, transparent 0 24px, rgba(255, 255, 255, 0.08) 24px 27px),
+    linear-gradient(#9bd67d, #69af5f);
+  z-index: 5;
+}
+
+.farm-path {
+  position: absolute;
+  left: 21%;
+  top: 8px;
+  bottom: -18px;
+  width: 28%;
+  background:
+    repeating-linear-gradient(18deg, rgba(109, 75, 52, 0.1) 0 8px, transparent 8px 18px),
+    #d9b982;
+  clip-path: polygon(22% 0, 65% 0, 92% 100%, 0 100%);
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.wild-bloom {
+  position: absolute;
+  width: 16px;
+  height: 20px;
+  z-index: 1;
+  animation: flowerSway 2.4s ease-in-out infinite alternate;
+}
+
+.wild-bloom:before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  bottom: 0;
+  width: 4px;
+  height: 14px;
+  background: var(--leaf-dark);
+}
+
+.wild-bloom:after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  background:
+    radial-gradient(circle at 50% 50%, #fff8df 0 18%, transparent 20%),
+    radial-gradient(circle at 50% 0, var(--bloom) 0 30%, transparent 31%),
+    radial-gradient(circle at 100% 50%, var(--bloom) 0 30%, transparent 31%),
+    radial-gradient(circle at 50% 100%, var(--bloom) 0 30%, transparent 31%),
+    radial-gradient(circle at 0 50%, var(--bloom) 0 30%, transparent 31%);
+}
+
+.character {
+  left: clamp(16px, 8vw, 86px);
+  bottom: 150px;
+  transform-origin: bottom center;
+  animation: characterIdle 2.2s ease-in-out infinite alternate;
+  z-index: 9;
+}
+
+.character:before {
+  border-radius: 14px 14px 8px 8px;
+}
+
+.character.species-Fox:before,
+.animal-badge.portrait-Fox {
+  --player-color: #d98245;
+}
+
+.character.species-Rabbit:before,
+.animal-badge.portrait-Rabbit {
+  --player-color: #f0d8c5;
+}
+
+.character.species-Mongoose:before,
+.animal-badge.portrait-Mongoose {
+  --player-color: #b07b48;
+}
+
+.character.species-Fox:before {
+  box-shadow:
+    inset 0 -7px 0 rgba(255, 255, 255, 0.18),
+    34px 24px 0 -4px #d98245;
+}
+
+.plots {
+  position: relative;
+  z-index: 6;
+  grid-template-columns: repeat(4, minmax(74px, 1fr));
+  gap: 8px;
+  width: min(100%, 620px);
+  max-width: 620px;
+  margin: 8px auto 0;
+}
+
+.plot {
+  width: 100%;
+  min-height: 78px;
+  border-width: 2px;
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.1) 0 8px, transparent 8px 16px),
+    linear-gradient(180deg, #9b6b49, #76513d);
+  box-shadow: inset 0 -4px 0 rgba(63, 40, 27, 0.22), 0 3px 0 rgba(109, 75, 52, 0.18);
+}
+
+.plot.empty {
+  background:
+    radial-gradient(ellipse at 50% 66%, rgba(71, 43, 29, 0.24) 0 26%, transparent 27%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 8px, transparent 8px 16px),
+    #9a7050;
+}
+
+.plot.ready {
+  border-color: #fff1b8;
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 241, 184, 0.36),
+    0 0 0 3px rgba(255, 241, 184, 0.2),
+    0 3px 0 rgba(109, 75, 52, 0.18);
+}
+
+.plot-name,
+.plot-meta {
+  text-shadow: 0 1px 0 rgba(63, 40, 27, 0.45);
+}
+
+.pixel-flower,
+.stage-bud,
+.stage-sprout {
+  animation: flowerSway 1.9s ease-in-out infinite alternate;
+}
+
+.quick-actions {
+  margin: -30px 10px 12px;
+  position: relative;
+  z-index: 11;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  border: 2px solid rgba(109, 75, 52, 0.3);
+  border-radius: 14px;
+  background: rgba(255, 250, 240, 0.84);
+  box-shadow: 0 5px 0 rgba(109, 75, 52, 0.12);
+  backdrop-filter: blur(6px);
+}
+
+.quick-actions button {
+  min-height: 46px;
+  background: #fff5c8;
+}
+
+.panel {
+  border-color: rgba(109, 75, 52, 0.26);
+  background:
+    linear-gradient(90deg, rgba(216, 201, 157, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(216, 201, 157, 0.08) 1px, transparent 1px),
+    rgba(255, 250, 240, 0.94);
+  box-shadow: 0 4px 0 rgba(109, 75, 52, 0.1);
+}
+
+[data-screen="farm"] aside .panel {
+  backdrop-filter: blur(4px);
+}
+
+.task-card {
+  border-color: rgba(109, 75, 52, 0.36);
+  background:
+    radial-gradient(circle at 8% 16%, rgba(223, 120, 146, 0.16), transparent 18%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.36), transparent),
+    #fff0b7;
+}
+
+.valley-screen {
+  display: grid;
+  gap: 12px;
+}
+
+.valley-map {
+  position: relative;
+  min-height: 560px;
+  overflow: hidden;
+  border: 3px solid var(--wood);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 12% 78%, rgba(223, 120, 146, 0.18), transparent 12%),
+    radial-gradient(circle at 82% 72%, rgba(237, 191, 83, 0.2), transparent 14%),
+    linear-gradient(#a9ddf5 0 35%, #c4e89b 36% 100%);
+  box-shadow: var(--shadow);
+}
+
+.valley-map.restoration-low {
+  filter: saturate(0.76);
+}
+
+.valley-map.restoration-started {
+  filter: saturate(0.95);
+}
+
+.valley-map.restoration-mid,
+.valley-map.restoration-high {
+  filter: saturate(1.12);
+}
+
+.map-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 26% 36%, #8bcf68 0 18%, transparent 19%),
+    radial-gradient(ellipse at 74% 38%, #7bbc63 0 16%, transparent 17%);
+  opacity: 0.72;
+}
+
+.map-title {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin: 12px;
+  padding: 10px;
+  border: 2px solid rgba(109, 75, 52, 0.28);
+  border-radius: 14px;
+  background: rgba(255, 250, 240, 0.9);
+}
+
+.map-title h2,
+.map-title p {
+  margin: 0;
+}
+
+.stained-emblem {
+  width: 46px;
+  height: 46px;
+  border: 3px solid var(--wood);
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, transparent 46%, rgba(109, 75, 52, 0.6) 47% 53%, transparent 54%),
+    linear-gradient(0deg, transparent 46%, rgba(109, 75, 52, 0.6) 47% 53%, transparent 54%),
+    conic-gradient(from 30deg, #fff176, #9edcf5, #df7892, #9181c9, #71b86b, #fff176);
+}
+
+.map-progress {
+  position: relative;
+  z-index: 5;
+  height: 18px;
+  margin: 0 14px;
+  border: 2px solid rgba(109, 75, 52, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 250, 240, 0.78);
+  overflow: hidden;
+}
+
+.map-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 10px 50%, #fff8df 0 20%, transparent 22%),
+    linear-gradient(90deg, #71b86b, #edbf53, #df7892);
+}
+
+.map-path {
+  position: absolute;
+  left: 16%;
+  right: 14%;
+  top: 46%;
+  height: 38%;
+  border: 28px solid transparent;
+  border-left-color: #d9b982;
+  border-bottom-color: #d9b982;
+  border-radius: 50%;
+  transform: rotate(-6deg);
+  opacity: 0.8;
+}
+
+.map-location {
+  position: absolute;
+  z-index: 4;
+  width: min(34vw, 190px);
+  min-height: 116px;
+  padding: 10px;
+  border: 2px solid var(--wood);
+  border-radius: 12px;
+  background: rgba(255, 253, 245, 0.92);
+  box-shadow: 0 5px 0 rgba(109, 75, 52, 0.14);
+}
+
+.map-location strong,
+.map-location p {
+  position: relative;
+  z-index: 2;
+}
+
+.map-location p {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+}
+
+.map-location.sleepy {
+  background: rgba(244, 239, 216, 0.92);
+  color: #68705f;
+  filter: saturate(0.72);
+}
+
+.map-location.restored {
+  background:
+    radial-gradient(circle at 84% 18%, rgba(255, 241, 184, 0.44), transparent 20%),
+    rgba(255, 253, 245, 0.95);
+}
+
+.location-icon {
+  display: block;
+  width: 46px;
+  height: 38px;
+  margin-bottom: 5px;
+  image-rendering: pixelated;
+}
+
+.location-farm {
+  left: 6%;
+  bottom: 8%;
+}
+
+.location-florist {
+  left: 35%;
+  bottom: 15%;
+}
+
+.location-square {
+  left: 40%;
+  top: 42%;
+}
+
+.location-store {
+  right: 6%;
+  bottom: 12%;
+}
+
+.location-cafe {
+  right: 8%;
+  top: 34%;
+}
+
+.location-society {
+  left: 8%;
+  top: 32%;
+}
+
+.location-farm .location-icon {
+  background:
+    linear-gradient(90deg, transparent 34%, var(--wood) 35% 65%, transparent 66%),
+    radial-gradient(ellipse at 50% 88%, var(--leaf) 0 36%, transparent 37%),
+    linear-gradient(45deg, transparent 35%, #b9684f 36% 65%, transparent 66%),
+    #f3d2a4;
+}
+
+.location-florist .location-icon,
+.location-square .location-icon,
+.location-store .location-icon,
+.location-cafe .location-icon,
+.location-society .location-icon {
+  border: 2px solid var(--wood);
+  border-radius: 7px 7px 4px 4px;
+  background:
+    radial-gradient(circle at 30% 70%, var(--rose) 0 10%, transparent 11%),
+    radial-gradient(circle at 55% 65%, var(--gold) 0 10%, transparent 11%),
+    radial-gradient(circle at 76% 70%, var(--violet) 0 10%, transparent 11%),
+    #f3d2a4;
+}
+
+.location-cafe .location-icon {
+  background:
+    radial-gradient(circle at 50% 50%, #fff8df 0 22%, transparent 23%),
+    #b98957;
+}
+
+.location-society .location-icon {
+  background:
+    linear-gradient(90deg, transparent 46%, rgba(109, 75, 52, 0.5) 47% 53%, transparent 54%),
+    conic-gradient(from 45deg, #9edcf5, #9181c9, #fff176, #71b86b, #9edcf5);
+}
+
+@keyframes rainDrift {
+  from { background-position: 0 0; }
+  to { background-position: 0 18px; }
+}
+
+@keyframes flowerSway {
+  from { transform: translateX(-50%) rotate(-2deg); }
+  to { transform: translateX(-50%) rotate(2deg); }
+}
+
+.wild-bloom {
+  transform: translateX(-50%);
+}
+
+@keyframes characterIdle {
+  from { transform: translateY(0); }
+  to { transform: translateY(-3px); }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .hero-scene {
+    min-height: 300px;
+  }
+
+  .farmhouse {
+    width: 92px;
+    height: 66px;
+    top: 35%;
+  }
+
+  .farmhouse:before {
+    top: -25px;
+    height: 30px;
+  }
+
+  .farm-ground {
+    min-height: 54%;
+    padding-top: 46px;
+  }
+
+  .character {
+    bottom: 112px;
+  }
+
+  .plots {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    max-width: 620px;
+    gap: 6px;
+  }
+
+  .plot {
+    min-height: 64px;
+  }
+
+  .quick-actions {
+    margin-top: -22px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .nav-button {
+    min-height: 46px;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .stats {
+    justify-content: start;
+  }
+
+  .hero-scene {
+    min-height: 560px;
+  }
+
+  .farmhouse {
+    left: 4%;
+    width: 104px;
+  }
+
+  .town-strip {
+    justify-content: flex-end;
+  }
+
+  .plots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .map-location {
+    position: relative;
+    inset: auto;
+    width: auto;
+    min-height: 0;
+  }
+
+  .valley-map {
+    min-height: auto;
+    display: grid;
+    gap: 8px;
+    padding: 0 10px 12px;
+  }
+
+  .map-path,
+  .map-sky {
+    display: none;
+  }
+
+  .map-title,
+  .map-progress {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

@@ -448,25 +448,22 @@ function renderTaskCard() {
 }
 
 function renderTopbar() {
-  const passive = species[state.species]?.passive || "Choose an animal to begin";
   const farmhand = state.species ? `${state.gender ? `${state.gender} ` : ""}${state.species}` : "New farmhand";
   return `
     <header class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
+      <div class="brand world-brand">
+        <div class="animal-badge mini-portrait portrait-${state.species || "Fox"} presentation-${state.gender || "none"}" aria-hidden="true"></div>
         <div>
-          <h1>Bloomhaven</h1>
-          <small>${farmhand} - ${passive}</small>
+          <h1>${farmhand}</h1>
+          <small>Day ${state.day} - Spring - ${state.weather}</small>
         </div>
       </div>
       <div class="stats">
-        <span class="pill">Day ${state.day}</span>
-        <span class="pill">${state.phase}</span>
+        <span class="pill stained-pill">${state.phase}</span>
         <span class="pill">${state.coins} coins</span>
         <span class="pill">${state.reputation} rep</span>
         <span class="pill">${state.discoveryEnergy} energy</span>
         <span class="pill">${state.pollinationPoints} pollen</span>
-        <span class="pill">${state.discoveryTokens} token${state.discoveryTokens === 1 ? "" : "s"}</span>
       </div>
     </header>
   `;
@@ -474,17 +471,32 @@ function renderTopbar() {
 
 function renderFarm() {
   const sceneClass = state.phase === "Evening" && state.day % 3 === 0 ? "night" : state.phase === "Evening" ? "evening" : "";
+  const weatherClass = weatherSceneClass();
   return `
     <section class="screen ${isActive("farm")}" data-screen="farm">
       <div class="desktop-grid">
         <div>
-          <div class="hero-scene ${sceneClass}">
+          <div class="hero-scene ${sceneClass} ${weatherClass}">
             ${sceneClass === "night" ? '<div class="moon"></div>' : '<div class="sun"></div>'}
             <div class="cloud"></div>
+            <div class="cloud cloud-two"></div>
+            <div class="sky-hills"></div>
+            <div class="tree-line"></div>
             ${renderTownStrip()}
+            <div class="farmhouse">
+              <span class="window"></span>
+              <span class="door"></span>
+            </div>
+            <div class="mailbox"></div>
+            <div class="watering-can"></div>
+            <div class="garden-sign">Farm</div>
+            <div class="weather-atmosphere"></div>
             <div class="farm-ground">
               ${renderGrass()}
+              ${renderDecorativeFlowers()}
+              <div class="farm-path"></div>
               <div class="pollinator" style="left:14%;top:38px"></div>
+              <div class="pollinator butterfly" style="left:74%;top:86px"></div>
               ${renderCharacter()}
               <div class="plots">${state.plots.map(renderPlot).join("")}</div>
             </div>
@@ -553,11 +565,26 @@ function renderTownStrip() {
   `;
 }
 
+function weatherSceneClass() {
+  if (state.weather === "Drizzle" || state.weather === "Cool Mist") return "rainy";
+  if (state.weather === "Warm Breeze") return "breezy";
+  return "sunny";
+}
+
 function renderGrass() {
-  return Array.from({ length: 22 }, (_, index) => {
+  return Array.from({ length: 34 }, (_, index) => {
     const left = 4 + ((index * 17) % 93);
     const bottom = 8 + ((index * 23) % 190);
     return `<span class="grass" style="left:${left}%;bottom:${bottom}px;animation-delay:${(index % 5) * 0.2}s"></span>`;
+  }).join("");
+}
+
+function renderDecorativeFlowers() {
+  return Array.from({ length: 18 }, (_, index) => {
+    const left = 6 + ((index * 29) % 88);
+    const bottom = 22 + ((index * 37) % 210);
+    const colors = ["#fff176", "#ff6f61", "#9b7ad9", "#f28f33", "#f799c4"];
+    return `<span class="wild-bloom" style="left:${left}%;bottom:${bottom}px;--bloom:${colors[index % colors.length]};animation-delay:${(index % 6) * 0.18}s"></span>`;
   }).join("");
 }
 
@@ -1019,25 +1046,39 @@ function renderHybridLeads() {
 }
 
 function renderValley() {
+  const restoredClass = state.restoration >= 60 ? "restoration-high" : state.restoration >= 25 ? "restoration-mid" : state.restoration >= 10 ? "restoration-started" : "restoration-low";
   return `
-    <section class="screen ${isActive("valley")}" data-screen="valley">
-      <div class="panel restoration-panel">
-        <h2>Bloomhaven Town Square</h2>
-        <p class="tagline">Discovery, orders, and rare flowers restore District 1.</p>
-        <div class="progress"><span style="width:${state.restoration}%"></span></div>
-        <p><strong>${state.restoration}% restored</strong></p>
-        <p class="milestone-now">${currentMilestoneText()}</p>
+    <section class="screen valley-screen ${isActive("valley")}" data-screen="valley">
+      <div class="valley-map ${restoredClass}">
+        <div class="map-sky"></div>
+        <div class="map-title">
+          <span class="stained-emblem"></span>
+          <div>
+            <h2>Bloomhaven Town Square</h2>
+            <p>${state.restoration}% restored - ${currentMilestoneText()}</p>
+          </div>
+        </div>
+        <div class="map-progress"><span style="width:${state.restoration}%"></span></div>
+        <div class="map-path"></div>
+        ${renderMapLocation("farm", "Grandfather's Farm", state.restoration >= 10, state.restoration >= 10 ? "Fresh beds and pollinators return." : "Quiet fields waiting for color.")}
+        ${renderMapLocation("florist", "Bloomhaven Florist", state.reputation >= 8, state.reputation >= 8 ? "Locals talk about your bouquets." : "A small counter beside seed crates.")}
+        ${renderMapLocation("square", "Town Square", state.restoration >= 60, state.restoration >= 60 ? "Market stalls return with ribbons." : "The old square needs blooms.")}
+        ${renderMapLocation("store", "General Store", state.restoration >= 60, "Seed packets and garden tools.")}
+        ${renderMapLocation("cafe", "Clover Cafe", state.restoration >= 25, state.restoration >= 25 ? "Growers share morning rumors." : "Ben wants cheerful table flowers.")}
+        ${renderMapLocation("society", "Botanical Society", state.restoration >= 40, state.restoration >= 40 ? "The front room has reopened." : "Locked until the town feels alive.")}
       </div>
       <div class="milestone-list">${restorationMilestones.map(renderMilestone).join("")}</div>
-      <div class="district-list">
-        <div class="district-card ${state.restoration >= 10 ? "restored" : ""}"><strong>Grandfather's Farm</strong><p>${state.restoration >= 10 ? "Fresh beds and fluttering pollinators return." : "The fields are quiet but ready."}</p></div>
-        <div class="district-card"><strong>Bloomhaven Florist</strong><p>${state.reputation >= 8 ? "Locals are talking about your bouquets." : "A small counter waits for regular customers."}</p></div>
-        <div class="district-card ${state.restoration >= 60 ? "restored" : ""}"><strong>Town Square</strong><p>${state.restoration >= 60 ? "Market stalls return with ribbons and seed crates." : "The old square needs color."}</p></div>
-        <div class="district-card ${state.restoration >= 60 ? "restored" : ""}"><strong>General Store</strong><p>Seed packets arrive through step events and florist income.</p></div>
-        <div class="district-card ${state.restoration >= 25 ? "restored" : ""}"><strong>Clover Cafe</strong><p>${state.restoration >= 25 ? "Cafe regulars trade rumors about rare flowers." : "The owner wants cheerful table flowers."}</p></div>
-        <div class="district-card ${state.restoration >= 40 ? "restored" : ""}"><strong>Botanical Society</strong><p>${state.restoration >= 40 ? "Unlocked: members request rare research specimens." : "Locked until Bloomhaven feels alive again."}</p></div>
-      </div>
     </section>
+  `;
+}
+
+function renderMapLocation(id, title, restored, text) {
+  return `
+    <div class="map-location location-${id} ${restored ? "restored" : "sleepy"}">
+      <span class="location-icon"></span>
+      <strong>${title}</strong>
+      <p>${text}</p>
+    </div>
   `;
 }
 
@@ -1052,15 +1093,21 @@ function renderMilestone(milestone) {
 }
 
 function renderNav() {
+  const tabs = [
+    ["farm", "Farm", "seedling"],
+    ["florist", "Florist", "bouquet"],
+    ["journal", "Journal", "book"],
+    ["hybridize", "Hybridize", "spark"],
+    ["valley", "Valley", "map"],
+  ];
   return `
     <nav class="bottom-nav">
-      ${[
-        ["farm", "Farm"],
-        ["florist", "Florist"],
-        ["journal", "Journal"],
-        ["hybridize", "Hybridize"],
-        ["valley", "Valley"],
-      ].map(([id, label]) => `<button class="nav-button ${state.active === id ? "active" : ""}" data-action="nav" data-target="${id}">${label}</button>`).join("")}
+      ${tabs.map(([id, label, icon]) => `
+        <button class="nav-button sign-${icon} ${state.active === id ? "active" : ""}" data-action="nav" data-target="${id}">
+          <span class="nav-icon" aria-hidden="true"></span>
+          <span>${label}</span>
+        </button>
+      `).join("")}
     </nav>
   `;
 }
