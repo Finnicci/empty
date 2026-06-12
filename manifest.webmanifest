@@ -1,0 +1,20 @@
+{
+  "name": "Bloomhaven",
+  "short_name": "Bloomhaven",
+  "description": "A cozy flower farming, florist, and discovery prototype.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#fff7dc",
+  "theme_color": "#71b86b",
+  "icons": [
+    {
+      "src": "icons/bloomhaven-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment"]
+}

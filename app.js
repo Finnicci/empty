@@ -311,6 +311,7 @@ const hybrids = flowers.filter((flower) => flower.recipe);
 const app = document.querySelector("#app");
 const memoryStorage = {};
 let pendingJournalUnlocks = [];
+let installPromptEvent = null;
 let state = createNewState();
 
 function f(name, rarity, value, growthDays, fragrance, beauty, pollinator, traits, color, recipe = null) {
@@ -387,6 +388,8 @@ function createResidentState() {
 }
 
 function init() {
+  registerServiceWorker();
+  setupInstallPrompt();
   state = loadState() || createNewState();
   if (!state.orders.length) state.orders = starterOrders();
   ensureEarlyOrder();
@@ -406,6 +409,7 @@ function render() {
     <div class="app">
       ${renderTopbar()}
       <main class="main">
+        ${renderHomeScreenSetup()}
         ${renderTaskCard()}
         ${renderFarm()}
         ${renderFlorist()}
@@ -419,6 +423,36 @@ function render() {
     </div>
   `;
   app.onclick = handleClick;
+}
+
+function renderHomeScreenSetup() {
+  const installed = isStandaloneMode();
+  const canInstall = !!installPromptEvent;
+  const secureInstall = isSecureInstallContext();
+  if (installed) {
+    return `
+      <section class="home-setup-card installed">
+        <div>
+          <strong>Home Screen Ready</strong>
+          <p>Bloomhaven is running like an installed app.</p>
+        </div>
+        <span class="setup-status">Installed</span>
+      </section>
+    `;
+  }
+  return `
+    <section class="home-setup-card">
+      <div>
+        <strong>Home Screen Setup</strong>
+        <p>Add Bloomhaven to your phone home screen for a cleaner playtest window.</p>
+        <small>${secureInstall ? "Install may appear in supported browsers." : "Full install and offline mode need HTTPS; local network testing can still use a home-screen shortcut."}</small>
+      </div>
+      <div class="home-setup-actions">
+        <button data-action="install-app" ${canInstall ? "" : "disabled"}>${canInstall ? "Install App" : "Install Unavailable"}</button>
+        <button data-action="show-home-setup">Setup Steps</button>
+      </div>
+    </section>
+  `;
 }
 
 function renderTaskCard() {
@@ -1233,6 +1267,8 @@ function handleClick(event) {
   if (action === "talk-resident") talkResident(target.dataset.resident);
   if (action === "gift-resident") giftResident(target.dataset.resident);
   if (action === "try-hybrid") tryHybrid();
+  if (action === "install-app") installApp();
+  if (action === "show-home-setup") showHomeScreenHelp();
   if (action === "confirm-new-game") newGame();
   if (action === "close-modal") closeModal();
 }
@@ -1816,6 +1852,29 @@ function showWelcome() {
   openModal("Grandfather's Farm", `
     <p>You inherited a quiet flower farm and a fading florist shop in Bloomhaven Town Square.</p>
     <p>Choose an animal farmhand, pick a male or female portrait style, plant seeds, harvest blooms, fill orders, log steps, and try hybrids to restore the town.</p>
+  `);
+}
+
+async function installApp() {
+  if (!installPromptEvent) {
+    showHomeScreenHelp();
+    return;
+  }
+  const promptEvent = installPromptEvent;
+  installPromptEvent = null;
+  promptEvent.prompt();
+  const choice = await promptEvent.userChoice.catch(() => ({ outcome: "dismissed" }));
+  toast(choice.outcome === "accepted" ? "Bloomhaven added to your device." : "Install skipped for now.");
+  render();
+}
+
+function showHomeScreenHelp() {
+  const address = `${window.location.origin}${window.location.pathname}`;
+  openModal("Home Screen Setup", `
+    <p><strong>Current address:</strong><br>${address}</p>
+    <p><strong>iPhone / iPad:</strong> open this page in Safari, tap Share, then Add to Home Screen.</p>
+    <p><strong>Android:</strong> open this page in Chrome, tap the menu, then Install App or Add to Home screen.</p>
+    <p class="muted">For full install prompts and offline cache on a phone, Bloomhaven needs to be served from HTTPS. Local Wi-Fi testing may behave as a shortcut until we host it securely.</p>
   `);
 }
 
@@ -2573,6 +2632,35 @@ function storageRemove(key) {
     return;
   }
   delete memoryStorage[key];
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  if (!isSecureInstallContext()) return;
+  navigator.serviceWorker.register("./sw.js").catch(() => {
+    // Local prototype servers may block service workers; the game remains playable without offline cache.
+  });
+}
+
+function setupInstallPrompt() {
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installPromptEvent = event;
+    render();
+  });
+  window.addEventListener("appinstalled", () => {
+    installPromptEvent = null;
+    toast("Bloomhaven is on your home screen.");
+    render();
+  });
+}
+
+function isStandaloneMode() {
+  return window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+function isSecureInstallContext() {
+  return window.isSecureContext || ["localhost", "127.0.0.1"].includes(window.location.hostname);
 }
 
 function random(list) {

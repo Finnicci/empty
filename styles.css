@@ -567,6 +567,58 @@ select {
   font-weight: 700;
 }
 
+.home-setup-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 2px solid rgba(109, 75, 52, 0.28);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 6% 20%, rgba(113, 184, 107, 0.18), transparent 20%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.42), transparent),
+    rgba(255, 253, 245, 0.94);
+  box-shadow: 0 4px 0 rgba(109, 75, 52, 0.1);
+}
+
+.home-setup-card p {
+  margin: 4px 0;
+}
+
+.home-setup-card small {
+  color: var(--muted);
+}
+
+.home-setup-card.installed {
+  border-color: rgba(76, 141, 80, 0.58);
+  background:
+    linear-gradient(90deg, rgba(113, 184, 107, 0.18), transparent),
+    rgba(255, 253, 245, 0.96);
+}
+
+.home-setup-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  min-width: 148px;
+}
+
+.home-setup-actions button {
+  min-height: 42px;
+  box-shadow: none;
+}
+
+.setup-status {
+  padding: 8px 10px;
+  border: 2px solid rgba(76, 141, 80, 0.52);
+  border-radius: 999px;
+  background: #edf7dd;
+  font-weight: 800;
+  color: var(--leaf-dark);
+}
+
 .task-hint {
   color: #5d6b43;
   font-weight: 700;
@@ -1870,6 +1922,15 @@ select {
 }
 
 @media (max-width: 430px) {
+  .home-setup-card {
+    grid-template-columns: 1fr;
+  }
+
+  .home-setup-actions {
+    grid-template-columns: 1fr 1fr;
+    min-width: 0;
+  }
+
   .journal-tab {
     font-size: 0.72rem;
   }

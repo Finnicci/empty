@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Bloomhaven app icon</title>
+  <desc id="desc">A cozy pixel-inspired flower bed icon for Bloomhaven.</desc>
+  <rect width="512" height="512" rx="112" fill="#fff7dc"/>
+  <rect x="64" y="88" width="384" height="352" rx="44" fill="#71b86b"/>
+  <path d="M64 262h384v134c0 24-20 44-44 44H108c-24 0-44-20-44-44V262Z" fill="#8d6348"/>
+  <path d="M96 300h320M96 348h320M96 396h320" stroke="#6d4b34" stroke-width="20" stroke-linecap="round" opacity=".5"/>
+  <path d="M256 160v126" stroke="#4c8d50" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="256" cy="150" r="38" fill="#edbf53"/>
+  <circle cx="214" cy="174" r="38" fill="#df7892"/>
+  <circle cx="298" cy="174" r="38" fill="#9181c9"/>
+  <circle cx="256" cy="214" r="38" fill="#fff176"/>
+  <circle cx="256" cy="178" r="24" fill="#fffaf0"/>
+  <path d="M210 276c-40-16-63-44-68-86 42 5 72 28 90 66M302 276c40-16 63-44 68-86-42 5-72 28-90 66" fill="#4c8d50"/>
+  <path d="M136 112h240" stroke="#6d4b34" stroke-width="22" stroke-linecap="round"/>
+</svg>
