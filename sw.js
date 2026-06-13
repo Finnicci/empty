@@ -1,11 +1,17 @@
-const CACHE_NAME = "bloomhaven-static-v3";
+const CACHE_NAME = "bloomhaven-static-v4";
 const APP_ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=20260613-farm-hero",
-  "./app.js?v=20260613-farm-hero",
+  "./styles.css?v=20260613-characters",
+  "./app.js?v=20260613-characters",
   "./manifest.webmanifest",
   "./icons/bloomhaven-icon.svg",
+  "./assets/characters/fox-female.png",
+  "./assets/characters/fox-male.png",
+  "./assets/characters/rabbit-female.png",
+  "./assets/characters/rabbit-male.png",
+  "./assets/characters/mongoose-female.png",
+  "./assets/characters/mongoose-male.png",
 ];
 
 self.addEventListener("install", (event) => {

@@ -668,10 +668,22 @@ select {
   background: #fffef8;
   padding: 10px;
   display: grid;
-  grid-template-columns: 52px 1fr;
-  gap: 4px 10px;
+  grid-template-columns: 78px 1fr;
+  gap: 6px 12px;
   align-items: center;
   text-align: left;
+  overflow: hidden;
+}
+
+.character-choice-art {
+  grid-row: span 2;
+  width: 78px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 2px solid rgba(109, 75, 52, 0.28);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 0 3px 0 rgba(109, 75, 52, 0.12);
 }
 
 .starter-panel {
@@ -709,15 +721,24 @@ select {
   background: #e5ffd2;
 }
 
+.species-card.selected .character-choice-art {
+  border-color: var(--leaf);
+  box-shadow: 0 0 0 3px rgba(152, 194, 112, 0.28), 0 3px 0 rgba(109, 75, 52, 0.12);
+}
+
 .species-card .muted {
   grid-column: 2;
 }
 
 .player-panel {
   display: grid;
-  grid-template-columns: 64px 1fr;
+  grid-template-columns: 76px 1fr;
   gap: 12px;
   align-items: center;
+}
+
+.player-panel .character-choice-art {
+  width: 76px;
 }
 
 .animal-badge {

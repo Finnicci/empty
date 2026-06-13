@@ -34,9 +34,9 @@ const flowers = [
 ];
 
 const species = {
-  Fox: { color: "#d98245", icon: "fox", passive: "+10% hybrid discovery chance", hybridBonus: 0.1 },
-  Rabbit: { color: "#f2e7d5", icon: "rabbit", passive: "+10% flower growth speed", growthBonus: 0.1 },
-  Mongoose: { color: "#ba855b", icon: "mongoose", passive: "+10% shop revenue", revenueBonus: 0.1 },
+  Fox: { color: "#d98245", icon: "fox", passive: "+10% hybrid discovery chance", hybridBonus: 0.1, portraits: { Female: "assets/characters/fox-female.png", Male: "assets/characters/fox-male.png" } },
+  Rabbit: { color: "#f2e7d5", icon: "rabbit", passive: "+10% flower growth speed", growthBonus: 0.1, portraits: { Female: "assets/characters/rabbit-female.png", Male: "assets/characters/rabbit-male.png" } },
+  Mongoose: { color: "#ba855b", icon: "mongoose", passive: "+10% shop revenue", revenueBonus: 0.1, portraits: { Female: "assets/characters/mongoose-female.png", Male: "assets/characters/mongoose-male.png" } },
 };
 
 const flowerFamilies = [
@@ -687,21 +687,23 @@ function flowerClassName(name) {
 
 function renderSpeciesPicker() {
   if (state.species && state.gender) {
+    const portrait = characterPortrait(state.species, state.gender);
     return `
       <div class="panel player-panel">
-        <div class="animal-badge portrait-${state.species} presentation-${state.gender}"></div>
+        <img class="character-choice-art selected" src="${portrait}" alt="${state.gender} ${state.species} farmhand portrait" loading="lazy">
         <div><h2>${state.gender} ${state.species} Farmhand</h2><p class="tagline">${species[state.species].passive}</p></div>
       </div>
     `;
   }
+  const previewGender = state.gender || "Female";
   return `
     <div class="panel starter-panel">
       <h2>Choose Your Farmhand</h2>
-      <p class="tagline">Pick one of three animal backgrounds, then choose male or female portrait styling.</p>
+      <p class="tagline">Pick one of three animal backgrounds, then choose a male or female farmhand portrait.</p>
       <div class="species-grid">
         ${Object.entries(species).map(([name, data]) => `
           <button class="species-card ${state.species === name ? "selected" : ""}" data-action="choose-species" data-species="${name}">
-            <span class="animal-badge portrait-${name}"></span>
+            <img class="character-choice-art" src="${characterPortrait(name, previewGender)}" alt="${previewGender} ${name} farmhand portrait" loading="lazy">
             <strong>${name}</strong>
             <span class="muted">${data.passive}</span>
           </button>
@@ -713,6 +715,10 @@ function renderSpeciesPicker() {
       </div>
     </div>
   `;
+}
+
+function characterPortrait(speciesName, gender = "Female") {
+  return species[speciesName]?.portraits?.[gender] || species[speciesName]?.portraits?.Female || "";
 }
 
 function renderPlotExpansion() {
