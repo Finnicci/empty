@@ -2977,3 +2977,672 @@ body {
     margin-right: 0;
   }
 }
+
+/* World-first refinement pass */
+.screen[data-screen="farm"].active {
+  margin-top: -6px;
+}
+
+.screen[data-screen="farm"].active .desktop-grid {
+  position: relative;
+}
+
+.farm-world-overlay {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 13;
+  display: grid;
+  gap: 6px;
+  width: min(270px, calc(100% - 24px));
+  pointer-events: none;
+}
+
+.farm-world-overlay .task-card,
+.farm-world-overlay .home-setup-card {
+  margin: 0;
+  pointer-events: auto;
+  border-width: 2px;
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.44), rgba(255, 250, 240, 0.22)),
+    rgba(255, 250, 240, 0.72);
+  box-shadow: 0 3px 0 rgba(109, 75, 52, 0.1);
+  backdrop-filter: blur(5px);
+}
+
+.farm-world-overlay .task-card {
+  grid-template-columns: minmax(0, 1fr) 32px;
+  padding: 7px 8px;
+}
+
+.farm-world-overlay .task-card p {
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.farm-world-overlay .task-card h3,
+.farm-world-overlay .home-setup-card h3 {
+  font-size: 0.82rem;
+}
+
+.farm-world-overlay .task-card .task-hint,
+.farm-world-overlay .task-card small {
+  display: none;
+}
+
+.farm-world-overlay .task-card > span {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background:
+    radial-gradient(circle at 50% 20%, #fff8df 0 20%, transparent 21%),
+    #cce9ad;
+}
+
+.farm-world-overlay .home-setup-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 7px 8px;
+}
+
+.farm-world-overlay .home-setup-card p,
+.farm-world-overlay .home-setup-card small {
+  display: none;
+}
+
+.farm-world-overlay .home-setup-actions {
+  grid-template-columns: 1fr;
+  min-width: 90px;
+}
+
+.farm-world-overlay .home-setup-actions button:first-child {
+  display: none;
+}
+
+.farm-world-overlay .home-setup-actions button {
+  min-height: 30px;
+  padding: 4px 7px;
+  font-size: 0.66rem;
+}
+
+.farm-fence {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 48%;
+  height: 42px;
+  z-index: 4;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 28px, rgba(109, 75, 52, 0.65) 28px 35px, transparent 35px 56px),
+    linear-gradient(180deg, transparent 0 12px, rgba(255, 245, 200, 0.82) 13px 22px, transparent 23px 100%);
+  opacity: 0.82;
+}
+
+.garden-pond {
+  position: absolute;
+  right: 20%;
+  top: 51%;
+  width: 86px;
+  height: 36px;
+  border: 3px solid rgba(109, 75, 52, 0.5);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 30% 34%, rgba(255, 255, 255, 0.62) 0 16%, transparent 17%),
+    linear-gradient(135deg, #8bd8e8, #69b9cf);
+  box-shadow: inset 0 -5px 0 rgba(67, 143, 157, 0.22), 0 4px 0 rgba(109, 75, 52, 0.12);
+  z-index: 7;
+}
+
+.garden-pond:after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  width: 22px;
+  height: 10px;
+  background:
+    radial-gradient(ellipse at 28% 50%, #71b86b 0 44%, transparent 45%),
+    radial-gradient(ellipse at 72% 50%, #4c8d50 0 42%, transparent 43%);
+}
+
+.scarecrow {
+  position: absolute;
+  right: 34%;
+  top: 43%;
+  width: 42px;
+  height: 74px;
+  z-index: 7;
+  filter: drop-shadow(0 4px 0 rgba(109, 75, 52, 0.18));
+}
+
+.scarecrow:before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 12px;
+  width: 7px;
+  height: 58px;
+  background: var(--wood);
+}
+
+.scarecrow:after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0;
+  width: 34px;
+  height: 42px;
+  background:
+    linear-gradient(90deg, transparent 0 8px, #f7d58d 9px 25px, transparent 26px),
+    linear-gradient(0deg, transparent 0 18px, var(--wood) 19px 25px, transparent 26px),
+    radial-gradient(circle at 50% 68%, #f7d58d 0 28%, transparent 29%);
+}
+
+.hero-scene.night .farmhouse .window {
+  box-shadow: 0 0 18px rgba(255, 241, 184, 0.7);
+}
+
+.hero-scene.night .farm-ground:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 36%, rgba(255, 241, 184, 0.42) 0 3px, transparent 4px),
+    radial-gradient(circle at 62% 48%, rgba(255, 241, 184, 0.32) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 28%, rgba(255, 241, 184, 0.38) 0 3px, transparent 4px);
+  animation: firefly 3s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.character .character-prop {
+  position: absolute;
+  z-index: 4;
+}
+
+.character.species-Fox .character-prop {
+  right: -16px;
+  bottom: 20px;
+  width: 26px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d98245;
+  border: 3px solid var(--wood);
+  transform: rotate(-18deg);
+}
+
+.character.species-Fox .character-prop:after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 2px;
+  width: 10px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff8df;
+}
+
+.character.species-Rabbit .character-prop {
+  left: -10px;
+  bottom: 18px;
+  width: 18px;
+  height: 18px;
+  background:
+    radial-gradient(circle at 36% 36%, #fff8df 0 14%, transparent 15%),
+    var(--leaf);
+  border: 2px solid var(--wood);
+  border-radius: 50%;
+}
+
+.character.species-Mongoose .character-prop {
+  right: -15px;
+  bottom: 14px;
+  width: 24px;
+  height: 18px;
+  border: 3px solid var(--wood);
+  border-radius: 5px 5px 10px 10px;
+  background: #d9b982;
+}
+
+.character.species-Mongoose .character-prop:before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: -9px;
+  height: 12px;
+  border: 3px solid var(--wood);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+}
+
+.plot.stage-bloom {
+  background:
+    radial-gradient(circle at 50% 68%, rgba(255, 241, 184, 0.2) 0 20%, transparent 21%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.1) 0 8px, transparent 8px 16px),
+    linear-gradient(180deg, #85583b, #623d2c);
+}
+
+.plot .pixel-flower {
+  transform: translateX(-50%) scale(1.18);
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--bloom), white 30%));
+}
+
+.map-restoration-garden,
+.map-npc-activity,
+.map-festival-ribbons {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.map-restoration-garden {
+  z-index: 2;
+  background:
+    radial-gradient(circle at 18% 74%, var(--rose) 0 6px, transparent 7px),
+    radial-gradient(circle at 24% 78%, var(--gold) 0 5px, transparent 6px),
+    radial-gradient(circle at 72% 68%, var(--violet) 0 6px, transparent 7px),
+    radial-gradient(circle at 78% 73%, #fff176 0 5px, transparent 6px),
+    radial-gradient(circle at 54% 82%, var(--rose) 0 5px, transparent 6px);
+  opacity: 0.28;
+}
+
+.valley-map.restoration-started .map-restoration-garden {
+  opacity: 0.5;
+}
+
+.valley-map.restoration-mid .map-restoration-garden,
+.valley-map.restoration-high .map-restoration-garden {
+  opacity: 0.86;
+  background:
+    radial-gradient(circle at 14% 72%, var(--rose) 0 7px, transparent 8px),
+    radial-gradient(circle at 22% 78%, var(--gold) 0 6px, transparent 7px),
+    radial-gradient(circle at 30% 70%, #fff176 0 5px, transparent 6px),
+    radial-gradient(circle at 66% 65%, var(--violet) 0 7px, transparent 8px),
+    radial-gradient(circle at 74% 72%, #fff176 0 6px, transparent 7px),
+    radial-gradient(circle at 82% 68%, var(--rose) 0 5px, transparent 6px),
+    radial-gradient(circle at 50% 84%, #f799c4 0 7px, transparent 8px);
+}
+
+.map-npc-activity {
+  z-index: 3;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 42% 68%, #6d4b34 0 5px, transparent 6px),
+    radial-gradient(circle at 58% 58%, #6d4b34 0 5px, transparent 6px),
+    radial-gradient(circle at 68% 76%, #6d4b34 0 5px, transparent 6px);
+}
+
+.valley-map.restoration-mid .map-npc-activity,
+.valley-map.restoration-high .map-npc-activity {
+  opacity: 0.55;
+}
+
+.map-festival-ribbons {
+  z-index: 3;
+  opacity: 0;
+  background:
+    linear-gradient(20deg, transparent 0 43%, rgba(223, 120, 146, 0.8) 44% 46%, transparent 47%),
+    linear-gradient(-18deg, transparent 0 55%, rgba(237, 191, 83, 0.8) 56% 58%, transparent 59%);
+}
+
+.valley-map.restoration-high .map-festival-ribbons {
+  opacity: 0.5;
+}
+
+@keyframes firefly {
+  from { opacity: 0.35; transform: translateY(0); }
+  to { opacity: 0.85; transform: translateY(-6px); }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .farm-world-overlay {
+    width: min(320px, 36vw);
+  }
+
+  .farm-world-overlay .home-setup-card {
+    display: none;
+  }
+
+  .farm-world-overlay .task-card p {
+    display: none;
+  }
+
+  .garden-pond,
+  .scarecrow {
+    transform: scale(0.82);
+    transform-origin: center;
+  }
+}
+
+/* Farm hero polish pass */
+.screen[data-screen="farm"].active .desktop-grid {
+  grid-template-columns: minmax(0, 7fr) minmax(240px, 3fr);
+}
+
+.screen[data-screen="farm"].active aside {
+  max-height: calc(100vh - 156px);
+  overflow: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+}
+
+.screen[data-screen="farm"].active aside .panel {
+  margin-bottom: 8px;
+  padding: 9px;
+}
+
+.screen[data-screen="farm"].active aside .panel h2,
+.screen[data-screen="farm"].active aside .panel h3 {
+  font-size: 0.96rem;
+  margin-bottom: 5px;
+}
+
+.screen[data-screen="farm"].active aside .tagline,
+.screen[data-screen="farm"].active aside .muted,
+.screen[data-screen="farm"].active aside .provider-panel,
+.screen[data-screen="farm"].active aside .step-summary {
+  font-size: 0.76rem;
+}
+
+.screen[data-screen="farm"].active .player-panel {
+  grid-template-columns: 46px minmax(0, 1fr);
+}
+
+.screen[data-screen="farm"].active .player-panel .animal-badge {
+  width: 42px;
+  height: 42px;
+}
+
+.screen[data-screen="farm"].active .hero-scene {
+  min-height: min(72vh, 720px);
+}
+
+.tool-shed {
+  position: absolute;
+  right: 5%;
+  top: 35%;
+  width: 92px;
+  height: 72px;
+  border: 3px solid var(--wood);
+  border-radius: 7px;
+  background:
+    linear-gradient(90deg, transparent 42%, rgba(109, 75, 52, 0.18) 43% 57%, transparent 58%),
+    #c78b58;
+  box-shadow: 0 6px 0 rgba(109, 75, 52, 0.14);
+  z-index: 5;
+}
+
+.tool-shed:before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  right: -7px;
+  top: -24px;
+  height: 30px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: #7c9b65;
+  border: 3px solid var(--wood);
+}
+
+.tool-shed:after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: 0;
+  width: 24px;
+  height: 42px;
+  border: 3px solid var(--wood);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: #6d4b34;
+}
+
+.water-barrel {
+  position: absolute;
+  left: 18%;
+  top: 54%;
+  width: 34px;
+  height: 42px;
+  border: 3px solid var(--wood);
+  border-radius: 10px 10px 8px 8px;
+  background:
+    linear-gradient(0deg, transparent 0 22%, rgba(109, 75, 52, 0.32) 23% 30%, transparent 31% 58%, rgba(109, 75, 52, 0.32) 59% 66%, transparent 67%),
+    #8bd8e8;
+  z-index: 8;
+}
+
+.wheelbarrow {
+  position: absolute;
+  right: 14%;
+  top: 58%;
+  width: 58px;
+  height: 30px;
+  z-index: 8;
+}
+
+.wheelbarrow:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 48px;
+  height: 22px;
+  border: 3px solid var(--wood);
+  border-radius: 5px 5px 16px 16px;
+  background:
+    radial-gradient(circle at 30% 20%, var(--rose) 0 12%, transparent 13%),
+    radial-gradient(circle at 58% 18%, var(--gold) 0 12%, transparent 13%),
+    #9bcf75;
+  transform: rotate(-5deg);
+}
+
+.wheelbarrow:after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: -1px;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--wood);
+  border-radius: 50%;
+  background: #4a3425;
+}
+
+.flower-pots {
+  position: absolute;
+  left: 8%;
+  top: 58%;
+  width: 84px;
+  height: 32px;
+  z-index: 8;
+  background:
+    radial-gradient(circle at 16% 22%, #fff176 0 8%, transparent 9%),
+    radial-gradient(circle at 48% 12%, #9b7ad9 0 9%, transparent 10%),
+    radial-gradient(circle at 78% 20%, #df7892 0 8%, transparent 9%),
+    linear-gradient(90deg, #b96d45 0 26%, transparent 27% 36%, #b96d45 37% 63%, transparent 64% 72%, #b96d45 73% 100%);
+  border-bottom: 4px solid rgba(109, 75, 52, 0.45);
+}
+
+.stone-path {
+  position: absolute;
+  left: 43%;
+  top: 24px;
+  width: 23%;
+  height: 70%;
+  z-index: 1;
+  opacity: 0.75;
+  background:
+    radial-gradient(ellipse at 42% 8%, #cfc3a6 0 14px, transparent 15px),
+    radial-gradient(ellipse at 56% 24%, #d8c99d 0 15px, transparent 16px),
+    radial-gradient(ellipse at 38% 42%, #cfc3a6 0 14px, transparent 15px),
+    radial-gradient(ellipse at 60% 60%, #d8c99d 0 15px, transparent 16px),
+    radial-gradient(ellipse at 45% 78%, #cfc3a6 0 16px, transparent 17px);
+}
+
+.pollen-field {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pollen {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 241, 184, 0.8);
+  box-shadow: 0 0 6px rgba(255, 241, 184, 0.55);
+  animation: pollenFloat 7s ease-in-out infinite;
+}
+
+.rare-pollinator {
+  width: 17px;
+  height: 17px;
+  background:
+    radial-gradient(circle at 50% 50%, #fff8df 0 18%, transparent 19%),
+    radial-gradient(circle at 25% 50%, #9edcf5 0 34%, transparent 35%),
+    radial-gradient(circle at 75% 50%, #9b7ad9 0 34%, transparent 35%);
+  animation: rarePollinatorFloat 9s ease-in-out infinite;
+  opacity: 0.82;
+}
+
+.character.species-Fox {
+  animation: foxIdle 5.8s ease-in-out infinite;
+}
+
+.character.species-Rabbit {
+  animation: rabbitHop 3.6s ease-in-out infinite;
+}
+
+.character.species-Mongoose {
+  animation: mongooseWalk 5s ease-in-out infinite;
+}
+
+.plot.ready .discovery-glint {
+  position: absolute;
+  right: 9px;
+  top: 10px;
+  width: 18px;
+  height: 18px;
+  z-index: 3;
+  background:
+    radial-gradient(circle at 50% 50%, #fff8df 0 16%, transparent 17%),
+    conic-gradient(from 45deg, transparent 0 12%, rgba(255, 241, 184, 0.95) 13% 24%, transparent 25% 37%, rgba(145, 129, 201, 0.76) 38% 49%, transparent 50%);
+  animation: glintPulse 2.8s ease-in-out infinite;
+}
+
+.plot.ready .pixel-flower:before {
+  width: 42px;
+  height: 32px;
+  left: -18px;
+  top: -18px;
+  background:
+    radial-gradient(circle at 50% 50%, #fff8df 0 12%, transparent 13%),
+    radial-gradient(circle at 50% 0, var(--bloom, #ff7ea8) 0 26%, transparent 27%),
+    radial-gradient(circle at 83% 18%, var(--bloom, #ff7ea8) 0 22%, transparent 23%),
+    radial-gradient(circle at 100% 50%, var(--bloom, #ff7ea8) 0 25%, transparent 26%),
+    radial-gradient(circle at 83% 82%, var(--bloom, #ff7ea8) 0 22%, transparent 23%),
+    radial-gradient(circle at 50% 100%, var(--bloom, #ff7ea8) 0 26%, transparent 27%),
+    radial-gradient(circle at 17% 82%, var(--bloom, #ff7ea8) 0 22%, transparent 23%),
+    radial-gradient(circle at 0 50%, var(--bloom, #ff7ea8) 0 25%, transparent 26%),
+    radial-gradient(circle at 17% 18%, var(--bloom, #ff7ea8) 0 22%, transparent 23%);
+}
+
+.pixel-flower.flower-lavender:before,
+.pixel-flower.flower-lavender-rose:before,
+.pixel-flower.flower-woodland-bell:before {
+  border-radius: 35% 35% 50% 50%;
+  transform: scaleY(1.2);
+}
+
+.pixel-flower.flower-sunflower:before,
+.pixel-flower.flower-golden-star:before {
+  filter: saturate(1.3) drop-shadow(0 0 6px rgba(255, 216, 78, 0.7));
+}
+
+.pixel-flower.flower-daisy:before,
+.pixel-flower.flower-cosmos:before,
+.pixel-flower.flower-meadow-crown:before {
+  filter: saturate(1.15) drop-shadow(0 0 6px rgba(255, 255, 210, 0.62));
+}
+
+.pixel-flower.flower-rose:before,
+.pixel-flower.flower-peony:before,
+.pixel-flower.flower-velvet-peony:before {
+  transform: scale(1.08);
+  filter: saturate(1.25) drop-shadow(0 0 6px rgba(223, 120, 146, 0.7));
+}
+
+.pixel-flower.flower-iris:before,
+.pixel-flower.flower-hydrangea:before,
+.pixel-flower.flower-crystal-lily:before {
+  filter: saturate(1.2) drop-shadow(0 0 6px rgba(105, 185, 207, 0.68));
+}
+
+.pixel-flower.rarity-Hybrid:before,
+.pixel-flower.rarity-Epic:before {
+  filter: saturate(1.35) drop-shadow(0 0 8px color-mix(in srgb, var(--bloom), white 20%));
+}
+
+@keyframes pollenFloat {
+  0% { transform: translate3d(0, 10px, 0); opacity: 0; }
+  20% { opacity: 0.7; }
+  100% { transform: translate3d(18px, -42px, 0); opacity: 0; }
+}
+
+@keyframes rarePollinatorFloat {
+  0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+  35% { transform: translate(-34px, 18px) rotate(8deg); }
+  70% { transform: translate(24px, -12px) rotate(-10deg); }
+}
+
+@keyframes foxIdle {
+  0%, 100% { transform: translate(0, 0) scaleX(1); }
+  35% { transform: translate(18px, -2px) scaleX(1); }
+  50% { transform: translate(18px, -2px) scaleX(-1); }
+  80% { transform: translate(-6px, 0) scaleX(-1); }
+}
+
+@keyframes rabbitHop {
+  0%, 100% { transform: translate(0, 0); }
+  18% { transform: translate(8px, -9px); }
+  28% { transform: translate(12px, 0); }
+  62% { transform: translate(0, -4px); }
+}
+
+@keyframes mongooseWalk {
+  0%, 100% { transform: translateX(0); }
+  35% { transform: translateX(24px); }
+  70% { transform: translateX(8px); }
+}
+
+@keyframes glintPulse {
+  0%, 100% { opacity: 0.34; transform: scale(0.82) rotate(0deg); }
+  50% { opacity: 0.92; transform: scale(1.08) rotate(18deg); }
+}
+
+@media (min-width: 720px) {
+  .screen[data-screen="farm"].active .desktop-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(250px, 3fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .screen[data-screen="farm"].active .hero-scene {
+    min-height: 68vh;
+  }
+
+  .tool-shed,
+  .garden-pond,
+  .scarecrow {
+    transform: scale(0.82);
+    transform-origin: center;
+  }
+
+  .farm-world-overlay {
+    width: min(300px, calc(100% - 24px));
+  }
+}

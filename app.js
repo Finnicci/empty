@@ -409,8 +409,8 @@ function render() {
     <div class="app">
       ${renderTopbar()}
       <main class="main">
-        ${renderHomeScreenSetup()}
-        ${renderTaskCard()}
+        ${state.active === "farm" ? "" : renderHomeScreenSetup()}
+        ${state.active === "farm" ? "" : renderTaskCard()}
         ${renderFarm()}
         ${renderFlorist()}
         ${renderJournal()}
@@ -517,20 +517,34 @@ function renderFarm() {
             <div class="sky-hills"></div>
             <div class="tree-line"></div>
             ${renderTownStrip()}
+            <div class="farm-fence"></div>
             <div class="farmhouse">
               <span class="window"></span>
               <span class="door"></span>
             </div>
+            <div class="tool-shed"></div>
             <div class="mailbox"></div>
             <div class="watering-can"></div>
+            <div class="water-barrel"></div>
+            <div class="wheelbarrow"></div>
+            <div class="flower-pots"></div>
+            <div class="garden-pond"></div>
+            <div class="scarecrow"></div>
             <div class="garden-sign">Farm</div>
             <div class="weather-atmosphere"></div>
+            <div class="pollen-field">${renderPollenParticles()}</div>
+            <div class="farm-world-overlay">
+              ${renderTaskCard()}
+              ${renderHomeScreenSetup()}
+            </div>
             <div class="farm-ground">
               ${renderGrass()}
               ${renderDecorativeFlowers()}
               <div class="farm-path"></div>
+              <div class="stone-path"></div>
               <div class="pollinator" style="left:14%;top:38px"></div>
               <div class="pollinator butterfly" style="left:74%;top:86px"></div>
+              <div class="pollinator rare-pollinator" style="left:56%;top:118px"></div>
               ${renderCharacter()}
               <div class="plots">${state.plots.map(renderPlot).join("")}</div>
             </div>
@@ -584,7 +598,8 @@ function renderFarm() {
 
 function renderCharacter() {
   const label = state.species ? `${state.gender || ""} ${state.species}`.trim() : "?";
-  return `<div class="character species-${state.species || "none"} presentation-${state.gender || "none"}" title="${label}"></div>`;
+  const action = state.species === "Rabbit" ? "Inspecting blooms" : state.species === "Mongoose" ? "Carrying a basket" : state.species === "Fox" ? "Walking the beds" : "New farmhand";
+  return `<div class="character species-${state.species || "none"} presentation-${state.gender || "none"}" title="${label} - ${action}"><span class="character-prop"></span></div>`;
 }
 
 function renderTownStrip() {
@@ -614,11 +629,19 @@ function renderGrass() {
 }
 
 function renderDecorativeFlowers() {
-  return Array.from({ length: 18 }, (_, index) => {
+  return Array.from({ length: 26 }, (_, index) => {
     const left = 6 + ((index * 29) % 88);
     const bottom = 22 + ((index * 37) % 210);
-    const colors = ["#fff176", "#ff6f61", "#9b7ad9", "#f28f33", "#f799c4"];
-    return `<span class="wild-bloom" style="left:${left}%;bottom:${bottom}px;--bloom:${colors[index % colors.length]};animation-delay:${(index % 6) * 0.18}s"></span>`;
+    const colors = ["#fff176", "#ff6f61", "#9b7ad9", "#6db7e8", "#f799c4", "#f8f0df"];
+    return `<span class="wild-bloom wild-bloom-${index % 4}" style="left:${left}%;bottom:${bottom}px;--bloom:${colors[index % colors.length]};animation-delay:${(index % 6) * 0.18}s"></span>`;
+  }).join("");
+}
+
+function renderPollenParticles() {
+  return Array.from({ length: 18 }, (_, index) => {
+    const left = 3 + ((index * 31) % 94);
+    const top = 22 + ((index * 47) % 72);
+    return `<span class="pollen" style="left:${left}%;top:${top}%;animation-delay:${(index % 9) * 0.34}s"></span>`;
   }).join("");
 }
 
@@ -655,7 +678,11 @@ function renderPlotStage(stage, flower) {
   if (stage === "seed") return '<span class="plot-stage stage-seed"></span>';
   if (stage === "sprout") return '<span class="plot-stage stage-sprout"></span>';
   if (stage === "bud") return `<span class="plot-stage stage-bud" style="--bloom:${flower.color}"></span>`;
-  return `<span class="pixel-flower" style="--bloom:${flower.color}"></span>`;
+  return `<span class="discovery-glint"></span><span class="pixel-flower flower-${flowerClassName(flower.name)} rarity-${flower.rarity}" style="--bloom:${flower.color}"></span>`;
+}
+
+function flowerClassName(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 function renderSpeciesPicker() {
@@ -1085,6 +1112,9 @@ function renderValley() {
     <section class="screen valley-screen ${isActive("valley")}" data-screen="valley">
       <div class="valley-map ${restoredClass}">
         <div class="map-sky"></div>
+        <div class="map-restoration-garden"></div>
+        <div class="map-npc-activity"></div>
+        <div class="map-festival-ribbons"></div>
         <div class="map-title">
           <span class="stained-emblem"></span>
           <div>
