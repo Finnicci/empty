@@ -1,5 +1,13 @@
 const SAVE_KEY = "bloomhaven-save-v2";
-
+const timePhases = ["Morning", "Afternoon", "Evening", "Night"];
+const baseDailyEnergy = 10;
+const energyCosts = {
+  plant: 1,
+  harvest: 1,
+  hybridize: 2,
+  research: 1,
+  inspectEvent: 1,
+};
 const flowers = [
   f("Daisy", "Common", 7, 1, 2, 3, 4, ["cheerful", "meadow", "simple"], "#fff176"),
   f("Tulip", "Common", 9, 1, 2, 5, 3, ["spring", "cup", "bright"], "#ff6f61"),
@@ -176,7 +184,7 @@ const eventPool = [
 const natureEncounters = [
   { name: "Bee Swarm", rarity: "Common", min: 0, duration: 2, note: "A gentle swarm follows you back to the beds.", effect: "+15% hybrid success for 2 days and +2 Pollination Points.", reward: "pollination" },
   { name: "Monarch Butterfly", rarity: "Uncommon", min: 5000, duration: 0, note: "A monarch circles a flower sketch in the journal.", effect: "Adds a family clue and 1 Discovery Energy.", reward: "family-clue" },
-  { name: "Golden Bee", rarity: "Rare", min: 8000, duration: 1, note: "A golden bee dusts the greenhouse latch with pollen.", effect: "Improves the next hybrid attempt.", reward: "hybrid-focus" },
+  { name: "Golden Bee", rarity: "Rare", min: 8000, duration: 1, note: "A golden bee dusts a sleepy flower bed with warm pollen.", effect: "Advances one growing flower instantly.", reward: "instant-growth" },
   { name: "Rare Pollinator", rarity: "Rare", min: 8000, duration: 0, note: "An unfamiliar pollinator favors the strongest scent trail.", effect: "Adds an advanced research clue.", reward: "advanced-note" },
   { name: "Traveling Botanist", rarity: "Rare", min: 8000, duration: 0, note: "A botanist trades a roadside observation for a seed.", effect: "Adds one uncommon or rare seed.", reward: "seed" },
   { name: "Migrating Butterflies", rarity: "Epic", min: 12000, duration: 2, note: "A ribbon of butterflies crosses Town Square at dusk.", effect: "Adds a journal investigation and lasting pollination.", reward: "journal-fragment" },
@@ -322,6 +330,8 @@ function createNewState() {
   return {
     day: 1,
     phase: "Morning",
+    energy: baseDailyEnergy,
+    maxEnergy: baseDailyEnergy,
     coins: 70,
     reputation: 0,
     restoration: 8,
@@ -351,6 +361,7 @@ function createNewState() {
     pollinationPoints: 0,
     discoveryTokens: 0,
     nextHybridBoost: false,
+    nextQualityBoost: false,
     lastStepSummary: null,
     lastStepDay: 0,
     pollinationBonus: false,
@@ -489,22 +500,22 @@ function renderTopbar() {
         <div class="animal-badge mini-portrait portrait-${state.species || "Fox"} presentation-${state.gender || "none"}" aria-hidden="true"></div>
         <div>
           <h1>${farmhand}</h1>
-          <small>Day ${state.day} - Spring - ${state.weather}</small>
+          <small>Day ${state.day} - ${state.phase} - ${state.weather}</small>
         </div>
       </div>
       <div class="stats">
-        <span class="pill stained-pill">${state.phase}</span>
+        <span class="pill stained-pill">${state.energy}/${state.maxEnergy} Energy</span>
         <span class="pill">${state.coins} coins</span>
         <span class="pill">${state.reputation} rep</span>
-        <span class="pill">${state.discoveryEnergy} energy</span>
-        <span class="pill">${state.pollinationPoints} pollen</span>
+        <span class="pill">${state.discoveryEnergy} discovery</span>
+        <span class="pill">${state.pollinationPoints} pollination</span>
       </div>
     </header>
   `;
 }
 
 function renderFarm() {
-  const sceneClass = state.phase === "Evening" && state.day % 3 === 0 ? "night" : state.phase === "Evening" ? "evening" : "";
+  const sceneClass = state.phase === "Night" ? "night" : state.phase === "Evening" ? "evening" : state.phase === "Morning" ? "morning" : "";
   const weatherClass = weatherSceneClass();
   return `
     <section class="screen ${isActive("farm")}" data-screen="farm">
@@ -550,8 +561,8 @@ function renderFarm() {
             </div>
           </div>
           <div class="quick-actions">
-            <button data-action="advance-phase">Advance Time</button>
-            <button data-action="next-day">End Day</button>
+            <button data-action="advance-phase">Advance Time<br><small>${nextPhaseLabel()}</small></button>
+            <button data-action="next-day">End Day<br><small>Restores energy</small></button>
             <button data-action="wait-ready">Wait Until Ready</button>
             <button data-action="new-game">New Game</button>
           </div>
@@ -560,15 +571,17 @@ function renderFarm() {
           ${renderSpeciesPicker()}
           <div class="panel">
             <h2>Plant Flowers</h2>
-            <p class="tagline">${filledPlots()} / ${state.maxPlots} beds planted.</p>
+            <p class="tagline">${filledPlots()} / ${state.maxPlots} beds planted. Planting costs ${energyCosts.plant} Energy.</p>
             <p class="tagline">Choose a seed, then tap an empty bed or plant in the first open plot.</p>
             <div class="grid">
               <select id="seed-select">${renderSeedOptions()}</select>
-              <button data-action="plant-selected" ${hasSeeds() ? "" : "disabled"}>Plant First Open Plot</button>
+              <button data-action="plant-selected" ${hasSeeds() && canSpendEnergy(energyCosts.plant) ? "" : "disabled"}>Plant First Open Plot</button>
               <button data-action="plant-starter-mix" ${canPlantStarterMix() ? "" : "disabled"}>Plant Starter Mix</button>
             </div>
           </div>
           ${renderPlotExpansion()}
+          ${renderPollinationActions()}
+          ${renderFutureUpgrades()}
           <div class="panel">
             <h2>Daily Steps</h2>
             <p class="tagline">Manual entry is used for this prototype. Future versions may connect to fitness apps and wearables.</p>
@@ -617,6 +630,7 @@ function renderTownStrip() {
 function weatherSceneClass() {
   if (state.weather === "Drizzle" || state.weather === "Cool Mist") return "rainy";
   if (state.weather === "Warm Breeze") return "breezy";
+  if (state.weather === "Cloudy") return "cloudy";
   return "sunny";
 }
 
@@ -647,36 +661,40 @@ function renderPollenParticles() {
 
 function renderPlot(plot, index) {
   if (!plot) {
-    return `<button class="plot empty" data-action="plant-plot" data-index="${index}"><span class="plot-name">Empty Bed</span><span class="plot-meta">Fresh soil</span><span class="plot-stage stage-empty"></span></button>`;
+    return `<button class="plot empty" data-action="plant-plot" data-index="${index}" ${canSpendEnergy(energyCosts.plant) ? "" : "disabled"}><span class="plot-name">Empty Bed</span><span class="plot-meta">Fresh soil</span><span class="plot-stage stage-empty"></span></button>`;
   }
   const flower = flowerByName.get(plot.name);
-  const ready = plot.daysLeft <= 0;
+  normalizePlot(plot, flower);
+  const ready = isPlotReady(plot, flower);
   const stage = plotStage(plot, flower);
+  const progressText = `${Math.min(plot.growthProgress, plot.growthDays)} / ${plot.growthDays} day${plot.growthDays === 1 ? "" : "s"}`;
   return `
-    <button class="plot ${ready ? "ready" : ""} stage-${stage}" data-action="${ready ? "harvest" : "inspect-plot"}" data-index="${index}">
+    <button class="plot ${ready ? "ready" : ""} stage-${stage}" data-action="${ready ? "harvest" : "inspect-plot"}" data-index="${index}" ${ready && !canSpendEnergy(energyCosts.harvest) ? "disabled" : ""}>
       <span class="plot-name">${plot.name}</span>
-      <span class="plot-meta">${ready ? "Bloom" : `${stageLabel(stage)} - ${plot.daysLeft} day${plot.daysLeft === 1 ? "" : "s"}`}</span>
+      <span class="plot-meta">${ready ? "Bloom - harvest 1 Energy" : `${stageLabel(stage)} - ${progressText}`}</span>
       ${renderPlotStage(stage, flower)}
     </button>
   `;
 }
 
 function plotStage(plot, flower) {
-  if (plot.daysLeft <= 0) return "bloom";
-  const total = Math.max(1, flower.growthDays);
-  const progress = 1 - plot.daysLeft / total;
-  if (progress < 0.34) return "seed";
-  if (progress < 0.67) return "sprout";
+  normalizePlot(plot, flower);
+  if (isPlotReady(plot, flower)) return "bloom";
+  const ratio = plot.growthProgress / Math.max(1, plot.growthDays);
+  if (ratio < 0.2) return "seed";
+  if (ratio < 0.45) return "sprout";
+  if (ratio < 0.75) return "growing";
   return "bud";
 }
 
 function stageLabel(stage) {
-  return { seed: "Seed", sprout: "Sprout", bud: "Bud", bloom: "Bloom" }[stage] || "Growing";
+  return { seed: "Seed", sprout: "Sprout", growing: "Growing Plant", bud: "Bud", bloom: "Bloom" }[stage] || "Growing Plant";
 }
 
 function renderPlotStage(stage, flower) {
   if (stage === "seed") return '<span class="plot-stage stage-seed"></span>';
   if (stage === "sprout") return '<span class="plot-stage stage-sprout"></span>';
+  if (stage === "growing") return '<span class="plot-stage stage-growing"></span>';
   if (stage === "bud") return `<span class="plot-stage stage-bud" style="--bloom:${flower.color}"></span>`;
   return `<span class="discovery-glint"></span><span class="pixel-flower flower-${flowerClassName(flower.name)} rarity-${flower.rarity}" style="--bloom:${flower.color}"></span>`;
 }
@@ -1233,7 +1251,7 @@ function renderStepSummary() {
   return `
     <div class="step-summary">
       <strong>${summary.tier}</strong>
-      <p>${summary.steps.toLocaleString()} steps became ${summary.energy} energy, ${summary.pollination} pollination, and ${summary.tokens} token${summary.tokens === 1 ? "" : "s"}.</p>
+      <p>${summary.steps.toLocaleString()} steps became ${summary.energy} Discovery Energy, ${summary.pollination} Pollination, and ${summary.tokens} token${summary.tokens === 1 ? "" : "s"}.</p>
       <div class="reward-tags">${summary.rewards.map((reward) => `<span>${reward}</span>`).join("")}</div>
     </div>
   `;
@@ -1272,6 +1290,52 @@ function renderExpeditions() {
   `;
 }
 
+function renderPollinationActions() {
+  const growing = state.plots.some((plot) => plot && !isPlotReady(plot, flowerByName.get(plot.name)));
+  return `
+    <div class="panel pollination-panel">
+      <h2>Pollination</h2>
+      <p class="tagline">Spend walking-earned pollination to accelerate the garden. It helps discovery without replacing farming.</p>
+      <div class="resource-grid compact">
+        <span><strong>${state.energy}/${state.maxEnergy}</strong> Energy</span>
+        <span><strong>${state.pollinationPoints}</strong> Pollination</span>
+      </div>
+      <div class="discovery-actions pollination-actions">
+        <button data-action="pollination-growth" ${state.pollinationPoints >= 2 && growing ? "" : "disabled"}>Accelerate Growth<br><small>2 pollination</small></button>
+        <button data-action="pollination-quality" ${state.pollinationPoints >= 2 ? "" : "disabled"}>Improve Quality<br><small>2 pollination</small></button>
+        <button data-action="pollination-hybrid" ${state.pollinationPoints >= 2 ? "" : "disabled"}>Hybrid Bonus<br><small>2 pollination</small></button>
+        <button data-action="pollination-event" ${state.pollinationPoints >= 3 ? "" : "disabled"}>Attract Pollinator<br><small>3 pollination</small></button>
+      </div>
+      <p class="muted">${pollinationStatusText()}</p>
+    </div>
+  `;
+}
+
+function renderFutureUpgrades() {
+  const upgrades = [
+    ["Greenhouse", "Steadier weather growth"],
+    ["Conservatory", "Rare flower care"],
+    ["Pollinator Sanctuary", "Stronger event chains"],
+    ["Research Center", "Deeper hybrid studies"],
+  ];
+  return `
+    <div class="panel upgrade-hooks">
+      <h2>Future Farm Upgrades</h2>
+      <div class="upgrade-hook-list">
+        ${upgrades.map(([name, text]) => `<div><strong>${name}</strong><small>${text}</small><span>Coming Later</span></div>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function pollinationStatusText() {
+  const pieces = [];
+  if (state.nextQualityBoost) pieces.push("Next harvest has boosted quality.");
+  if (state.nextHybridBoost || activeEffect("hybridFocus")) pieces.push("Next hybrid has a focused pollinator trail.");
+  if (activeEffect("pollination")) pieces.push("Bee activity is lingering near the beds.");
+  return pieces.join(" ") || "Log Daily Steps to gain more Pollination.";
+}
+
 function handleClick(event) {
   const target = event.target.closest("[data-action]");
   if (!target) return;
@@ -1295,6 +1359,10 @@ function handleClick(event) {
   if (action === "use-token-connection") useTokenConnection();
   if (action === "use-token-hybrid") useTokenHybrid();
   if (action === "run-expedition") runExpedition(target.dataset.expedition);
+  if (action === "pollination-growth") spendPollinationGrowth();
+  if (action === "pollination-quality") spendPollinationQuality();
+  if (action === "pollination-hybrid") spendPollinationHybrid();
+  if (action === "pollination-event") spendPollinationEvent();
   if (action === "fulfill-order") fulfillOrder(Number(target.dataset.index));
   if (action === "sell-flower") sellFlower(target.dataset.flower, target.dataset.quality);
   if (action === "buy-seed") buySeed(target.dataset.flower);
@@ -1341,7 +1409,11 @@ function plantFirstEmpty(name) {
 }
 
 function plantStarterMix() {
-  ["Daisy", "Cosmos", "Tulip"].forEach((name) => {
+  const mix = ["Daisy", "Cosmos", "Tulip"].filter((name) => state.seeds[name] > 0);
+  const openBeds = state.plots.filter((plot) => !plot).length;
+  const plantCount = Math.min(mix.length, openBeds);
+  if (!spendEnergy(plantCount * energyCosts.plant, "plant the Starter Mix")) return;
+  mix.slice(0, plantCount).forEach((name) => {
     const index = state.plots.findIndex((plot) => !plot);
     if (index !== -1 && state.seeds[name] > 0) plantAt(index, name, false);
   });
@@ -1354,22 +1426,23 @@ function plantAt(index, name, shouldRender = true) {
   if (!state.species) return toast("Choose an animal character first.");
   if (state.plots[index]) return;
   if (!state.seeds[name]) return toast(`No ${name} seeds available.`);
+  if (shouldRender && !spendEnergy(energyCosts.plant, "plant a flower")) return;
   const flower = flowerByName.get(name);
-  const bonus = species[state.species]?.growthBonus || 0;
   state.seeds[name] -= 1;
-  state.plots[index] = { name, daysLeft: Math.max(1, Math.ceil(flower.growthDays * (1 - bonus))) };
+  state.plots[index] = createPlot(name, flower);
   state.stats.planted += 1;
   discover(name);
   if (shouldRender) saveAndRender();
 }
 
 function canPlantStarterMix() {
-  return !!state.species && ["Daisy", "Cosmos", "Tulip"].every((name) => state.seeds[name] > 0) && state.plots.filter((plot) => !plot).length >= 3;
+  return !!state.species && ["Daisy", "Cosmos", "Tulip"].every((name) => state.seeds[name] > 0) && state.plots.filter((plot) => !plot).length >= 3 && canSpendEnergy(energyCosts.plant * 3);
 }
 
 function harvest(index) {
   const plot = state.plots[index];
-  if (!plot || plot.daysLeft > 0) return;
+  if (!plot || !isPlotReady(plot, flowerByName.get(plot.name))) return;
+  if (!spendEnergy(energyCosts.harvest, "harvest a flower")) return;
   const quality = rollQuality(plot.name);
   addInventory(plot.name, quality, 1);
   state.plots[index] = null;
@@ -1389,53 +1462,93 @@ function harvest(index) {
   }
 }
 
-function advancePhase() {
-  const phases = ["Morning", "Daytime", "Evening"];
-  const current = phases.indexOf(state.phase);
-  if (current === phases.length - 1) return nextDay();
-  state.phase = phases[current + 1];
-  saveAndRender();
+function createPlot(name, flower = flowerByName.get(name)) {
+  const rabbitBonus = state.species === "Rabbit" ? 1 : 0;
+  const growthDays = Math.max(1, flower.growthDays - rabbitBonus);
+  return { name, growthProgress: 0, growthDays, daysLeft: growthDays, plantedDay: state.day };
 }
 
-function nextDay() {
+function normalizePlot(plot, flower = flowerByName.get(plot.name)) {
+  if (!plot || !flower) return plot;
+  if (!Number.isFinite(plot.growthDays)) {
+    const rabbitBonus = state.species === "Rabbit" ? 1 : 0;
+    plot.growthDays = Math.max(1, flower.growthDays - rabbitBonus);
+  }
+  if (!Number.isFinite(plot.growthProgress)) {
+    const daysLeft = Number.isFinite(plot.daysLeft) ? plot.daysLeft : plot.growthDays;
+    plot.growthProgress = clamp(plot.growthDays - daysLeft, 0, plot.growthDays);
+  }
+  plot.daysLeft = Math.max(0, plot.growthDays - plot.growthProgress);
+  return plot;
+}
+
+function isPlotReady(plot, flower = flowerByName.get(plot?.name)) {
+  if (!plot || !flower) return false;
+  normalizePlot(plot, flower);
+  return plot.growthProgress >= plot.growthDays;
+}
+
+function advancePlotGrowth(plot, amount = 1) {
+  const flower = flowerByName.get(plot?.name);
+  if (!plot || !flower) return false;
+  normalizePlot(plot, flower);
+  if (isPlotReady(plot, flower)) return false;
+  plot.growthProgress = clamp(plot.growthProgress + amount, 0, plot.growthDays);
+  plot.daysLeft = Math.max(0, plot.growthDays - plot.growthProgress);
+  return true;
+}
+
+function advanceFirstGrowingFlower(amount = 1) {
+  const plot = state.plots.find((item) => item && !isPlotReady(item, flowerByName.get(item.name)));
+  if (!plot) return false;
+  return advancePlotGrowth(plot, amount);
+}
+
+function startNextDay() {
   tickEventEffects();
   state.day += 1;
   state.dailyCoinsEarned = 0;
   state.phase = "Morning";
-  state.weather = random(["Clear", "Drizzle", "Warm Breeze", "Cool Mist"]);
+  state.energy = state.maxEnergy || baseDailyEnergy;
+  state.weather = random(["Clear", "Sunny", "Drizzle", "Warm Breeze", "Cool Mist", "Cloudy"]);
+  const weatherBoost = rainyWeather() || state.growthBoost || activeEffect("growth") ? 1 : 0;
   state.plots.forEach((plot) => {
     if (!plot) return;
-    const weatherBoost = state.weather === "Drizzle" || state.growthBoost || activeEffect("growth") ? 1 : 0;
-    plot.daysLeft = Math.max(0, plot.daysLeft - 1 - weatherBoost);
+    advancePlotGrowth(plot, 1 + weatherBoost);
   });
+  if (windyWeather() && Math.random() < 0.45) {
+    state.pollinationPoints += 1;
+  }
   state.growthBoost = false;
   state.stepToday = 0;
   state.events = [];
   state.orders = makeOrders(3);
   ensureEarlyOrder();
+}
+
+function advancePhase() {
+  const current = timePhases.indexOf(state.phase);
+  if (current === -1) {
+    state.phase = "Morning";
+  } else if (current === timePhases.length - 1) {
+    return nextDay();
+  } else {
+    state.phase = timePhases[current + 1];
+  }
   saveAndRender();
-  toast(`Day ${state.day}: ${state.weather}. Check your beds and step events.`);
+}
+
+function nextDay() {
+  startNextDay();
+  saveAndRender();
+  toast(`Day ${state.day}: ${state.weather}. Energy restored and flowers grew.`);
 }
 
 function waitUntilReady() {
   if (!state.plots.some(Boolean)) return toast("Plant flowers first, then time can pass.");
   let daysPassed = 0;
-  while (!state.plots.some((plot) => plot && plot.daysLeft <= 0) && daysPassed < 7) {
-    tickEventEffects();
-    state.day += 1;
-    state.dailyCoinsEarned = 0;
-    state.phase = "Morning";
-    state.weather = random(["Clear", "Drizzle", "Warm Breeze", "Cool Mist"]);
-    state.plots.forEach((plot) => {
-      if (!plot) return;
-      const weatherBoost = state.weather === "Drizzle" || state.growthBoost || activeEffect("growth") ? 1 : 0;
-      plot.daysLeft = Math.max(0, plot.daysLeft - 1 - weatherBoost);
-    });
-    state.growthBoost = false;
-    state.stepToday = 0;
-    state.events = [];
-    state.orders = makeOrders(3);
-    ensureEarlyOrder();
+  while (!state.plots.some((plot) => plot && isPlotReady(plot, flowerByName.get(plot.name))) && daysPassed < 7) {
+    startNextDay(false);
     daysPassed += 1;
   }
   saveAndRender();
@@ -1507,34 +1620,38 @@ function applyEventReward(event) {
     state.growthBoost = true;
     state.eventEffects.growth = Math.max(state.eventEffects.growth || 0, event.duration || 1);
   }
+  if (event.reward === "instant-growth") {
+    if (!advanceFirstGrowingFlower(1)) state.nextQualityBoost = true;
+  }
 }
 
 function processStepRewards(steps) {
-  const reward = { steps, tier: "Garden Stroll", energy: 1, pollination: 1, tokens: 0, rewards: ["Small pollination"] };
+  const pollinationFromSteps = Math.floor(steps / 1000);
+  const reward = { steps, tier: "Garden Stroll", energy: 1, pollination: Math.max(1, pollinationFromSteps), tokens: 0, rewards: ["Small pollination"] };
   if (steps >= 2000) {
     reward.tier = "Town Walk";
     reward.energy = 2;
-    reward.pollination = 2;
+    reward.pollination = Math.max(2, pollinationFromSteps);
     if (Math.random() < 0.55) reward.rewards.push("Research clue");
   }
   if (steps >= 5000) {
     reward.tier = "Nature Encounter";
     reward.energy = 3;
-    reward.pollination = 3;
+    reward.pollination = Math.max(5, pollinationFromSteps);
     reward.rewards.push("Nature encounter");
     if (Math.random() < 0.55) reward.rewards.push("Discovery Network hint");
   }
   if (steps >= 8000) {
     reward.tier = "Rare Encounter";
     reward.energy = 5;
-    reward.pollination = 4;
+    reward.pollination = Math.max(8, pollinationFromSteps);
     reward.rewards.push("Rare encounter");
     if (Math.random() < 0.45) reward.rewards.push("Journal page");
   }
   if (steps >= 12000) {
     reward.tier = "Legendary Trail";
     reward.energy = 7;
-    reward.pollination = 5;
+    reward.pollination = Math.max(12, pollinationFromSteps);
     reward.tokens = Math.random() < 0.65 ? 1 : 0;
     reward.rewards.push("Legendary encounter");
     if (reward.tokens) reward.rewards.push("Discovery Token");
@@ -1544,6 +1661,7 @@ function processStepRewards(steps) {
 
 function spendEnergyResearch() {
   if (state.discoveryEnergy < 3) return;
+  if (!spendEnergy(energyCosts.research, "research notes")) return;
   state.discoveryEnergy -= 3;
   addNote(Math.min(state.notes.length, researchNotes.length - 1));
   saveAndRender();
@@ -1552,6 +1670,7 @@ function spendEnergyResearch() {
 
 function spendEnergyFamily() {
   if (state.discoveryEnergy < 4) return;
+  if (!spendEnergy(energyCosts.research, "study flower families")) return;
   state.discoveryEnergy -= 4;
   addFamilyInsight();
   saveAndRender();
@@ -1578,6 +1697,7 @@ function useTokenHybrid() {
 function runExpedition(id) {
   const expedition = expeditionOptions.find((item) => item.id === id);
   if (!expedition || state.discoveryEnergy < expedition.cost) return;
+  if (!spendEnergy(energyCosts.research, "run an expedition")) return;
   state.discoveryEnergy -= expedition.cost;
   expedition.action();
   state.journalPages += Math.random() < 0.25 ? 1 : 0;
@@ -1616,13 +1736,13 @@ function tryHybrid() {
   if (!a || !b) return toast("Harvest two flowers before hybridizing.");
   if (a === b && totalFlowerCount(a) < 2) return toast(`You need two ${a} blooms for that pairing.`);
   if (a !== b && (!totalFlowerCount(a) || !totalFlowerCount(b))) return toast("One of those flowers is missing.");
+  if (!spendEnergy(energyCosts.hybridize, "hybridize flowers")) return;
 
   const qa = consumeInventory(a, 1, "Common");
   const qb = consumeInventory(b, 1, "Common");
   state.hybridAttempts += 1;
   const match = hybrids.find((hybrid) => sameRecipe(hybrid.recipe, [a, b]));
   const chance = match && !isDiscovered(match.name) && state.stats.hybrids === 0 ? 1 : hybridChance(match);
-  if (state.pollinationPoints > 0) state.pollinationPoints -= 1;
   state.pollinationBonus = false;
   state.nextHybridBoost = false;
 
@@ -1648,16 +1768,15 @@ function tryHybrid() {
 }
 
 function hybridChance(match) {
-  const pointBonus = state.pollinationPoints > 0 ? 0.06 : 0;
   const tokenBonus = state.nextHybridBoost || activeEffect("hybridFocus") ? 0.14 : 0;
-  if (!match) return clamp(0.12 + (state.pollinationBonus ? 0.12 : 0) + pointBonus + tokenBonus, 0, 0.45);
-  return clamp(0.58 + (state.pollinationBonus ? 0.15 : 0) + (activeEffect("pollination") ? 0.15 : 0) + pointBonus + tokenBonus + (species[state.species]?.hybridBonus || 0), 0, 0.94);
+  if (!match) return clamp(0.12 + (state.pollinationBonus ? 0.12 : 0) + tokenBonus, 0, 0.45);
+  return clamp(0.58 + (state.pollinationBonus ? 0.15 : 0) + (activeEffect("pollination") ? 0.15 : 0) + tokenBonus + (species[state.species]?.hybridBonus || 0), 0, 0.94);
 }
 
 function hybridChanceText() {
   const bonus = state.pollinationBonus ? "Bee Swarm active: improved odds." : "No pollination event active.";
   const lasting = activeEffect("pollination") ? ` Pollination lasts ${state.eventEffects.pollination} day${state.eventEffects.pollination === 1 ? "" : "s"}.` : "";
-  const points = state.pollinationPoints > 0 ? ` ${state.pollinationPoints} Pollination Point${state.pollinationPoints === 1 ? "" : "s"} ready.` : "";
+  const points = state.pollinationPoints > 0 ? ` ${state.pollinationPoints} Pollination Point${state.pollinationPoints === 1 ? "" : "s"} available for chosen bonuses.` : "";
   const focus = state.nextHybridBoost || activeEffect("hybridFocus") ? " Focused pollinator trail active." : "";
   return `${bonus}${lasting}${points}${focus} Attempts: ${state.hybridAttempts}.`;
 }
@@ -2288,6 +2407,77 @@ function activeEffect(key) {
   return (state.eventEffects[key] || 0) > 0;
 }
 
+function canSpendEnergy(cost) {
+  return (state.energy ?? baseDailyEnergy) >= cost;
+}
+
+function spendEnergy(cost, actionLabel) {
+  if (canSpendEnergy(cost)) {
+    state.energy -= cost;
+    return true;
+  }
+  toast(`Not enough Energy to ${actionLabel}. End the day to rest.`);
+  return false;
+}
+
+function nextPhaseLabel() {
+  const index = timePhases.indexOf(state.phase);
+  if (index === -1) return "Morning";
+  if (index === timePhases.length - 1) return "Next day";
+  return timePhases[index + 1];
+}
+
+function rainyWeather() {
+  return ["Drizzle", "Cool Mist"].includes(state.weather);
+}
+
+function sunnyWeather() {
+  return ["Clear", "Sunny"].includes(state.weather);
+}
+
+function windyWeather() {
+  return state.weather === "Warm Breeze";
+}
+
+function spendPollinationGrowth() {
+  if (state.pollinationPoints < 2) return;
+  if (!advanceFirstGrowingFlower(1)) return toast("No growing flowers need pollination right now.");
+  state.pollinationPoints -= 2;
+  saveAndRender();
+  toast("Pollination advanced one flower to its next growth stage.");
+}
+
+function spendPollinationQuality() {
+  if (state.pollinationPoints < 2) return;
+  state.pollinationPoints -= 2;
+  state.nextQualityBoost = true;
+  saveAndRender();
+  toast("The next harvest has better quality odds.");
+}
+
+function spendPollinationHybrid() {
+  if (state.pollinationPoints < 2) return;
+  state.pollinationPoints -= 2;
+  state.nextHybridBoost = true;
+  state.eventEffects.hybridFocus = Math.max(state.eventEffects.hybridFocus || 0, 1);
+  saveAndRender();
+  toast("The next hybrid attempt has improved odds.");
+}
+
+function spendPollinationEvent() {
+  if (state.pollinationPoints < 3) return;
+  if (!spendEnergy(energyCosts.inspectEvent, "inspect a rare pollinator event")) return;
+  state.pollinationPoints -= 3;
+  const event = random(natureEncounters.filter((item) => ["Bee Swarm", "Rare Pollinator", "Golden Bee", "Traveling Botanist", "Ancient Journal Fragment"].includes(item.name)));
+  state.events = [event, ...state.events].slice(0, 4);
+  applyEventReward(event);
+  saveAndRender();
+  openModal(event.name, `
+    ${renderEvent(event)}
+    <p class="muted">Pollination attracted a nature encounter without replacing farm work.</p>
+  `);
+}
+
 function rollQuality(name) {
   const flower = flowerByName.get(name);
   let score = Math.random();
@@ -2295,9 +2485,12 @@ function rollQuality(name) {
   if (flower.rarity === "Rare") score += 0.16;
   if (flower.rarity === "Epic" || flower.rarity === "Hybrid") score += 0.22;
   if (state.pollinationBonus || activeEffect("pollination")) score += 0.12;
-  if (state.weather === "Drizzle" || activeEffect("growth")) score += 0.05;
+  if (sunnyWeather()) score += 0.07;
+  if (state.nextQualityBoost) score += 0.18;
+  if (activeEffect("growth")) score += 0.05;
   if (state.species === "Rabbit") score += 0.04;
   if (state.species === "Fox" && flower.recipe) score += 0.05;
+  state.nextQualityBoost = false;
   if (score >= 0.96) return "Masterpiece";
   if (score >= 0.78) return "Premium";
   if (score >= 0.48) return "Fine";
@@ -2565,10 +2758,20 @@ function loadState() {
     migrated.pollinationPoints = Number(parsed.pollinationPoints || 0);
     migrated.discoveryTokens = Number(parsed.discoveryTokens || 0);
     migrated.nextHybridBoost = !!parsed.nextHybridBoost;
+    migrated.nextQualityBoost = !!parsed.nextQualityBoost;
+    migrated.maxEnergy = Number(parsed.maxEnergy || baseDailyEnergy);
+    migrated.energy = Number.isFinite(parsed.energy) ? clamp(Number(parsed.energy), 0, migrated.maxEnergy) : migrated.maxEnergy;
+    migrated.phase = timePhases.includes(parsed.phase) ? parsed.phase : (parsed.phase === "Daytime" ? "Afternoon" : "Morning");
     migrated.lastStepSummary = parsed.lastStepSummary || null;
     migrated.lastStepDay = Number(parsed.lastStepDay || 0);
     migrated.maxPlots = parsed.maxPlots || Math.max(12, parsed.plots?.length || 12);
     while (migrated.plots.length < migrated.maxPlots) migrated.plots.push(null);
+    migrated.plots = migrated.plots.map((plot) => {
+      if (!plot) return null;
+      const flower = flowerByName.get(plot.name);
+      if (!flower) return null;
+      return normalizePlot({ ...plot }, flower);
+    });
     migrated.inventory = migrateInventory(parsed.inventory || {});
     migrated.orders = migrated.orders.map(normalizeSavedOrder);
     syncJournalUnlocksFor(migrated);

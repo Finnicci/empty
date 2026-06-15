@@ -468,6 +468,38 @@ select {
   transform: scaleX(-1) rotate(-18deg);
 }
 
+.stage-growing {
+  width: 10px;
+  height: 30px;
+  background: var(--leaf-dark);
+}
+
+.stage-growing:before,
+.stage-growing:after {
+  content: "";
+  position: absolute;
+  border: 2px solid var(--wood);
+  background: var(--leaf);
+}
+
+.stage-growing:before {
+  left: -16px;
+  top: 6px;
+  width: 20px;
+  height: 13px;
+  border-radius: 13px 5px 13px 5px;
+  transform: rotate(-18deg);
+}
+
+.stage-growing:after {
+  right: -16px;
+  top: 12px;
+  width: 20px;
+  height: 13px;
+  border-radius: 5px 13px 5px 13px;
+  transform: rotate(18deg);
+}
+
 .stage-bud {
   width: 9px;
   height: 30px;
@@ -1416,6 +1448,10 @@ select {
   margin: 8px 0;
 }
 
+.resource-grid.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .provider-panel {
   border: 2px solid var(--line);
   border-radius: 8px;
@@ -1541,6 +1577,51 @@ select {
 .discovery-actions small {
   color: inherit;
   opacity: 0.78;
+}
+
+.pollination-panel {
+  border-color: rgba(236, 184, 75, 0.72);
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 223, 117, 0.22), transparent 34%),
+    var(--paper);
+}
+
+.pollination-actions button:first-child {
+  background: #fff3b7;
+}
+
+.upgrade-hooks {
+  background:
+    linear-gradient(90deg, rgba(111, 164, 90, 0.11), transparent),
+    var(--paper);
+}
+
+.upgrade-hook-list {
+  display: grid;
+  gap: 7px;
+}
+
+.upgrade-hook-list div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  align-items: center;
+  border: 2px dashed rgba(109, 75, 52, 0.28);
+  border-radius: 8px;
+  background: #fffdf5;
+  padding: 8px;
+}
+
+.upgrade-hook-list small {
+  color: var(--muted);
+}
+
+.upgrade-hook-list span {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 
 .expedition-card {
