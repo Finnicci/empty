@@ -45,6 +45,7 @@ const species = {
   Fox: { color: "#d98245", icon: "fox", passive: "+10% hybrid discovery chance", hybridBonus: 0.1, portraits: { Female: "assets/characters/fox-female.png", Male: "assets/characters/fox-male.png" } },
   Rabbit: { color: "#f2e7d5", icon: "rabbit", passive: "+10% flower growth speed", growthBonus: 0.1, portraits: { Female: "assets/characters/rabbit-female.png", Male: "assets/characters/rabbit-male.png" } },
   Mongoose: { color: "#ba855b", icon: "mongoose", passive: "+10% shop revenue", revenueBonus: 0.1, portraits: { Female: "assets/characters/mongoose-female.png", Male: "assets/characters/mongoose-male.png" } },
+  "Calico Cat": { color: "#d69a54", icon: "calico-cat", passive: "+10% flower quality chance", qualityBonus: 0.1, portraits: { Female: "assets/characters/calico-cat-female.png", Male: "assets/characters/calico-cat-male.png" } },
 };
 
 const flowerFamilies = [
@@ -506,6 +507,7 @@ function animalTypeText(name) {
     Fox: "Animal type: clever hybrid seeker",
     Rabbit: "Animal type: gentle garden sprinter",
     Mongoose: "Animal type: compact florist merchant",
+    "Calico Cat": "Animal type: careful quality curator",
   }[name] || "Animal type: Bloomhaven resident";
 }
 
@@ -696,7 +698,7 @@ function renderCharacter() {
 }
 
 function characterExpression(speciesName, gender = "Female", expression = "happy") {
-  const slug = `${speciesName}-${gender}-${expression}`.toLowerCase();
+  const slug = `${speciesName}-${gender}-${expression}`.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   return `assets/characters/expressions/${slug}.png`;
 }
 
@@ -2606,6 +2608,7 @@ function rollQuality(name) {
   if (activeEffect("growth")) score += 0.05;
   if (state.species === "Rabbit") score += 0.04;
   if (state.species === "Fox" && flower.recipe) score += 0.05;
+  score += species[state.species]?.qualityBonus || 0;
   state.nextQualityBoost = false;
   if (score >= 0.96) return "Masterpiece";
   if (score >= 0.78) return "Premium";

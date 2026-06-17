@@ -4165,10 +4165,10 @@ body {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: end;
-  gap: clamp(8px, 2vw, 18px);
-  width: min(980px, calc(100% - 24px));
+  gap: clamp(5px, 1.2vw, 14px);
+  width: min(1120px, calc(100% - 24px));
   margin: 0 auto;
   padding: 2vh 0 1vh;
 }
@@ -4188,7 +4188,7 @@ body {
 }
 
 .intro-character-card img {
-  width: min(112%, 330px);
+  width: min(118%, 300px);
   height: min(44vh, 430px);
   object-fit: contain;
   object-position: bottom center;
@@ -4316,7 +4316,7 @@ body {
 
   .character-stage {
     width: calc(100% - 12px);
-    gap: 3px;
+    gap: 2px;
     padding-top: 0;
   }
 
@@ -4325,7 +4325,7 @@ body {
   }
 
   .intro-character-card img {
-    width: 128%;
+    width: 136%;
     height: 38vh;
   }
 
