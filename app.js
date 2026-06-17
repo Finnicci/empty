@@ -407,7 +407,7 @@ function init() {
   syncJournalUnlocks();
   render();
   pendingJournalUnlocks = [];
-  if (!state.hasSeenIntro) {
+  if (!state.hasSeenIntro && isCharacterReady()) {
     state.hasSeenIntro = true;
     saveState();
     showWelcome();
@@ -416,6 +416,17 @@ function init() {
 
 function render() {
   document.documentElement.style.setProperty("--player-color", state.species ? species[state.species].color : "#d98245");
+  if (!isCharacterReady()) {
+    app.innerHTML = `
+      <div class="app intro-app">
+        ${renderCharacterChoiceScreen()}
+        <div id="modal" class="modal hidden"></div>
+        <div id="toasts" class="toast-stack"></div>
+      </div>
+    `;
+    app.onclick = handleClick;
+    return;
+  }
   app.innerHTML = `
     <div class="app">
       ${renderTopbar()}
@@ -434,6 +445,68 @@ function render() {
     </div>
   `;
   app.onclick = handleClick;
+}
+
+function isCharacterReady() {
+  return !!state.species && !!state.gender;
+}
+
+function renderCharacterChoiceScreen() {
+  const chosenSpecies = state.species || "Fox";
+  const previewGender = state.gender || "Female";
+  return `
+    <main class="character-select-screen">
+      <img class="character-select-bg" src="assets/characters/character-choice-flower-shop.png" alt="Three Bloomhaven farmhands gathered in the flower shop" loading="eager">
+      <div class="character-select-scrim"></div>
+      <section class="character-select-header">
+        <span class="stained-emblem"></span>
+        <div>
+          <p class="eyebrow">Bloomhaven Farmhand</p>
+          <h1>Choose Your Character</h1>
+          <p>Pick the animal whose passive fits how you want to restore Grandfather's farm.</p>
+        </div>
+      </section>
+      <section class="character-stage" aria-label="Character choices">
+        ${Object.entries(species).map(([name, data]) => renderIntroCharacterChoice(name, data, previewGender)).join("")}
+      </section>
+      <section class="intro-choice-dock">
+        <div class="presentation-picker intro-presentation">
+          <button class="${state.gender === "Female" ? "active" : ""}" data-action="choose-gender" data-gender="Female">Female</button>
+          <button class="${state.gender === "Male" ? "active" : ""}" data-action="choose-gender" data-gender="Male">Male</button>
+        </div>
+        <div class="intro-selected-card">
+          <img src="${characterExpression(chosenSpecies, previewGender, "happy")}" alt="${previewGender} ${chosenSpecies} portrait" loading="lazy">
+          <div>
+            <strong>${previewGender} ${chosenSpecies}</strong>
+            <p>${species[chosenSpecies].passive}</p>
+            <button data-action="start-game" ${isCharacterReady() ? "" : "disabled"}>Begin in Bloomhaven</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  `;
+}
+
+function renderIntroCharacterChoice(name, data, gender) {
+  const selected = state.species === name;
+  return `
+    <button class="intro-character-card intro-${name.toLowerCase()} ${selected ? "selected" : ""}" data-action="choose-species" data-species="${name}" aria-label="Choose ${name}">
+      <img src="${characterExpression(name, gender, selected ? "excited" : "curious")}" alt="${gender} ${name} farmhand" loading="lazy">
+      <span class="intro-character-info">
+        <strong>${name}</strong>
+        <small>${animalTypeText(name)}</small>
+        <em>${data.passive}</em>
+      </span>
+    </button>
+  `;
+}
+
+function animalTypeText(name) {
+  return {
+    Fox: "Animal type: clever hybrid seeker",
+    Rabbit: "Animal type: gentle garden sprinter",
+    Mongoose: "Animal type: compact florist merchant",
+  }[name] || "Animal type: Bloomhaven resident";
 }
 
 function renderHomeScreenSetup() {
@@ -494,10 +567,11 @@ function renderTaskCard() {
 
 function renderTopbar() {
   const farmhand = state.species ? `${state.gender ? `${state.gender} ` : ""}${state.species}` : "New farmhand";
+  const portrait = state.species && state.gender ? characterExpression(state.species, state.gender, "satisfied") : "";
   return `
     <header class="topbar">
       <div class="brand world-brand">
-        <div class="animal-badge mini-portrait portrait-${state.species || "Fox"} presentation-${state.gender || "none"}" aria-hidden="true"></div>
+        ${portrait ? `<img class="topbar-portrait" src="${portrait}" alt="${farmhand} portrait" loading="lazy">` : '<div class="animal-badge mini-portrait portrait-Fox presentation-none" aria-hidden="true"></div>'}
         <div>
           <h1>${farmhand}</h1>
           <small>Day ${state.day} - ${state.phase} - ${state.weather}</small>
@@ -522,6 +596,7 @@ function renderFarm() {
       <div class="desktop-grid">
         <div>
           <div class="hero-scene ${sceneClass} ${weatherClass}">
+            <img class="scene-art farm-scene-art" src="${farmSceneArt()}" alt="Grandfather's starter farm with flower beds" loading="eager">
             ${sceneClass === "night" ? '<div class="moon"></div>' : '<div class="sun"></div>'}
             <div class="cloud"></div>
             <div class="cloud cloud-two"></div>
@@ -612,7 +687,23 @@ function renderFarm() {
 function renderCharacter() {
   const label = state.species ? `${state.gender || ""} ${state.species}`.trim() : "?";
   const action = state.species === "Rabbit" ? "Inspecting blooms" : state.species === "Mongoose" ? "Carrying a basket" : state.species === "Fox" ? "Walking the beds" : "New farmhand";
-  return `<div class="character species-${state.species || "none"} presentation-${state.gender || "none"}" title="${label} - ${action}"><span class="character-prop"></span></div>`;
+  const portrait = state.species && state.gender ? characterExpression(state.species, state.gender, "curious") : "";
+  return `
+    <div class="character species-${state.species || "none"} presentation-${state.gender || "none"}" title="${label} - ${action}">
+      ${portrait ? `<img src="${portrait}" alt="${label} farmhand" loading="lazy">` : '<span class="character-prop"></span>'}
+    </div>
+  `;
+}
+
+function characterExpression(speciesName, gender = "Female", expression = "happy") {
+  const slug = `${speciesName}-${gender}-${expression}`.toLowerCase();
+  return `assets/characters/expressions/${slug}.png`;
+}
+
+function farmSceneArt() {
+  if (state.maxPlots >= 20) return "assets/farm/plot-sizes/starter-farm-large-plots.png";
+  if (state.maxPlots >= 16) return "assets/farm/plot-sizes/starter-farm-medium-plots.png";
+  return "assets/farm/plot-sizes/starter-farm-small-plots.png";
 }
 
 function renderTownStrip() {
@@ -833,6 +924,7 @@ function renderInventory(withSell = false) {
     }).join("");
     return `
       <div class="item-row">
+        ${renderFlowerArtwork(flower, "inventory-flower-art")}
         <div>
           <strong>${name}</strong>
           <small>${flower.rarity} - base ${flower.value} coins</small>
@@ -847,6 +939,7 @@ function renderInventory(withSell = false) {
 function renderSeedMarket() {
   return starters.slice(0, 14).map((flower) => `
     <div class="seed-card">
+      ${renderFlowerArtwork(flower, "seed-flower-art")}
       <strong>${flower.name}</strong>
       <span class="muted">${flower.rarity} - ${seedCost(flower)} coins</span>
       <button data-action="buy-seed" data-flower="${flower.name}" ${state.coins >= seedCost(flower) ? "" : "disabled"}>Buy Seed</button>
@@ -1088,7 +1181,7 @@ function renderFlowerCard(flower) {
   }
   return `
     <div class="flower-card">
-      <div class="card-bloom" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>
+      ${renderFlowerArtwork(flower, "journal-flower-art")}
       <strong>${flower.name}</strong>
       <div class="family-tags">${renderFamilyTags(flower)}</div>
       <p class="muted">${flower.rarity} - ${flower.value} coins - ${flower.growthDays} days</p>
@@ -1135,6 +1228,7 @@ function renderValley() {
   return `
     <section class="screen valley-screen ${isActive("valley")}" data-screen="valley">
       <div class="valley-map ${restoredClass}">
+        <img class="scene-art town-scene-art" src="assets/town/bloomhaven-town-homescreen.png" alt="Bloomhaven Town Square illustration" loading="lazy">
         <div class="map-sky"></div>
         <div class="map-restoration-garden"></div>
         <div class="map-npc-activity"></div>
@@ -1168,6 +1262,21 @@ function renderMapLocation(id, title, restored, text) {
       <p>${text}</p>
     </div>
   `;
+}
+
+function flowerArtworkPath(flower) {
+  const starterArt = {
+    Daisy: "assets/flowers/starters/daisy-starter.png",
+    Tulip: "assets/flowers/starters/tulip-starter.png",
+    Lavender: "assets/flowers/starters/lavender-starter.png",
+  };
+  return starterArt[flower.name] || "";
+}
+
+function renderFlowerArtwork(flower, className = "flower-art") {
+  const path = flowerArtworkPath(flower);
+  if (path) return `<img class="${className}" src="${path}" alt="${flower.name} illustration" loading="lazy">`;
+  return `<div class="card-bloom ${className}" style="--bloom:${flower.color}"><span class="pixel-flower"></span></div>`;
 }
 
 function renderMilestone(milestone) {
@@ -1345,6 +1454,7 @@ function handleClick(event) {
   if (action === "new-game") confirmNewGame();
   if (action === "choose-species") chooseSpecies(target.dataset.species);
   if (action === "choose-gender") chooseGender(target.dataset.gender);
+  if (action === "start-game") startGame();
   if (action === "plant-selected") plantFirstEmpty(document.querySelector("#seed-select")?.value);
   if (action === "plant-starter-mix") plantStarterMix();
   if (action === "plant-plot") plantAt(Number(target.dataset.index), document.querySelector("#seed-select")?.value);
@@ -1400,6 +1510,14 @@ function chooseGender(gender) {
   state.gender = gender;
   saveAndRender();
   toast(`${gender} farmhand style selected.`);
+}
+
+function startGame() {
+  if (!isCharacterReady()) return toast("Choose an animal and presentation first.");
+  state.hasSeenIntro = true;
+  state.active = "farm";
+  saveAndRender();
+  showWelcome();
 }
 
 function plantFirstEmpty(name) {
@@ -1998,9 +2116,7 @@ function newGame() {
   storageRemove(SAVE_KEY);
   state = createNewState();
   state.orders = starterOrders();
-  state.hasSeenIntro = true;
   saveAndRender();
-  showWelcome();
 }
 
 function showWelcome() {
