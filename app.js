@@ -402,6 +402,10 @@ function createResidentState() {
 function init() {
   registerServiceWorker();
   setupInstallPrompt();
+  if (shouldResetFromUrl()) {
+    storageRemove(SAVE_KEY);
+    window.history?.replaceState?.({}, "", window.location.pathname);
+  }
   state = loadState() || createNewState();
   if (!state.orders.length) state.orders = starterOrders();
   ensureEarlyOrder();
@@ -450,6 +454,14 @@ function render() {
 
 function isCharacterReady() {
   return !!state.species && !!state.gender;
+}
+
+function shouldResetFromUrl() {
+  try {
+    return new URLSearchParams(window.location.search).has("reset");
+  } catch {
+    return false;
+  }
 }
 
 function renderCharacterChoiceScreen() {
@@ -585,6 +597,7 @@ function renderTopbar() {
         <span class="pill">${state.reputation} rep</span>
         <span class="pill">${state.discoveryEnergy} discovery</span>
         <span class="pill">${state.pollinationPoints} pollination</span>
+        <button class="topbar-reset" data-action="new-game">New Game</button>
       </div>
     </header>
   `;
