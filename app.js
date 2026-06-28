@@ -48,6 +48,22 @@ const species = {
   "Calico Cat": { color: "#d69a54", icon: "calico-cat", passive: "+10% flower quality chance", qualityBonus: 0.1, portraits: { Female: "assets/characters/calico-cat-female.png", Male: "assets/characters/calico-cat-male.png" } },
 };
 
+const starterCompanions = ["Fox", "Rabbit", "Mongoose"];
+const companionCopy = {
+  Fox: {
+    role: "Curious Discoverer",
+    line: "There's always something hidden just beyond the path.",
+  },
+  Rabbit: {
+    role: "Gentle Gardener",
+    line: "Give me a little soil and a little sun, and I'll grow something wonderful.",
+  },
+  Mongoose: {
+    role: "Clever Merchant",
+    line: "A good flower deserves the right customer.",
+  },
+};
+
 const flowerFamilies = [
   { id: "wildflower", name: "Wildflowers", flowers: ["Daisy", "Black-Eyed Susan", "Coneflower", "Cosmos", "Meadow Crown"], breakthrough: "Wildflower Expert", note: "Wildflower Expert: cheerful meadow blooms often lead toward crown-shaped hybrids." },
   { id: "fragrant", name: "Fragrant Flowers", flowers: ["Lavender", "Rose", "Lily", "Lavender Rose", "Woodland Bell", "Moon Blossom"], breakthrough: "Fragrance Research", note: "Fragrance Research: Rose and Lavender share a useful trait when pollinators are active." },
@@ -300,8 +316,7 @@ const restorationMilestones = [
   { value: 100, title: "District 1 restored", text: "Bloomhaven Town Square is blooming again." },
 ];
 const taskDefinitions = [
-  { id: "choose-animal", title: "Meet the Farmhand", objective: "Choose an animal and presentation.", hint: "Fox helps hybrid discovery, Rabbit speeds growth, Mongoose boosts shop income. Male/female changes the farmhand portrait style only.", reward: { coins: 8 }, complete: () => !!state.species && !!state.gender },
-  { id: "plant-3", title: "Wake the Beds", objective: "Plant 3 flowers.", hint: "Use Starter Mix for Daisy + Cosmos + Tulip. That sets up your first order and first hybrid.", reward: { coins: 12, restoration: 2 }, complete: () => state.stats.planted >= 3 },
+  { id: "plant-3", title: "Plant Three Flowers", objective: "Plant 3 flowers.", hint: "Use Starter Mix for Daisy + Cosmos + Tulip. That sets up your first order and first hybrid.", reward: { coins: 10, journalPage: 1 }, complete: () => state.stats.planted >= 3 },
   { id: "harvest-1", title: "First Bloom", objective: "Harvest your first flower.", hint: "End the day once your beds are planted. Ready beds glow darker.", reward: { coins: 10, note: true }, complete: () => state.stats.harvested >= 1 },
   { id: "fill-order-1", title: "First Customer", objective: "Fill 1 florist order.", hint: "Simple orders accept any quality. Higher-quality requests pay more later.", reward: { reputation: 2, restoration: 4 }, complete: () => state.stats.orders >= 1 },
   { id: "log-steps", title: "A Walk Through Town", objective: "Enter today's steps.", hint: "Even 0 steps gives an opportunity. Walking adds clues, seeds, and hybrid odds.", reward: { note: true, seed: "Black-Eyed Susan" }, complete: () => state.stats.stepsLogged >= 1 },
@@ -370,6 +385,12 @@ function createNewState() {
     growthBoost: false,
     hybridAttempts: 0,
     completedTasks: [],
+    introStage: "title",
+    selectedCompanion: "",
+    hasSeenArrival: false,
+    hasReadGrandfatherLetter: false,
+    hasSeenJournalIntro: false,
+    hasSeenFarmReveal: false,
     stats: {
       planted: 0,
       harvested: 0,
@@ -412,25 +433,32 @@ function init() {
   syncJournalUnlocks();
   render();
   pendingJournalUnlocks = [];
-  if (!state.hasSeenIntro && isCharacterReady()) {
-    state.hasSeenIntro = true;
-    saveState();
-    showWelcome();
-  }
 }
 
 function render() {
   document.documentElement.style.setProperty("--player-color", state.species ? species[state.species].color : "#d98245");
-  if (!isCharacterReady()) {
-    app.innerHTML = `
-      <div class="app intro-app">
-        ${renderCharacterChoiceScreen()}
-        <div id="modal" class="modal hidden"></div>
-        <div id="toasts" class="toast-stack"></div>
-      </div>
-    `;
-    app.onclick = handleClick;
+  if (state.introStage === "title") {
+    renderIntroShell(renderTitleScreen());
     return;
+  }
+  if (state.introStage === "arrival") {
+    renderIntroShell(renderArrivalScene());
+    return;
+  }
+  if (state.introStage === "character" || !isCharacterReady()) {
+    state.introStage = "character";
+    renderIntroShell(renderCharacterChoiceScreen());
+    return;
+  }
+  if (state.introStage === "letter" || !state.hasReadGrandfatherLetter) {
+    state.introStage = "letter";
+    renderIntroShell(renderGrandfatherLetterScreen());
+    return;
+  }
+  if (!state.hasSeenFarmReveal) {
+    state.hasSeenFarmReveal = true;
+    state.active = "farm";
+    saveState();
   }
   app.innerHTML = `
     <div class="app">
@@ -452,6 +480,17 @@ function render() {
   app.onclick = handleClick;
 }
 
+function renderIntroShell(content) {
+  app.innerHTML = `
+    <div class="app intro-app">
+      ${content}
+      <div id="modal" class="modal hidden"></div>
+      <div id="toasts" class="toast-stack"></div>
+    </div>
+  `;
+  app.onclick = handleClick;
+}
+
 function isCharacterReady() {
   return !!state.species && !!state.gender;
 }
@@ -464,9 +503,94 @@ function shouldResetFromUrl() {
   }
 }
 
+function hasSavedGame() {
+  return !!storageGet(SAVE_KEY);
+}
+
+function renderTitleScreen() {
+  return `
+    <main class="opening-screen title-screen">
+      <div class="opening-sky">
+        <span class="opening-sun"></span>
+        <span class="opening-cloud cloud-a"></span>
+        <span class="opening-cloud cloud-b"></span>
+        <span class="opening-butterfly butterfly-a"></span>
+        <span class="opening-butterfly butterfly-b"></span>
+      </div>
+      <section class="title-card">
+        <span class="stained-emblem title-emblem"></span>
+        <p class="eyebrow">A cozy flower mystery</p>
+        <h1>Bloomhaven</h1>
+        <p>Restore Grandfather's flower farm, follow his unfinished journal, and discover the blooms that made the valley famous.</p>
+        <div class="title-actions">
+          <button data-action="title-new-game">New Game</button>
+          <button data-action="continue-game" ${hasSavedGame() ? "" : "disabled"}>Continue</button>
+          <button data-action="settings">Settings</button>
+        </div>
+      </section>
+      <div class="opening-farmhouse">
+        <span class="farmhouse-window"></span>
+        <span class="farmhouse-door"></span>
+      </div>
+      <div class="opening-flowerbed">${renderOpeningFlowers(18)}</div>
+    </main>
+  `;
+}
+
+function renderArrivalScene() {
+  return `
+    <main class="opening-screen arrival-screen">
+      <section class="arrival-panel">
+        <div class="arrival-world">
+          <span class="arrival-town"></span>
+          <span class="arrival-farmhouse"></span>
+          <span class="arrival-mailbox"></span>
+          <span class="arrival-journal"></span>
+          <span class="arrival-butterfly"></span>
+          <div class="arrival-beds">${Array.from({ length: 8 }, (_, index) => `<span style="--i:${index}"></span>`).join("")}</div>
+        </div>
+        <div class="arrival-copy">
+          <p>You arrive at the edge of Bloomhaven Valley.</p>
+          <p>The old flower farm is quieter than you remember.</p>
+          <p>Grandfather's journal waits on the porch.</p>
+          <div class="title-actions">
+            <button data-action="arrival-next">Choose Companion</button>
+            <button data-action="skip-arrival">Skip</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  `;
+}
+
+function renderGrandfatherLetterScreen() {
+  return `
+    <main class="opening-screen letter-screen">
+      <article class="grandfather-letter">
+        <span class="stained-emblem letter-emblem"></span>
+        <p class="eyebrow">Grandfather's Letter</p>
+        <p>If you're reading this, then the farm is yours now.</p>
+        <p>Bloomhaven once grew flowers people traveled hundreds of miles to see.</p>
+        <p>I couldn't finish what I started.</p>
+        <p>Perhaps you can.</p>
+        <p>Begin with the old garden.</p>
+        <p>The flowers will teach you the rest.</p>
+        <strong>- Grandfather</strong>
+        <button data-action="read-grandfather-letter">Open the Farm Gate</button>
+      </article>
+    </main>
+  `;
+}
+
+function renderOpeningFlowers(count) {
+  const colors = ["#fff176", "#f799c4", "#9b7ad9", "#ffc928", "#7fc7ff"];
+  return Array.from({ length: count }, (_, index) => `<span style="--i:${index};--bloom:${colors[index % colors.length]}"></span>`).join("");
+}
+
 function renderCharacterChoiceScreen() {
   const chosenSpecies = state.species || "Fox";
   const previewGender = state.gender || "Female";
+  const chosenCopy = companionCopy[chosenSpecies] || companionCopy.Fox;
   return `
     <main class="character-select-screen">
       <img class="character-select-bg" src="assets/characters/character-choice-flower-shop.png" alt="Three Bloomhaven farmhands gathered in the flower shop" loading="eager">
@@ -474,13 +598,13 @@ function renderCharacterChoiceScreen() {
       <section class="character-select-header">
         <span class="stained-emblem"></span>
         <div>
-          <p class="eyebrow">Bloomhaven Farmhand</p>
-          <h1>Choose Your Character</h1>
-          <p>Pick the animal whose passive fits how you want to restore Grandfather's farm.</p>
+          <p class="eyebrow">Bloomhaven Companion</p>
+          <h1>Who Arrives With You?</h1>
+          <p>Choose the animal companion whose heart matches how you want to restore Grandfather's farm.</p>
         </div>
       </section>
       <section class="character-stage" aria-label="Character choices">
-        ${Object.entries(species).map(([name, data]) => renderIntroCharacterChoice(name, data, previewGender)).join("")}
+        ${starterCompanions.map((name) => renderIntroCharacterChoice(name, species[name], previewGender)).join("")}
       </section>
       <section class="intro-choice-dock">
         <div class="presentation-picker intro-presentation">
@@ -491,7 +615,7 @@ function renderCharacterChoiceScreen() {
           <img src="${characterExpression(chosenSpecies, previewGender, "happy")}" alt="${previewGender} ${chosenSpecies} portrait" loading="lazy">
           <div>
             <strong>${previewGender} ${chosenSpecies}</strong>
-            <p>${species[chosenSpecies].passive}</p>
+            <p>${chosenCopy.role} - ${species[chosenSpecies].passive}</p>
             <button data-action="start-game" ${isCharacterReady() ? "" : "disabled"}>Begin in Bloomhaven</button>
           </div>
         </div>
@@ -502,12 +626,14 @@ function renderCharacterChoiceScreen() {
 
 function renderIntroCharacterChoice(name, data, gender) {
   const selected = state.species === name;
+  const copy = companionCopy[name] || { role: animalTypeText(name), line: data.passive };
   return `
     <button class="intro-character-card intro-${name.toLowerCase()} ${selected ? "selected" : ""}" data-action="choose-species" data-species="${name}" aria-label="Choose ${name}">
       <img src="${characterExpression(name, gender, selected ? "excited" : "curious")}" alt="${gender} ${name} farmhand" loading="lazy">
       <span class="intro-character-info">
         <strong>${name}</strong>
-        <small>${animalTypeText(name)}</small>
+        <small>${copy.role}</small>
+        <small>${copy.line}</small>
         <em>${data.passive}</em>
       </span>
     </button>
@@ -1467,9 +1593,15 @@ function handleClick(event) {
   if (action === "nav") setActive(target.dataset.target);
   if (action === "journal-tab") setJournalTab(target.dataset.tab);
   if (action === "new-game") confirmNewGame();
+  if (action === "title-new-game") startArrival();
+  if (action === "continue-game") continueGame();
+  if (action === "settings") showSettings();
+  if (action === "arrival-next") showCompanionChoice();
+  if (action === "skip-arrival") skipArrival();
   if (action === "choose-species") chooseSpecies(target.dataset.species);
   if (action === "choose-gender") chooseGender(target.dataset.gender);
   if (action === "start-game") startGame();
+  if (action === "read-grandfather-letter") readGrandfatherLetter();
   if (action === "plant-selected") plantFirstEmpty(document.querySelector("#seed-select")?.value);
   if (action === "plant-starter-mix") plantStarterMix();
   if (action === "plant-plot") plantAt(Number(target.dataset.index), document.querySelector("#seed-select")?.value);
@@ -1505,6 +1637,11 @@ function handleClick(event) {
 function setActive(screen) {
   state.active = screen;
   saveAndRender();
+  if (screen === "journal" && !state.hasSeenJournalIntro) {
+    state.hasSeenJournalIntro = true;
+    saveState();
+    showJournalIntro();
+  }
 }
 
 function setJournalTab(tab) {
@@ -1515,7 +1652,9 @@ function setJournalTab(tab) {
 }
 
 function chooseSpecies(name) {
+  if (!species[name]) return;
   state.species = name;
+  state.selectedCompanion = name;
   saveAndRender();
   toast(`${name} selected: ${species[name].passive}`);
 }
@@ -1529,10 +1668,52 @@ function chooseGender(gender) {
 
 function startGame() {
   if (!isCharacterReady()) return toast("Choose an animal and presentation first.");
+  state.selectedCompanion = state.species;
+  state.introStage = "letter";
+  saveAndRender();
+}
+
+function startArrival() {
+  state = createNewState();
+  state.orders = starterOrders();
+  state.introStage = "arrival";
+  saveAndRender();
+}
+
+function continueGame() {
+  const loaded = loadState();
+  if (!loaded) return toast("No saved garden yet.");
+  state = loaded;
+  if (isCharacterReady() && state.hasReadGrandfatherLetter) state.introStage = "farm";
+  saveAndRender();
+}
+
+function showSettings() {
+  openModal("Settings", `
+    <p>Bloomhaven saves automatically in this browser.</p>
+    <p class="muted">Audio, accessibility, and language settings will come later in the prototype.</p>
+  `);
+}
+
+function showCompanionChoice() {
+  state.hasSeenArrival = true;
+  state.introStage = "character";
+  saveAndRender();
+}
+
+function skipArrival() {
+  state.hasSeenArrival = true;
+  state.introStage = "character";
+  saveAndRender();
+}
+
+function readGrandfatherLetter() {
+  state.hasReadGrandfatherLetter = true;
   state.hasSeenIntro = true;
+  state.introStage = "farm";
   state.active = "farm";
   saveAndRender();
-  showWelcome();
+  toast("First task: plant three flowers.");
 }
 
 function plantFirstEmpty(name) {
@@ -2141,6 +2322,20 @@ function showWelcome() {
   `);
 }
 
+function showJournalIntro() {
+  openModal("Grandfather's Journal", `
+    <div class="journal-intro-spread">
+      <div class="journal-intro-illustration">
+        <span class="journal-intro-flower"></span>
+      </div>
+      <div>
+        <p>"Every flower has a story. You simply have to be patient enough to let it bloom."</p>
+        <p class="muted">The rest of Grandfather's notes are scattered through Bloomhaven.</p>
+      </div>
+    </div>
+  `, "Open Journal");
+}
+
 async function installApp() {
   if (!installPromptEvent) {
     showHomeScreenHelp();
@@ -2505,6 +2700,10 @@ function applyTaskReward(reward) {
   if (reward.reputation) state.reputation += reward.reputation;
   if (reward.restoration) state.restoration = clamp(state.restoration + reward.restoration, 0, 100);
   if (reward.note) addNote();
+  if (reward.journalPage) {
+    state.journalPages += reward.journalPage;
+    unlockJournalEntry("grandfather", "seed-before-coins", "Grandfather's note recovered");
+  }
   if (reward.seed) addSeed(reward.seed, 1);
 }
 
@@ -2514,6 +2713,7 @@ function rewardText(reward) {
   if (reward.reputation) parts.push(`${reward.reputation} rep`);
   if (reward.restoration) parts.push(`${reward.restoration}% restoration`);
   if (reward.note) parts.push("research clue");
+  if (reward.journalPage) parts.push(`${reward.journalPage} journal page${reward.journalPage === 1 ? "" : "s"}`);
   if (reward.seed) parts.push(`${reward.seed} seed`);
   return parts.join(", ");
 }
@@ -2881,7 +3081,13 @@ function loadState() {
     migrated.familyBreakthroughs = Array.isArray(parsed.familyBreakthroughs) ? parsed.familyBreakthroughs : [];
     migrated.stats = { ...createNewState().stats, ...(parsed.stats || {}) };
     migrated.eventEffects = { ...(parsed.eventEffects || {}) };
-    migrated.completedTasks = parsed.completedTasks || [];
+    migrated.completedTasks = (parsed.completedTasks || []).filter((id) => id !== "choose-animal");
+    migrated.selectedCompanion = parsed.selectedCompanion || parsed.species || "";
+    migrated.hasSeenArrival = typeof parsed.hasSeenArrival === "boolean" ? parsed.hasSeenArrival : isSavedCharacterReady(parsed);
+    migrated.hasReadGrandfatherLetter = typeof parsed.hasReadGrandfatherLetter === "boolean" ? parsed.hasReadGrandfatherLetter : isSavedCharacterReady(parsed);
+    migrated.hasSeenJournalIntro = typeof parsed.hasSeenJournalIntro === "boolean" ? parsed.hasSeenJournalIntro : false;
+    migrated.hasSeenFarmReveal = typeof parsed.hasSeenFarmReveal === "boolean" ? parsed.hasSeenFarmReveal : isSavedCharacterReady(parsed);
+    migrated.introStage = ["title", "arrival", "character", "letter", "farm"].includes(parsed.introStage) ? parsed.introStage : (isSavedCharacterReady(parsed) ? "farm" : "title");
     migrated.shopStrategy = strategyOptions[parsed.shopStrategy] ? parsed.shopStrategy : "Budget";
     migrated.strategyChangedDay = parsed.strategyChangedDay || 0;
     migrated.dailyCoinsEarned = parsed.dailyCoinsEarned || 0;
@@ -2911,6 +3117,10 @@ function loadState() {
   } catch {
     return null;
   }
+}
+
+function isSavedCharacterReady(saved) {
+  return !!(saved?.species && ["Male", "Female"].includes(saved?.gender));
 }
 
 function migrateJournal(saved) {
