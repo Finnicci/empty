@@ -4112,9 +4112,10 @@ body {
   display: grid;
   place-items: center;
   padding: 18px;
-  color: #fff8df;
+  color: var(--ink);
   background:
-    linear-gradient(180deg, #a9dcf2 0%, #f7df9a 52%, #8fcf86 53%, #5d9c60 100%);
+    linear-gradient(180deg, rgba(255, 239, 178, 0.34), transparent 34%),
+    linear-gradient(180deg, var(--sky) 0 42%, #d7e8bd 42% 52%, #94c77a 52% 100%);
 }
 
 .opening-sky,
@@ -4132,15 +4133,16 @@ body {
 
 .opening-screen:before {
   content: "";
-  left: -8%;
-  right: -8%;
-  bottom: 18%;
-  height: 34%;
+  left: -6%;
+  right: -6%;
+  bottom: 22%;
+  height: 36%;
   background:
-    radial-gradient(ellipse at 15% 80%, #6aa962 0 18%, transparent 19%),
-    radial-gradient(ellipse at 48% 78%, #74b56f 0 26%, transparent 27%),
-    radial-gradient(ellipse at 84% 82%, #5d9b63 0 22%, transparent 23%);
-  opacity: 0.9;
+    radial-gradient(ellipse at 15% 86%, #5f9d62 0 17%, transparent 18%),
+    radial-gradient(ellipse at 43% 82%, #77b86e 0 28%, transparent 29%),
+    radial-gradient(ellipse at 82% 86%, #6aa766 0 21%, transparent 22%),
+    linear-gradient(180deg, transparent 0 40%, rgba(81, 135, 80, 0.34));
+  opacity: 0.96;
 }
 
 .opening-screen:after {
@@ -4148,30 +4150,31 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 28%;
+  height: 33%;
   background:
-    linear-gradient(90deg, rgba(102, 135, 72, 0.25) 1px, transparent 1px) 0 0 / 18px 100%,
-    linear-gradient(180deg, #8bc870, #6baa5d);
+    linear-gradient(90deg, rgba(80, 123, 64, 0.22) 1px, transparent 1px) 0 0 / 18px 100%,
+    linear-gradient(0deg, rgba(77, 120, 63, 0.25), transparent 70%),
+    linear-gradient(180deg, #9ccc75, #6baa5d);
 }
 
 .opening-sun {
   position: absolute;
   right: 12%;
   top: 9%;
-  width: 74px;
-  height: 74px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  background: #ffe590;
-  box-shadow: 0 0 0 12px rgba(255, 229, 144, 0.2), 0 0 60px rgba(255, 229, 144, 0.55);
+  background: #ffe59b;
+  box-shadow: 0 0 0 12px rgba(255, 229, 155, 0.18);
 }
 
 .opening-cloud {
   position: absolute;
   width: 112px;
   height: 34px;
-  border-radius: 999px;
+  border-radius: 8px;
   background: rgba(255, 250, 225, 0.9);
-  box-shadow: 34px -12px 0 10px rgba(255, 250, 225, 0.86), 68px 0 0 2px rgba(255, 250, 225, 0.86);
+  box-shadow: 32px -10px 0 8px rgba(255, 250, 225, 0.86), 66px 0 0 0 rgba(255, 250, 225, 0.86);
   animation: cloudDrift 24s linear infinite;
 }
 
@@ -4190,11 +4193,11 @@ body {
 .opening-butterfly,
 .arrival-butterfly {
   position: absolute;
-  width: 22px;
-  height: 16px;
-  border-radius: 50%;
-  background: #f7d56c;
-  box-shadow: -8px 2px 0 #e889a8, 8px 2px 0 #9b7ad9;
+  width: 18px;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--gold);
+  box-shadow: -7px 2px 0 var(--rose), 7px 2px 0 var(--violet);
   animation: butterflyFloat 7s ease-in-out infinite;
 }
 
@@ -4210,14 +4213,16 @@ body {
 }
 
 .opening-farmhouse {
-  left: 10%;
-  bottom: 25%;
-  width: 190px;
-  height: 126px;
+  left: 9%;
+  bottom: 28%;
+  width: 210px;
+  height: 138px;
   border: 3px solid #8b6845;
-  border-radius: 12px 12px 8px 8px;
-  background: linear-gradient(180deg, #f6ddaa, #d59f69);
-  box-shadow: 0 10px 0 rgba(69, 45, 29, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(109, 75, 52, 0.09) 1px, transparent 1px) 0 0 / 18px 100%,
+    linear-gradient(180deg, #f4d89d, #d8a16b);
+  box-shadow: 0 8px 0 rgba(69, 45, 29, 0.18);
   z-index: 2;
 }
 
@@ -4244,22 +4249,23 @@ body {
   left: 28px;
   width: 36px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.18);
 }
 
 .farmhouse-door {
   right: 36px;
   width: 42px;
   height: 66px;
-  border-radius: 10px 10px 2px 2px;
+  border-radius: 8px 8px 2px 2px;
   background: #8f6a46;
 }
 
 .opening-flowerbed {
   left: 0;
   right: 0;
-  bottom: 4%;
-  height: 110px;
+  bottom: 2%;
+  height: 132px;
   z-index: 3;
 }
 
@@ -4267,11 +4273,14 @@ body {
   position: absolute;
   left: calc((var(--i) * 5.6%) + 1%);
   bottom: calc((var(--i) % 4) * 11px);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px 8px 10px 10px;
   background: var(--bloom);
-  box-shadow: 0 0 0 5px rgba(255, 248, 223, 0.36), 0 16px 0 -9px #4f884d;
+  box-shadow:
+    -9px 4px 0 -4px var(--bloom),
+    9px 4px 0 -4px var(--bloom),
+    0 16px 0 -9px #4f884d;
   animation: flowerSway 2.9s ease-in-out infinite alternate;
   animation-delay: calc(var(--i) * -0.14s);
 }
@@ -4280,24 +4289,45 @@ body {
 .grandfather-letter {
   position: relative;
   z-index: 5;
-  width: min(520px, calc(100% - 12px));
-  border: 3px solid rgba(126, 91, 58, 0.38);
-  border-radius: 22px;
+  width: min(500px, calc(100% - 12px));
+  border: 2px solid rgba(109, 75, 52, 0.42);
+  border-radius: 8px;
   background:
-    linear-gradient(180deg, rgba(255, 250, 226, 0.94), rgba(252, 237, 190, 0.95)),
-    repeating-linear-gradient(0deg, transparent 0 22px, rgba(126, 91, 58, 0.06) 23px);
+    linear-gradient(90deg, rgba(216, 201, 157, 0.18) 1px, transparent 1px) 0 0 / 18px 100%,
+    linear-gradient(180deg, rgba(255, 250, 226, 0.96), rgba(251, 241, 208, 0.97));
   color: var(--ink);
   text-align: center;
-  padding: clamp(18px, 4vw, 34px);
-  box-shadow: 0 12px 0 rgba(85, 59, 35, 0.18), 0 22px 48px rgba(54, 44, 27, 0.18);
+  padding: clamp(18px, 4vw, 30px);
+  box-shadow: var(--shadow), 0 18px 36px rgba(54, 44, 27, 0.14);
+}
+
+.title-card:before,
+.title-card:after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  height: 7px;
+  background:
+    linear-gradient(90deg, var(--leaf) 0 12%, transparent 12% 17%, var(--rose) 17% 28%, transparent 28% 34%, var(--violet) 34% 45%, transparent 45% 54%, var(--gold) 54% 68%, transparent 68% 74%, var(--leaf-dark) 74%);
+  border-radius: 999px;
+  opacity: 0.74;
+}
+
+.title-card:before {
+  top: 12px;
+}
+
+.title-card:after {
+  bottom: 12px;
 }
 
 .title-card h1 {
   margin: 8px 0 10px;
-  font-size: clamp(3rem, 12vw, 5.8rem);
-  line-height: 0.85;
-  color: #4c6742;
-  text-shadow: 0 3px 0 #f3dca6;
+  font-size: clamp(2.8rem, 10vw, 5.2rem);
+  line-height: 0.9;
+  color: #486840;
+  text-shadow: 0 3px 0 #f1d992;
 }
 
 .title-card p,
@@ -4313,26 +4343,29 @@ body {
 .title-actions {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 9px;
   margin-top: 18px;
 }
 
 .title-actions button,
 .grandfather-letter button {
   min-height: 52px;
+  border-color: rgba(109, 75, 52, 0.72);
+  background: #fff0b6;
 }
 
 .arrival-screen {
   background:
-    linear-gradient(180deg, #a8d6ee 0%, #f4d892 48%, #97ba7c 49%, #6f9461 100%);
+    linear-gradient(180deg, rgba(255, 236, 170, 0.2), transparent 36%),
+    linear-gradient(180deg, var(--sky) 0 43%, #d7e8bd 43% 52%, #83b36a 52% 100%);
 }
 
 .arrival-panel {
   position: relative;
   z-index: 4;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1.45fr) minmax(250px, 0.72fr);
+  gap: 12px;
   align-items: stretch;
   width: min(980px, 100%);
 }
@@ -4340,15 +4373,27 @@ body {
 .arrival-world {
   position: relative;
   min-height: min(62vh, 520px);
-  border: 3px solid rgba(126, 91, 58, 0.28);
-  border-radius: 22px;
+  border: 2px solid rgba(109, 75, 52, 0.32);
+  border-radius: 8px;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(165, 216, 238, 0.6) 0 45%, transparent 46%),
-    radial-gradient(ellipse at 28% 86%, #5f8e5b 0 18%, transparent 19%),
-    radial-gradient(ellipse at 75% 84%, #6fa365 0 22%, transparent 23%),
-    linear-gradient(180deg, #ead597 0 50%, #7fb467 51%);
-  box-shadow: 0 10px 0 rgba(85, 59, 35, 0.16);
+    linear-gradient(180deg, rgba(158, 220, 245, 0.72) 0 41%, transparent 42%),
+    radial-gradient(ellipse at 22% 82%, #607f5c 0 18%, transparent 19%),
+    radial-gradient(ellipse at 70% 84%, #759b6b 0 24%, transparent 25%),
+    linear-gradient(180deg, #deca8b 0 50%, #77ab62 51%);
+  box-shadow: var(--shadow);
+}
+
+.arrival-world:before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 34%;
+  background:
+    linear-gradient(90deg, rgba(75, 116, 55, 0.24) 1px, transparent 1px) 0 0 / 16px 100%,
+    linear-gradient(180deg, rgba(107, 170, 93, 0.1), rgba(78, 126, 64, 0.28));
+  z-index: 0;
+}
 }
 
 .arrival-town {
@@ -4360,18 +4405,21 @@ body {
   background:
     linear-gradient(90deg, #dba16d 0 30%, #8c6a4c 30% 36%, #f1c978 36% 64%, #8c6a4c 64% 70%, #c98e78 70%);
   clip-path: polygon(0 38%, 14% 38%, 18% 5%, 33% 38%, 48% 38%, 52% 12%, 66% 38%, 82% 38%, 86% 0, 100% 38%, 100% 100%, 0 100%);
-  opacity: 0.78;
+  opacity: 0.65;
 }
 
 .arrival-farmhouse {
   position: absolute;
   left: 10%;
-  bottom: 30%;
+  bottom: 32%;
   width: 170px;
   height: 108px;
   border: 3px solid #8b6845;
-  border-radius: 12px;
-  background: #d6a36f;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(109, 75, 52, 0.11) 1px, transparent 1px) 0 0 / 16px 100%,
+    #d6a36f;
+  z-index: 2;
 }
 
 .arrival-farmhouse:before {
@@ -4394,6 +4442,7 @@ body {
   border-radius: 14px 14px 5px 5px;
   background: #8bb1d6;
   border: 3px solid #6d4b34;
+  z-index: 3;
 }
 
 .arrival-mailbox:after {
@@ -4416,6 +4465,8 @@ body {
   background: #7f4f35;
   border: 3px solid #f3dca6;
   transform: rotate(-8deg);
+  z-index: 3;
+  box-shadow: 0 0 0 4px rgba(255, 239, 178, 0.24);
 }
 
 .arrival-butterfly {
@@ -4427,35 +4478,39 @@ body {
   position: absolute;
   left: 12%;
   right: 12%;
-  bottom: 8%;
+  bottom: 7%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
+  z-index: 2;
 }
 
 .arrival-beds span {
   height: 48px;
   border: 3px solid #8b6845;
-  border-radius: 12px;
+  border-radius: 8px;
   background:
     linear-gradient(90deg, rgba(83, 55, 36, 0.22) 1px, transparent 1px) 0 0 / 14px 100%,
     #8d623f;
-  opacity: 0.72;
+  opacity: 0.68;
 }
 
 .arrival-copy {
-  border: 3px solid rgba(126, 91, 58, 0.34);
-  border-radius: 22px;
-  background: rgba(255, 250, 226, 0.94);
+  border: 2px solid rgba(109, 75, 52, 0.36);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(216, 201, 157, 0.18) 1px, transparent 1px) 0 0 / 18px 100%,
+    rgba(255, 250, 226, 0.95);
   color: var(--ink);
-  padding: clamp(18px, 3vw, 28px);
-  box-shadow: 0 10px 0 rgba(85, 59, 35, 0.16);
+  padding: clamp(16px, 3vw, 24px);
+  box-shadow: var(--shadow);
 }
 
 .arrival-copy p {
   margin: 0 0 14px;
   color: #535746;
-  font-size: clamp(1.05rem, 2vw, 1.28rem);
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  line-height: 1.36;
 }
 
 .letter-screen {
