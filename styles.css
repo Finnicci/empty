@@ -4120,7 +4120,7 @@ body {
 
 .opening-sky,
 .opening-flowerbed,
-.opening-farmhouse,
+.opening-asset-stage,
 .opening-screen:before,
 .opening-screen:after {
   position: absolute;
@@ -4212,53 +4212,58 @@ body {
   animation-delay: -2.8s;
 }
 
-.opening-farmhouse {
-  left: 9%;
-  bottom: 28%;
-  width: 210px;
-  height: 138px;
-  border: 3px solid #8b6845;
+.opening-asset-stage {
+  right: clamp(14px, 5vw, 70px);
+  bottom: 11%;
+  width: min(58vw, 650px);
+  height: min(68vh, 560px);
+  z-index: 3;
+}
+
+.opening-town-art,
+.opening-farm-art,
+.opening-seed-packets {
+  position: absolute;
+  filter: drop-shadow(0 8px 0 rgba(85, 59, 35, 0.14));
+}
+
+.opening-town-art {
+  right: 0;
+  top: 2%;
+  width: 66%;
+  max-height: 48%;
+  object-fit: contain;
+  opacity: 0.86;
+  border: 2px solid rgba(109, 75, 52, 0.16);
   border-radius: 8px;
-  background:
-    linear-gradient(90deg, rgba(109, 75, 52, 0.09) 1px, transparent 1px) 0 0 / 18px 100%,
-    linear-gradient(180deg, #f4d89d, #d8a16b);
-  box-shadow: 0 8px 0 rgba(69, 45, 29, 0.18);
-  z-index: 2;
 }
 
-.opening-farmhouse:before {
-  content: "";
-  position: absolute;
-  left: -16px;
-  right: -16px;
-  top: -48px;
-  height: 58px;
-  background: #9b6248;
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+.opening-farm-art {
+  right: 8%;
+  bottom: 0;
+  width: 82%;
+  max-height: 62%;
+  object-fit: contain;
+  border: 3px solid rgba(109, 75, 52, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 248, 223, 0.35);
 }
 
-.farmhouse-window,
-.farmhouse-door {
-  position: absolute;
-  bottom: 22px;
-  border: 3px solid #8b6845;
-  background: #ffe8a3;
+.opening-seed-packets {
+  left: 1%;
+  bottom: 4%;
+  display: grid;
+  grid-template-columns: repeat(3, 76px);
+  gap: 8px;
 }
 
-.farmhouse-window {
-  left: 28px;
-  width: 36px;
-  height: 32px;
-  border-radius: 6px;
-  box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.18);
-}
-
-.farmhouse-door {
-  right: 36px;
-  width: 42px;
-  height: 66px;
-  border-radius: 8px 8px 2px 2px;
-  background: #8f6a46;
+.opening-seed-packets img {
+  width: 76px;
+  height: 96px;
+  object-fit: cover;
+  border: 2px solid rgba(109, 75, 52, 0.35);
+  border-radius: 8px;
+  background: var(--paper);
 }
 
 .opening-flowerbed {
@@ -4301,6 +4306,12 @@ body {
   box-shadow: var(--shadow), 0 18px 36px rgba(54, 44, 27, 0.14);
 }
 
+.title-card {
+  justify-self: start;
+  margin-left: clamp(8px, 5vw, 82px);
+  text-align: left;
+}
+
 .title-card:before,
 .title-card:after {
   content: "";
@@ -4337,14 +4348,18 @@ body {
 
 .title-emblem,
 .letter-emblem {
-  margin: 0 auto 10px;
+  margin: 0 0 10px;
 }
 
 .title-actions {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 9px;
   margin-top: 18px;
+}
+
+.title-actions button:first-child {
+  grid-column: 1 / -1;
 }
 
 .title-actions button,
@@ -4394,6 +4409,32 @@ body {
     linear-gradient(180deg, rgba(107, 170, 93, 0.1), rgba(78, 126, 64, 0.28));
   z-index: 0;
 }
+
+.arrival-farm-art,
+.arrival-town-art {
+  position: absolute;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 0 rgba(85, 59, 35, 0.12));
+}
+
+.arrival-town-art {
+  right: 2%;
+  top: 5%;
+  width: 42%;
+  opacity: 0.42;
+  border-radius: 8px;
+}
+
+.arrival-farm-art {
+  left: 3%;
+  bottom: 5%;
+  width: 72%;
+  max-height: 68%;
+  opacity: 0.7;
+  border: 3px solid rgba(109, 75, 52, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 248, 223, 0.22);
 }
 
 .arrival-town {
@@ -4419,7 +4460,8 @@ body {
   background:
     linear-gradient(90deg, rgba(109, 75, 52, 0.11) 1px, transparent 1px) 0 0 / 16px 100%,
     #d6a36f;
-  z-index: 2;
+  z-index: 3;
+  opacity: 0.72;
 }
 
 .arrival-farmhouse:before {
@@ -4482,7 +4524,7 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  z-index: 2;
+  z-index: 4;
 }
 
 .arrival-beds span {
@@ -4580,14 +4622,49 @@ body {
     padding: 10px;
   }
 
-  .opening-farmhouse {
-    left: 5%;
-    width: 150px;
-    height: 100px;
+  .opening-asset-stage {
+    right: 0;
+    left: 0;
+    bottom: 6%;
+    width: 100%;
+    height: 45vh;
+  }
+
+  .opening-town-art {
+    right: 3%;
+    top: 0;
+    width: 54%;
+  }
+
+  .opening-farm-art {
+    right: 3%;
+    width: 62%;
+  }
+
+  .opening-seed-packets {
+    left: 8px;
+    bottom: 8px;
+    grid-template-columns: repeat(3, 52px);
+  }
+
+  .opening-seed-packets img {
+    width: 52px;
+    height: 68px;
   }
 
   .title-card h1 {
     font-size: 3.2rem;
+  }
+
+  .title-card {
+    align-self: start;
+    justify-self: center;
+    margin: 8px 0 0;
+    width: calc(100% - 18px);
+  }
+
+  .title-actions {
+    grid-template-columns: 1fr;
   }
 
   .arrival-panel {
@@ -4597,6 +4674,15 @@ body {
 
   .arrival-world {
     min-height: 48vh;
+  }
+
+  .arrival-farm-art {
+    width: 92%;
+    left: 2%;
+  }
+
+  .arrival-town-art {
+    width: 48%;
   }
 
   .arrival-copy {

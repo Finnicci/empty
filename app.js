@@ -528,9 +528,14 @@ function renderTitleScreen() {
           <button data-action="settings">Settings</button>
         </div>
       </section>
-      <div class="opening-farmhouse">
-        <span class="farmhouse-window"></span>
-        <span class="farmhouse-door"></span>
+      <div class="opening-asset-stage">
+        <img class="opening-town-art" src="assets/town/bloomhaven-town-homescreen.png" alt="Bloomhaven town at sunrise" loading="eager">
+        <img class="opening-farm-art" src="assets/farm/plot-sizes/starter-farm-small-plots.png" alt="Grandfather's starter farm" loading="eager">
+        <div class="opening-seed-packets">
+          <img src="assets/flowers/starters/daisy-starter.png" alt="Daisy starter flower" loading="eager">
+          <img src="assets/flowers/starters/tulip-starter.png" alt="Tulip starter flower" loading="eager">
+          <img src="assets/flowers/starters/lavender-starter.png" alt="Lavender starter flower" loading="eager">
+        </div>
       </div>
       <div class="opening-flowerbed">${renderOpeningFlowers(18)}</div>
     </main>
@@ -542,6 +547,8 @@ function renderArrivalScene() {
     <main class="opening-screen arrival-screen">
       <section class="arrival-panel">
         <div class="arrival-world">
+          <img class="arrival-farm-art" src="assets/farm/starter-farm-plots.png" alt="Grandfather's neglected starter farm" loading="eager">
+          <img class="arrival-town-art" src="assets/town/bloomhaven-town-homescreen.png" alt="Bloomhaven town in the distance" loading="eager">
           <span class="arrival-town"></span>
           <span class="arrival-farmhouse"></span>
           <span class="arrival-mailbox"></span>
