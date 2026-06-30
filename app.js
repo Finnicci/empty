@@ -515,6 +515,7 @@ function hasSavedGame() {
 function renderTitleScreen() {
   return `
     <main class="opening-screen title-screen">
+      <img class="opening-cover-art" src="assets/welcome/bloomhaven-welcome-storybook.png" alt="Bloomhaven flower farm at sunrise" loading="eager">
       <div class="opening-sky">
         <span class="opening-sun"></span>
         <span class="opening-cloud cloud-a"></span>
@@ -533,15 +534,6 @@ function renderTitleScreen() {
           <button data-action="settings">Settings</button>
         </div>
       </section>
-      <div class="opening-asset-stage">
-        <img class="opening-town-art" src="assets/town/bloomhaven-town-homescreen.png" alt="Bloomhaven town at sunrise" loading="eager">
-        <img class="opening-farm-art" src="assets/farm/plot-sizes/starter-farm-small-plots.png" alt="Grandfather's starter farm" loading="eager">
-        <div class="opening-seed-packets">
-          <img src="assets/flowers/starters/daisy-starter.png" alt="Daisy starter flower" loading="eager">
-          <img src="assets/flowers/starters/tulip-starter.png" alt="Tulip starter flower" loading="eager">
-          <img src="assets/flowers/starters/lavender-starter.png" alt="Lavender starter flower" loading="eager">
-        </div>
-      </div>
       <div class="opening-flowerbed">${renderOpeningFlowers(18)}</div>
     </main>
   `;
@@ -551,9 +543,8 @@ function renderArrivalScene() {
   return `
     <main class="opening-screen arrival-screen">
       <section class="arrival-panel">
-        <div class="arrival-world">
-          <img class="arrival-farm-art" src="assets/farm/starter-farm-plots.png" alt="Grandfather's neglected starter farm" loading="eager">
-          <img class="arrival-town-art" src="assets/town/bloomhaven-town-homescreen.png" alt="Bloomhaven town in the distance" loading="eager">
+        <div class="arrival-world illustrated-arrival">
+          <img class="arrival-farm-art" src="assets/home/bloomhaven-home-rough-garden.png" alt="Grandfather's neglected starter farm" loading="eager">
           <span class="arrival-town"></span>
           <span class="arrival-farmhouse"></span>
           <span class="arrival-mailbox"></span>
@@ -744,12 +735,14 @@ function renderTopbar() {
 function renderFarm() {
   const sceneClass = state.phase === "Night" ? "night" : state.phase === "Evening" ? "evening" : state.phase === "Morning" ? "morning" : "";
   const weatherClass = weatherSceneClass();
+  const sceneArt = farmSceneArt();
+  const illustratedClass = sceneArt.includes("assets/home/") ? "illustrated-home" : "";
   return `
     <section class="screen ${isActive("farm")}" data-screen="farm">
       <div class="desktop-grid">
         <div>
-          <div class="hero-scene ${sceneClass} ${weatherClass}">
-            <img class="scene-art farm-scene-art" src="${farmSceneArt()}" alt="Grandfather's starter farm with flower beds" loading="eager">
+          <div class="hero-scene ${sceneClass} ${weatherClass} ${illustratedClass}">
+            <img class="scene-art farm-scene-art" src="${sceneArt}" alt="Grandfather's starter farm with flower beds" loading="eager">
             ${sceneClass === "night" ? '<div class="moon"></div>' : '<div class="sun"></div>'}
             <div class="cloud"></div>
             <div class="cloud cloud-two"></div>
@@ -854,6 +847,7 @@ function characterExpression(speciesName, gender = "Female", expression = "happy
 }
 
 function farmSceneArt() {
+  if (state.maxPlots <= 12) return "assets/home/bloomhaven-home-rough-garden.png";
   if (state.maxPlots >= 20) return "assets/farm/plot-sizes/starter-farm-large-plots.png";
   if (state.maxPlots >= 16) return "assets/farm/plot-sizes/starter-farm-medium-plots.png";
   return "assets/farm/plot-sizes/starter-farm-small-plots.png";
