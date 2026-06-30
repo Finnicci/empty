@@ -2,6 +2,7 @@ const SAVE_KEY = "bloomhaven-save-v2";
 const timePhases = ["Morning", "Afternoon", "Evening", "Night"];
 const baseDailyEnergy = 10;
 const energyCosts = {
+  till: 1,
   plant: 1,
   harvest: 1,
   hybridize: 2,
@@ -316,7 +317,9 @@ const restorationMilestones = [
   { value: 100, title: "District 1 restored", text: "Bloomhaven Town Square is blooming again." },
 ];
 const taskDefinitions = [
-  { id: "plant-3", title: "Plant Three Flowers", objective: "Plant 3 flowers.", hint: "Use Starter Mix for Daisy + Cosmos + Tulip. That sets up your first order and first hybrid.", reward: { coins: 10, journalPage: 1 }, complete: () => state.stats.planted >= 3 },
+  { id: "clear-bed-1", title: "Clear a Flower Bed", objective: "Choose one rough bed and clear the weeds.", hint: "The old garden is overgrown. Tap a rough bed in the farm scene to till the first planting spot.", reward: { coins: 5 }, complete: () => state.stats.clearedBeds >= 1 },
+  { id: "plant-1", title: "Plant First Seeds", objective: "Plant your first flower.", hint: "Choose a seed, then tap the cleared bed or use Plant First Open Plot.", reward: { coins: 10, journalPage: 1 }, complete: () => state.stats.planted >= 1 },
+  { id: "plant-3", title: "Wake Three Beds", objective: "Plant 3 flowers.", hint: "Clear two more rough beds, then plant Daisy, Cosmos, and Tulip for your first order and hybrid clue.", reward: { restoration: 2 }, complete: () => state.stats.planted >= 3 },
   { id: "harvest-1", title: "First Bloom", objective: "Harvest your first flower.", hint: "End the day once your beds are planted. Ready beds glow darker.", reward: { coins: 10, note: true }, complete: () => state.stats.harvested >= 1 },
   { id: "fill-order-1", title: "First Customer", objective: "Fill 1 florist order.", hint: "Simple orders accept any quality. Higher-quality requests pay more later.", reward: { reputation: 2, restoration: 4 }, complete: () => state.stats.orders >= 1 },
   { id: "log-steps", title: "A Walk Through Town", objective: "Enter today's steps.", hint: "Even 0 steps gives an opportunity. Walking adds clues, seeds, and hybrid odds.", reward: { note: true, seed: "Black-Eyed Susan" }, complete: () => state.stats.stepsLogged >= 1 },
@@ -356,6 +359,7 @@ function createNewState() {
     gender: "",
     active: "farm",
     plots: Array.from({ length: 12 }, () => null),
+    tilledPlots: [],
     maxPlots: 12,
     seeds: { ...startingSeeds },
     inventory: {},
@@ -402,6 +406,7 @@ function createNewState() {
       hybridSales: 0,
       strategySwitches: 0,
       bestDailyCoins: 0,
+      clearedBeds: 0,
     },
     hasSeenIntro: false,
   };
@@ -794,11 +799,11 @@ function renderFarm() {
           ${renderSpeciesPicker()}
           <div class="panel">
             <h2>Plant Flowers</h2>
-            <p class="tagline">${filledPlots()} / ${state.maxPlots} beds planted. Planting costs ${energyCosts.plant} Energy.</p>
-            <p class="tagline">Choose a seed, then tap an empty bed or plant in the first open plot.</p>
+            <p class="tagline">${tilledPlotCount()} / ${state.maxPlots} beds cleared. ${filledPlots()} planted.</p>
+            <p class="tagline">Clear rough beds first, then choose a seed and plant in fresh soil.</p>
             <div class="grid">
               <select id="seed-select">${renderSeedOptions()}</select>
-              <button data-action="plant-selected" ${hasSeeds() && canSpendEnergy(energyCosts.plant) ? "" : "disabled"}>Plant First Open Plot</button>
+              <button data-action="plant-selected" ${hasSeeds() && hasOpenTilledPlot() && canSpendEnergy(energyCosts.plant) ? "" : "disabled"}>Plant First Open Plot</button>
               <button data-action="plant-starter-mix" ${canPlantStarterMix() ? "" : "disabled"}>Plant Starter Mix</button>
             </div>
           </div>
@@ -900,6 +905,9 @@ function renderPollenParticles() {
 
 function renderPlot(plot, index) {
   if (!plot) {
+    if (!isPlotTilled(index)) {
+      return `<button class="plot rough" data-action="till-plot" data-index="${index}" ${canSpendEnergy(energyCosts.till) ? "" : "disabled"}><span class="plot-name">Rough Bed</span><span class="plot-meta">Weeds, grass, and debris - clear 1 Energy</span><span class="plot-debris"></span></button>`;
+    }
     return `<button class="plot empty" data-action="plant-plot" data-index="${index}" ${canSpendEnergy(energyCosts.plant) ? "" : "disabled"}><span class="plot-name">Empty Bed</span><span class="plot-meta">Fresh soil</span><span class="plot-stage stage-empty"></span></button>`;
   }
   const flower = flowerByName.get(plot.name);
@@ -1609,6 +1617,7 @@ function handleClick(event) {
   if (action === "choose-gender") chooseGender(target.dataset.gender);
   if (action === "start-game") startGame();
   if (action === "read-grandfather-letter") readGrandfatherLetter();
+  if (action === "till-plot") tillPlot(Number(target.dataset.index));
   if (action === "plant-selected") plantFirstEmpty(document.querySelector("#seed-select")?.value);
   if (action === "plant-starter-mix") plantStarterMix();
   if (action === "plant-plot") plantAt(Number(target.dataset.index), document.querySelector("#seed-select")?.value);
@@ -1720,12 +1729,23 @@ function readGrandfatherLetter() {
   state.introStage = "farm";
   state.active = "farm";
   saveAndRender();
-  toast("First task: plant three flowers.");
+  toast("First task: clear one rough flower bed.");
+}
+
+function tillPlot(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= state.maxPlots) return;
+  if (state.plots[index]) return;
+  if (isPlotTilled(index)) return toast("That bed is already cleared.");
+  if (!spendEnergy(energyCosts.till, "clear a rough flower bed")) return;
+  state.tilledPlots = [...new Set([...(state.tilledPlots || []), index])].sort((a, b) => a - b);
+  state.stats.clearedBeds = Math.max(state.stats.clearedBeds || 0, state.tilledPlots.length);
+  saveAndRender();
+  toast("A rough bed is cleared and ready for seeds.");
 }
 
 function plantFirstEmpty(name) {
-  const index = state.plots.findIndex((plot) => !plot);
-  if (index === -1) return toast("All flower beds are full.");
+  const index = state.plots.findIndex((plot, plotIndex) => !plot && isPlotTilled(plotIndex));
+  if (index === -1) return toast("Clear a rough bed before planting.");
   plantAt(index, name);
 }
 
@@ -1735,7 +1755,7 @@ function plantStarterMix() {
   const plantCount = Math.min(mix.length, openBeds);
   if (!spendEnergy(plantCount * energyCosts.plant, "plant the Starter Mix")) return;
   mix.slice(0, plantCount).forEach((name) => {
-    const index = state.plots.findIndex((plot) => !plot);
+    const index = state.plots.findIndex((plot, plotIndex) => !plot && isPlotTilled(plotIndex));
     if (index !== -1 && state.seeds[name] > 0) plantAt(index, name, false);
   });
   saveAndRender();
@@ -1746,6 +1766,7 @@ function plantAt(index, name, shouldRender = true) {
   if (!name) return toast("You need seeds before planting.");
   if (!state.species) return toast("Choose an animal character first.");
   if (state.plots[index]) return;
+  if (!isPlotTilled(index)) return toast("Clear and till that rough bed before planting.");
   if (!state.seeds[name]) return toast(`No ${name} seeds available.`);
   if (shouldRender && !spendEnergy(energyCosts.plant, "plant a flower")) return;
   const flower = flowerByName.get(name);
@@ -1757,7 +1778,8 @@ function plantAt(index, name, shouldRender = true) {
 }
 
 function canPlantStarterMix() {
-  return !!state.species && ["Daisy", "Cosmos", "Tulip"].every((name) => state.seeds[name] > 0) && state.plots.filter((plot) => !plot).length >= 3 && canSpendEnergy(energyCosts.plant * 3);
+  const openTilled = state.plots.filter((plot, index) => !plot && isPlotTilled(index)).length;
+  return !!state.species && ["Daisy", "Cosmos", "Tulip"].every((name) => state.seeds[name] > 0) && openTilled >= 3 && canSpendEnergy(energyCosts.plant * 3);
 }
 
 function harvest(index) {
@@ -2727,7 +2749,9 @@ function rewardText(reward) {
 
 function nextObjectiveHint() {
   if (!state.species || !state.gender) return "Choose one animal and a male or female portrait style to begin.";
-  if (state.stats.planted < 3) return "Plant a starter mix so orders and hybrid clues line up.";
+  if ((state.stats.clearedBeds || 0) < 1) return "Clear one rough bed to make the old garden usable again.";
+  if (state.stats.planted < 1) return "Plant your first seed in the cleared bed.";
+  if (state.stats.planted < 3) return "Clear two more beds, then plant a starter mix so orders and hybrid clues line up.";
   if (state.stats.harvested < 1) return "Advance time until a bed is ready, then harvest.";
   if (state.stats.orders < 1) return "Open Florist and fill a Simple order.";
   if (state.stats.hybrids < 1) return "Try Daisy + Cosmos in Hybridize.";
@@ -2910,6 +2934,18 @@ function nextPlotSize() {
 
 function filledPlots() {
   return state.plots.filter(Boolean).length;
+}
+
+function isPlotTilled(index) {
+  return Array.isArray(state.tilledPlots) && state.tilledPlots.includes(index);
+}
+
+function tilledPlotCount() {
+  return Array.isArray(state.tilledPlots) ? state.tilledPlots.length : 0;
+}
+
+function hasOpenTilledPlot() {
+  return state.plots.some((plot, index) => !plot && isPlotTilled(index));
 }
 
 function currentMilestoneText() {
@@ -3111,6 +3147,8 @@ function loadState() {
     migrated.lastStepDay = Number(parsed.lastStepDay || 0);
     migrated.maxPlots = parsed.maxPlots || Math.max(12, parsed.plots?.length || 12);
     while (migrated.plots.length < migrated.maxPlots) migrated.plots.push(null);
+    migrated.tilledPlots = migrateTilledPlots(parsed, migrated);
+    migrated.stats.clearedBeds = Math.max(Number(migrated.stats.clearedBeds || 0), migrated.tilledPlots.length);
     migrated.plots = migrated.plots.map((plot) => {
       if (!plot) return null;
       const flower = flowerByName.get(plot.name);
@@ -3138,6 +3176,14 @@ function migrateJournal(saved) {
     migrated[section] = Array.isArray(migrated[section]) ? [...new Set(migrated[section])] : base[section];
   });
   return migrated;
+}
+
+function migrateTilledPlots(parsed, migrated) {
+  if (Array.isArray(parsed.tilledPlots)) {
+    return [...new Set(parsed.tilledPlots.map(Number).filter((index) => Number.isInteger(index) && index >= 0 && index < migrated.maxPlots))].sort((a, b) => a - b);
+  }
+  if (!isSavedCharacterReady(parsed)) return [];
+  return Array.from({ length: migrated.maxPlots }, (_, index) => index);
 }
 
 function syncJournalUnlocksFor(targetState) {

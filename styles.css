@@ -3897,6 +3897,8 @@ body {
 }
 
 .plot {
+  position: relative;
+  overflow: hidden;
   min-height: 0;
   border: 2px solid rgba(88, 57, 31, 0.34);
   background: rgba(72, 43, 23, 0.08);
@@ -3907,7 +3909,55 @@ body {
 }
 
 .plot.empty {
-  background: rgba(96, 58, 32, 0.08);
+  background:
+    linear-gradient(90deg, rgba(96, 58, 32, 0.18) 1px, transparent 1px) 0 0 / 12px 100%,
+    rgba(126, 85, 50, 0.28);
+  border-color: rgba(255, 241, 184, 0.42);
+}
+
+.plot.rough {
+  background:
+    radial-gradient(circle at 18% 24%, #5f7844 0 8%, transparent 9%),
+    radial-gradient(circle at 78% 22%, #9a7b55 0 7%, transparent 8%),
+    radial-gradient(circle at 56% 70%, #475f37 0 10%, transparent 11%),
+    linear-gradient(135deg, rgba(71, 95, 55, 0.68), rgba(99, 78, 52, 0.72));
+  border-color: rgba(77, 72, 44, 0.72);
+  color: #fff4c4;
+}
+
+.plot.rough:before,
+.plot.rough:after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.plot.rough:before {
+  left: 9%;
+  right: 9%;
+  bottom: 12%;
+  height: 32%;
+  background:
+    linear-gradient(78deg, transparent 0 42%, #344d2f 43% 50%, transparent 51%),
+    linear-gradient(102deg, transparent 0 45%, #49683a 46% 53%, transparent 54%),
+    linear-gradient(88deg, transparent 0 47%, #6c7e43 48% 54%, transparent 55%);
+  opacity: 0.82;
+}
+
+.plot.rough:after {
+  right: 10%;
+  top: 14%;
+  width: 26px;
+  height: 16px;
+  border-radius: 5px;
+  background: #9b7a58;
+  box-shadow: -34px 26px 0 -2px #6f5942, -12px 54px 0 -3px #b59a6b;
+  transform: rotate(-11deg);
+}
+
+.plot.rough .plot-name,
+.plot.rough .plot-meta {
+  background: rgba(48, 56, 34, 0.64);
 }
 
 .plot.ready {
