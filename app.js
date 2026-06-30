@@ -466,7 +466,7 @@ function render() {
     saveState();
   }
   app.innerHTML = `
-    <div class="app">
+    <div class="app active-${state.active}">
       ${renderTopbar()}
       <main class="main">
         ${state.active === "farm" ? "" : renderHomeScreenSetup()}
@@ -739,10 +739,11 @@ function renderFarm() {
   const illustratedClass = sceneArt.includes("assets/home/") ? "illustrated-home" : "";
   return `
     <section class="screen ${isActive("farm")}" data-screen="farm">
-      <div class="desktop-grid">
-        <div>
+      <div class="home-layout">
+        <div class="home-world-column">
           <div class="hero-scene ${sceneClass} ${weatherClass} ${illustratedClass}">
             <img class="scene-art farm-scene-art" src="${sceneArt}" alt="Grandfather's starter farm with flower beds" loading="eager">
+            ${renderHomeResourceRibbon()}
             ${sceneClass === "night" ? '<div class="moon"></div>' : '<div class="sun"></div>'}
             <div class="cloud"></div>
             <div class="cloud cloud-two"></div>
@@ -767,7 +768,6 @@ function renderFarm() {
             <div class="pollen-field">${renderPollenParticles()}</div>
             <div class="farm-world-overlay">
               ${renderTaskCard()}
-              ${renderHomeScreenSetup()}
             </div>
             <div class="farm-ground">
               ${renderGrass()}
@@ -781,51 +781,142 @@ function renderFarm() {
               <div class="plots">${state.plots.map(renderPlot).join("")}</div>
             </div>
           </div>
-          <div class="quick-actions">
-            <button data-action="advance-phase">Advance Time<br><small>${nextPhaseLabel()}</small></button>
-            <button data-action="next-day">End Day<br><small>Restores energy</small></button>
-            <button data-action="wait-ready">Wait Until Ready</button>
-            <button data-action="new-game">New Game</button>
-          </div>
+          ${renderHomeToolShelf()}
         </div>
-        <aside>
-          ${renderSpeciesPicker()}
-          <div class="panel">
-            <h2>Plant Flowers</h2>
-            <p class="tagline">${tilledPlotCount()} / ${state.maxPlots} beds cleared. ${filledPlots()} planted.</p>
-            <p class="tagline">Clear rough beds first, then choose a seed and plant in fresh soil.</p>
-            <div class="grid">
-              <select id="seed-select">${renderSeedOptions()}</select>
-              <button data-action="plant-selected" ${hasSeeds() && hasOpenTilledPlot() && canSpendEnergy(energyCosts.plant) ? "" : "disabled"}>Plant First Open Plot</button>
-              <button data-action="plant-starter-mix" ${canPlantStarterMix() ? "" : "disabled"}>Plant Starter Mix</button>
-            </div>
-          </div>
-          ${renderPlotExpansion()}
-          ${renderPollinationActions()}
-          ${renderFutureUpgrades()}
-          <div class="panel">
-            <h2>Daily Steps</h2>
-            <p class="tagline">Manual entry is used for this prototype. Future versions may connect to fitness apps and wearables.</p>
-            ${renderStepSourcePanel()}
-            <div class="resource-grid">
-              <span><strong>${state.discoveryEnergy}</strong> Discovery Energy</span>
-              <span><strong>${state.pollinationPoints}</strong> Pollination Points</span>
-              <span><strong>${state.discoveryTokens}</strong> Discovery Tokens</span>
-            </div>
-            <div class="grid">
-              <input id="step-input" aria-label="Today's steps" type="number" min="0" step="100" value="${state.stepToday}" />
-              <button data-action="submit-steps">Log Daily Steps</button>
-            </div>
-            ${renderStepSummary()}
-          </div>
-          ${renderDiscoveryActions()}
-          ${renderExpeditions()}
-          <div class="panel">
-            <h2>Active Events</h2>
-            <div class="event-list">${renderActiveEvents()}</div>
-          </div>
+        <aside class="home-field-kit">
+          ${renderHomePlantKit()}
+          ${renderHomeWalkingKit()}
+          ${renderHomeDiscoveryKit()}
         </aside>
       </div>
+    </section>
+  `;
+}
+
+function renderHomeResourceRibbon() {
+  return `
+    <div class="home-resource-ribbon" aria-label="Farm resources">
+      <span class="resource-tag resource-energy"><i></i><strong>${state.energy}/${state.maxEnergy}</strong><small>Energy</small></span>
+      <span class="resource-tag resource-coins"><i></i><strong>${state.coins}</strong><small>Coins</small></span>
+      <span class="resource-tag resource-rep"><i></i><strong>${state.reputation}</strong><small>Rep</small></span>
+      <span class="resource-tag resource-pollen"><i></i><strong>${state.pollinationPoints}</strong><small>Pollination</small></span>
+    </div>
+  `;
+}
+
+function renderHomeToolShelf() {
+  return `
+    <div class="home-tool-shelf" aria-label="Farm time controls">
+      <button class="tool-button primary-tool" data-action="advance-phase"><span class="tool-icon leaf-icon"></span><span>Advance Time</span><small>${nextPhaseLabel()}</small></button>
+      <button class="tool-button" data-action="next-day"><span class="tool-icon journal-icon"></span><span>End Day</span><small>Restore energy</small></button>
+      <button class="tool-button" data-action="wait-ready"><span class="tool-icon flower-icon"></span><span>Wait Until Ready</span><small>Grow blooms</small></button>
+    </div>
+  `;
+}
+
+function renderHomePlantKit() {
+  return `
+    <section class="field-kit-card plant-kit">
+      <div class="kit-heading">
+        <span class="pressed-flower-mark"></span>
+        <div>
+          <h2>Garden Tools</h2>
+          <p>${tilledPlotCount()} / ${state.maxPlots} beds cleared - ${filledPlots()} planted</p>
+        </div>
+      </div>
+      <label class="seed-label" for="seed-select">Seed pouch</label>
+      <select id="seed-select">${renderSeedOptions()}</select>
+      <div class="kit-actions">
+        <button class="primary-tool" data-action="plant-selected" ${hasSeeds() && hasOpenTilledPlot() && canSpendEnergy(energyCosts.plant) ? "" : "disabled"}>Plant First Open Plot</button>
+        <button data-action="plant-starter-mix" ${canPlantStarterMix() ? "" : "disabled"}>Plant Starter Mix</button>
+      </div>
+      <p class="kit-note">${hasOpenTilledPlot() ? "Fresh soil is ready for seeds." : "Tap a rough bed in the farm to clear weeds first."}</p>
+      ${renderHomeExpansionSlip()}
+    </section>
+  `;
+}
+
+function renderHomeExpansionSlip() {
+  const nextSize = nextPlotSize();
+  if (!nextSize) {
+    return `
+      <div class="mini-expansion-slip">
+        <strong>${state.maxPlots} beds cleared</strong>
+        <small>All starter farm beds are available.</small>
+        <button disabled>Complete</button>
+      </div>
+    `;
+  }
+  const cost = plotUpgradeCost();
+  return `
+    <div class="mini-expansion-slip">
+      <strong>${state.maxPlots} beds open</strong>
+      <small>Next: ${nextSize} beds for ${cost} coins.</small>
+      <button data-action="buy-plots" ${state.coins >= cost ? "" : "disabled"}>Buy More Beds</button>
+    </div>
+  `;
+}
+
+function renderHomeWalkingKit() {
+  return `
+    <section class="field-kit-card walking-kit">
+      <div class="kit-heading">
+        <span class="bee-mark"></span>
+        <div>
+          <h2>Daily Steps</h2>
+          <p>Manual entry for this prototype.</p>
+        </div>
+      </div>
+      ${renderStepSourcePanel()}
+      <div class="compact-resource-row">
+        <span><strong>${state.discoveryEnergy}</strong> Discovery</span>
+        <span><strong>${state.discoveryTokens}</strong> Tokens</span>
+      </div>
+      <div class="step-entry-row">
+        <input id="step-input" aria-label="Today's steps" type="number" min="0" step="100" value="${state.stepToday}" />
+        <button data-action="submit-steps">Log</button>
+      </div>
+      ${renderStepSummary()}
+    </section>
+  `;
+}
+
+function renderHomeDiscoveryKit() {
+  const growing = state.plots.some((plot) => plot && !isPlotReady(plot, flowerByName.get(plot.name)));
+  return `
+    <section class="field-kit-card discovery-kit">
+      <div class="kit-heading">
+        <span class="journal-mark"></span>
+        <div>
+          <h2>Discovery</h2>
+          <p>${state.events.length ? `${state.events.length} active event${state.events.length === 1 ? "" : "s"}` : "No active events yet"}</p>
+        </div>
+      </div>
+      <div class="compact-tool-grid">
+        <button data-action="pollination-growth" ${state.pollinationPoints >= 2 && growing ? "" : "disabled"}>Grow<br><small>2 pollen</small></button>
+        <button data-action="pollination-quality" ${state.pollinationPoints >= 2 ? "" : "disabled"}>Quality<br><small>2 pollen</small></button>
+        <button data-action="spend-energy-research" ${state.discoveryEnergy >= 3 ? "" : "disabled"}>Clue<br><small>3 energy</small></button>
+        <button data-action="use-token-connection" ${state.discoveryTokens >= 1 ? "" : "disabled"}>Reveal<br><small>1 token</small></button>
+      </div>
+      <details class="kit-details">
+        <summary>Field notes</summary>
+        <div class="compact-tool-grid">
+          <button data-action="pollination-hybrid" ${state.pollinationPoints >= 2 ? "" : "disabled"}>Hybrid Bonus<br><small>2 pollen</small></button>
+          <button data-action="pollination-event" ${state.pollinationPoints >= 3 ? "" : "disabled"}>Attract Pollinator<br><small>3 pollen</small></button>
+          <button data-action="spend-energy-family" ${state.discoveryEnergy >= 4 ? "" : "disabled"}>Family Insight<br><small>4 energy</small></button>
+          <button data-action="use-token-hybrid" ${state.discoveryTokens >= 1 ? "" : "disabled"}>Focus Hybrid<br><small>1 token</small></button>
+        </div>
+        <div class="field-expeditions">
+          ${expeditionOptions.map((expedition) => `
+            <div class="field-slip">
+              <strong>${expedition.name}</strong>
+              <small>${expedition.reward}</small>
+              <button data-action="run-expedition" data-expedition="${expedition.id}" ${state.discoveryEnergy >= expedition.cost ? "" : "disabled"}>${expedition.cost} energy</button>
+            </div>
+          `).join("")}
+        </div>
+        <div class="event-list">${renderActiveEvents()}</div>
+      </details>
     </section>
   `;
 }
