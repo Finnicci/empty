@@ -6043,7 +6043,6 @@ input {
   border-radius: 18px;
   background:
     radial-gradient(circle at 82% 18%, rgba(255, 234, 161, 0.42) 0 10%, transparent 11%),
-    linear-gradient(90deg, rgba(54, 34, 22, 0.5) 0 2px, transparent 2px 20%, rgba(54, 34, 22, 0.4) 20% 21%, transparent 21% 40%, rgba(54, 34, 22, 0.4) 40% 41%, transparent 41% 60%, rgba(54, 34, 22, 0.4) 60% 61%, transparent 61% 80%, rgba(54, 34, 22, 0.4) 80% 81%, transparent 81%),
     linear-gradient(180deg, rgba(255, 248, 234, 0.92), rgba(245, 239, 216, 0.88));
   backdrop-filter: blur(3px);
   box-shadow:
@@ -6051,8 +6050,27 @@ input {
     0 20px 44px rgba(24, 18, 12, 0.34);
 }
 
+.title-screen .title-card:before {
+  left: 18px;
+  right: 18px;
+  top: 14px;
+  height: 12px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.title-screen .title-card:after {
+  display: none;
+}
+
+.title-screen .title-card > * {
+  position: relative;
+  z-index: 1;
+}
+
 .title-screen .title-card h1 {
-  font-size: clamp(4rem, 8vw, 7rem);
+  font-size: clamp(3.2rem, 7vw, 5.6rem);
+  line-height: 0.95;
   color: #2f5636;
 }
 
@@ -6092,7 +6110,8 @@ input {
   }
 
   .title-screen .title-card h1 {
-    font-size: clamp(3rem, 13vw, 4.7rem);
+    font-size: clamp(2.8rem, 10vw, 4rem);
+    line-height: 1;
   }
 
   .title-screen .title-actions {
