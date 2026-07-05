@@ -6038,29 +6038,56 @@ input {
   z-index: 6;
   width: min(520px, 42vw);
   margin: 0 0 clamp(10px, 3vh, 28px) clamp(10px, 3vw, 42px);
-  padding: clamp(16px, 2.8vw, 28px);
-  border: 4px solid rgba(54, 34, 22, 0.88);
-  border-radius: 18px;
+  padding: clamp(24px, 3vw, 34px) clamp(18px, 2.8vw, 30px) clamp(28px, 3vw, 36px);
+  border: 5px solid #5c3925;
+  border-radius: 22px 18px 24px 18px;
   background:
-    radial-gradient(circle at 82% 18%, rgba(255, 234, 161, 0.42) 0 10%, transparent 11%),
-    linear-gradient(180deg, rgba(255, 248, 234, 0.92), rgba(245, 239, 216, 0.88));
-  backdrop-filter: blur(3px);
+    radial-gradient(ellipse at 16% 18%, rgba(255, 234, 161, 0.18) 0 12%, transparent 13%),
+    radial-gradient(ellipse at 82% 78%, rgba(112, 143, 75, 0.14) 0 18%, transparent 19%),
+    linear-gradient(90deg, rgba(73, 44, 25, 0.22) 0 2px, transparent 2px 25%, rgba(73, 44, 25, 0.18) 25% 26%, transparent 26% 51%, rgba(73, 44, 25, 0.18) 51% 52%, transparent 52% 77%, rgba(73, 44, 25, 0.18) 77% 78%, transparent 78%),
+    repeating-linear-gradient(0deg, rgba(94, 58, 32, 0.22) 0 2px, transparent 2px 18px),
+    linear-gradient(180deg, #d6a05f, #b87a3f 46%, #8e5632);
+  backdrop-filter: none;
   box-shadow:
-    0 8px 0 rgba(54, 34, 22, 0.58),
-    0 20px 44px rgba(24, 18, 12, 0.34);
+    0 8px 0 #4f301f,
+    0 20px 42px rgba(24, 18, 12, 0.38),
+    inset 0 0 0 3px rgba(255, 224, 150, 0.28),
+    inset 0 -10px 0 rgba(73, 44, 25, 0.16);
 }
 
 .title-screen .title-card:before {
   left: 18px;
   right: 18px;
-  top: 14px;
-  height: 12px;
+  top: 12px;
+  height: 16px;
   z-index: 0;
   pointer-events: none;
+  border: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 18px 50%, #f5d77f 0 6px, transparent 7px),
+    radial-gradient(circle at calc(100% - 18px) 50%, #f5d77f 0 6px, transparent 7px),
+    linear-gradient(90deg, #5f7c4e 0 18%, #df7892 18% 34%, #9181c9 34% 50%, #edbf53 50% 68%, #81c7e2 68% 84%, #6e8b5d 84%);
+  box-shadow:
+    0 2px 0 rgba(73, 44, 25, 0.6),
+    inset 0 0 0 2px rgba(73, 44, 25, 0.34);
 }
 
 .title-screen .title-card:after {
-  display: none;
+  content: "";
+  display: block;
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 12px;
+  height: 10px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 8% 50%, #fff8ea 0 3px, transparent 4px),
+    radial-gradient(circle at 92% 50%, #fff8ea 0 3px, transparent 4px),
+    linear-gradient(90deg, rgba(95, 124, 78, 0.72), rgba(237, 191, 83, 0.62), rgba(223, 120, 146, 0.58));
+  box-shadow: 0 -1px 0 rgba(73, 44, 25, 0.38);
+  pointer-events: none;
 }
 
 .title-screen .title-card > * {
@@ -6069,15 +6096,40 @@ input {
 }
 
 .title-screen .title-card h1 {
-  font-size: clamp(3.2rem, 7vw, 5.6rem);
+  font-size: clamp(3rem, 6.6vw, 5.2rem);
   line-height: 0.95;
-  color: #2f5636;
+  color: #284d34;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 1px rgba(255, 230, 148, 0.56);
+  text-shadow:
+    0 2px 0 #f5d77f,
+    0 4px 0 rgba(73, 44, 25, 0.38),
+    0 0 16px rgba(255, 234, 161, 0.3);
 }
 
 .title-screen .title-card p {
   max-width: 38ch;
-  color: #4e513f;
+  color: #fff8ea;
   font-weight: 700;
+  text-shadow: 0 2px 0 rgba(73, 44, 25, 0.55);
+}
+
+.title-screen .title-card .eyebrow {
+  color: #fff3bf;
+  text-shadow: 0 2px 0 rgba(73, 44, 25, 0.56);
+}
+
+.title-screen .title-emblem {
+  width: 58px;
+  height: 58px;
+  border: 4px solid #5c3925;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 50%, #fff8ea 0 12%, rgba(73, 44, 25, 0.72) 13% 16%, transparent 17%),
+    conic-gradient(from 18deg, #ffe578 0 16%, #df7892 16% 32%, #9181c9 32% 48%, #81c7e2 48% 64%, #b9d3a3 64% 82%, #edbf53 82% 100%);
+  box-shadow:
+    0 4px 0 #4f301f,
+    0 0 18px rgba(255, 234, 161, 0.38);
 }
 
 .title-screen .title-actions {
@@ -6091,6 +6143,15 @@ input {
 
 .title-screen .title-actions button {
   min-height: 56px;
+  border-color: #5c3925;
+  background:
+    radial-gradient(circle at 14px 12px, rgba(255, 248, 234, 0.55) 0 4px, transparent 5px),
+    linear-gradient(180deg, #ffe7a0, #d79b52 58%, #b8793f);
+  color: #342315;
+  box-shadow:
+    0 4px 0 #5c3925,
+    inset 0 0 0 1px rgba(255, 248, 234, 0.4);
+  text-shadow: 0 1px 0 rgba(255, 248, 234, 0.5);
 }
 
 @media (max-width: 860px) {
@@ -6106,7 +6167,7 @@ input {
   .title-screen .title-card {
     width: min(520px, calc(100% - 16px));
     margin: 0 0 8px;
-    padding: 14px;
+    padding: 24px 14px 28px;
   }
 
   .title-screen .title-card h1 {
