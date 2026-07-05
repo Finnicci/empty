@@ -57,6 +57,46 @@ The style should prioritize mobile readability, flower clarity, and cozy atmosph
 
 Use detailed cozy pixel art only as warmth and charm inspiration, not as the density target. Use storybook watercolor lightly for journal and lore surfaces only. Use clean line art for NPC and character readability. Reserve whimsical pastel magic for rare hybrid discoveries and future magical garden content.
 
+## Stained Glass Identity
+
+Stained glass is a signature Bloomhaven motif for ceremonial and story-important moments.
+
+Use stained glass strongly for:
+
+- Opening/title screen
+- Bloomhaven logo and wordmark treatments
+- Rare flower discovery moments
+- Journal chapter dividers
+- District emblems
+- Major restoration achievements
+
+Stained glass should feel:
+
+- Handmade
+- Botanical
+- Warmly magical
+- Connected to flowers and sunlight
+- 80% grounded, 20% magical
+
+Use:
+
+- Lead-line framing
+- Flower-petal pane shapes
+- Sunlit yellows, lavender, rose, garden green, robin egg blue
+- Cream paper layered over glass
+- Calligraphic title typography for ceremonial headings
+
+Avoid:
+
+- Using stained glass on ordinary farm terrain
+- Neon jewel tones
+- Dark cathedral mood
+- Busy glass detail behind dense gameplay UI
+- Making body text calligraphic or hard to read
+
+Typography note:
+Use calligraphic styling for the Bloomhaven title, chapter titles, and major story moments only. Keep buttons, body copy, inventories, and gameplay text readable and simple.
+
 ## 3. Style Rules
 
 Use:

@@ -4237,6 +4237,10 @@ body {
   z-index: 0;
 }
 
+.title-screen .opening-cover-art {
+  filter: saturate(1.08) brightness(0.88);
+}
+
 .title-screen:before,
 .title-screen:after,
 .title-screen .opening-flowerbed,
@@ -4251,35 +4255,40 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 22% 24%, rgba(255, 234, 161, 0.22), transparent 24%),
-    linear-gradient(90deg, rgba(255, 247, 220, 0.5), rgba(255, 247, 220, 0.12) 46%, transparent 72%);
+    radial-gradient(circle at 72% 26%, rgba(255, 234, 161, 0.38) 0 12%, transparent 13%),
+    radial-gradient(circle at 72% 26%, transparent 0 19%, rgba(96, 61, 39, 0.36) 19% 20%, transparent 21% 28%, rgba(96, 61, 39, 0.28) 28% 29%, transparent 30%),
+    linear-gradient(120deg, transparent 0 18%, rgba(96, 61, 39, 0.18) 18.2% 18.8%, transparent 19% 38%, rgba(96, 61, 39, 0.16) 38.2% 38.8%, transparent 39% 64%, rgba(96, 61, 39, 0.16) 64.2% 64.8%, transparent 65%),
+    linear-gradient(90deg, rgba(255, 247, 220, 0.58), rgba(255, 247, 220, 0.16) 42%, rgba(92, 60, 38, 0.16) 100%);
   pointer-events: none;
-  z-index: 1;
+  z-index: 3;
+  mix-blend-mode: soft-light;
 }
 
 .opening-stained-window {
   position: absolute;
-  left: auto;
-  right: clamp(16px, 6vw, 96px);
-  top: clamp(18px, 6vh, 72px);
-  width: min(520px, 44vw);
-  height: min(72vh, 560px);
+  left: clamp(300px, 38vw, 560px);
+  right: clamp(14px, 4vw, 56px);
+  top: clamp(16px, 4vh, 42px);
+  width: auto;
+  height: min(84vh, 650px);
   z-index: 2;
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr 1fr;
-  grid-template-rows: 0.9fr 1.1fr;
-  gap: 5px;
-  padding: 12px;
-  border: 5px solid rgba(96, 61, 39, 0.62);
-  border-radius: 34px 34px 18px 18px;
+  grid-template-columns: 1fr 0.85fr 1.1fr;
+  grid-template-rows: 0.78fr 1fr;
+  gap: 7px;
+  padding: 16px;
+  border: 7px solid rgba(66, 42, 28, 0.84);
+  border-radius: 48px 48px 22px 22px;
   background:
-    linear-gradient(90deg, rgba(96, 61, 39, 0.34) 2px, transparent 2px) 0 0 / 48px 100%,
-    linear-gradient(0deg, rgba(96, 61, 39, 0.28) 2px, transparent 2px) 0 0 / 100% 48px,
-    rgba(255, 248, 234, 0.18);
+    radial-gradient(circle at 50% 26%, rgba(255, 234, 161, 0.44) 0 12%, transparent 13%),
+    linear-gradient(90deg, rgba(66, 42, 28, 0.52) 3px, transparent 3px) 0 0 / 54px 100%,
+    linear-gradient(0deg, rgba(66, 42, 28, 0.42) 3px, transparent 3px) 0 0 / 100% 54px,
+    rgba(255, 248, 234, 0.28);
   box-shadow:
-    0 14px 0 rgba(75, 48, 31, 0.16),
-    inset 0 0 0 3px rgba(255, 248, 234, 0.34),
-    inset 0 0 36px rgba(255, 248, 234, 0.2);
+    0 18px 0 rgba(45, 30, 21, 0.28),
+    0 0 44px rgba(255, 234, 161, 0.22),
+    inset 0 0 0 4px rgba(255, 248, 234, 0.42),
+    inset 0 0 42px rgba(255, 248, 234, 0.28);
   opacity: 1;
   pointer-events: none;
 }
@@ -4292,13 +4301,14 @@ body {
 }
 
 .opening-stained-window:before {
-  inset: 10px;
-  border: 3px solid rgba(96, 61, 39, 0.38);
-  border-radius: 25px 25px 12px 12px;
+  inset: 12px;
+  border: 4px solid rgba(66, 42, 28, 0.58);
+  border-radius: 35px 35px 14px 14px;
   background:
-    radial-gradient(circle at 50% 38%, rgba(255, 248, 234, 0.58) 0 8%, transparent 9%),
-    linear-gradient(90deg, transparent 31%, rgba(96, 61, 39, 0.36) 32% 34%, transparent 35% 65%, rgba(96, 61, 39, 0.36) 66% 68%, transparent 69%),
-    linear-gradient(0deg, transparent 48%, rgba(96, 61, 39, 0.34) 49% 51%, transparent 52%);
+    radial-gradient(circle at 50% 28%, rgba(255, 248, 234, 0.72) 0 7%, rgba(255, 234, 161, 0.44) 8% 15%, transparent 16%),
+    radial-gradient(circle at 50% 28%, transparent 0 21%, rgba(66, 42, 28, 0.48) 22% 23%, transparent 24%),
+    linear-gradient(90deg, transparent 31%, rgba(66, 42, 28, 0.48) 32% 34%, transparent 35% 65%, rgba(66, 42, 28, 0.48) 66% 68%, transparent 69%),
+    linear-gradient(0deg, transparent 48%, rgba(66, 42, 28, 0.42) 49% 51%, transparent 52%);
 }
 
 .opening-stained-window:after {
@@ -4306,21 +4316,22 @@ body {
   right: 16px;
   top: 15px;
   height: 34%;
-  border-radius: 22px 22px 4px 4px;
+  border-radius: 30px 30px 5px 5px;
   background:
-    radial-gradient(ellipse at 50% 110%, rgba(255, 234, 161, 0.5) 0 34%, transparent 35%),
-    linear-gradient(90deg, rgba(145, 129, 201, 0.22), rgba(158, 220, 245, 0.2), rgba(223, 120, 146, 0.2));
+    radial-gradient(ellipse at 50% 110%, rgba(255, 234, 161, 0.78) 0 34%, transparent 35%),
+    linear-gradient(90deg, rgba(145, 129, 201, 0.48), rgba(158, 220, 245, 0.44), rgba(223, 120, 146, 0.44));
 }
 
 .opening-stained-window span {
   position: relative;
   overflow: hidden;
-  border: 2px solid rgba(96, 61, 39, 0.42);
-  border-radius: 16px;
+  border: 3px solid rgba(66, 42, 28, 0.56);
+  border-radius: 18px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.42), transparent 42%),
+    radial-gradient(circle at 50% 45%, rgba(255, 248, 234, 0.34) 0 7%, transparent 8%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 44%),
     var(--pane);
-  opacity: 0.92;
+  opacity: 0.98;
 }
 
 .opening-stained-window span:before {
@@ -4332,12 +4343,12 @@ body {
     linear-gradient(120deg, transparent 0 46%, rgba(96, 61, 39, 0.22) 47% 50%, transparent 51%);
 }
 
-.opening-stained-window span:nth-child(1) { --pane: rgba(255, 234, 161, 0.54); }
-.opening-stained-window span:nth-child(2) { --pane: rgba(185, 211, 163, 0.58); }
-.opening-stained-window span:nth-child(3) { --pane: rgba(158, 220, 245, 0.48); }
-.opening-stained-window span:nth-child(4) { --pane: rgba(223, 120, 146, 0.42); }
-.opening-stained-window span:nth-child(5) { --pane: rgba(145, 129, 201, 0.42); }
-.opening-stained-window span:nth-child(6) { --pane: rgba(237, 191, 83, 0.42); }
+.opening-stained-window span:nth-child(1) { --pane: rgba(255, 229, 120, 0.76); border-radius: 28px 10px 18px 18px; }
+.opening-stained-window span:nth-child(2) { --pane: rgba(185, 211, 163, 0.78); }
+.opening-stained-window span:nth-child(3) { --pane: rgba(129, 199, 226, 0.72); border-radius: 10px 28px 18px 18px; }
+.opening-stained-window span:nth-child(4) { --pane: rgba(223, 120, 146, 0.66); }
+.opening-stained-window span:nth-child(5) { --pane: rgba(145, 129, 201, 0.68); }
+.opening-stained-window span:nth-child(6) { --pane: rgba(237, 191, 83, 0.7); }
 
 .opening-sky,
 .opening-flowerbed,
@@ -4532,10 +4543,13 @@ body {
   margin-left: clamp(8px, 5vw, 82px);
   text-align: left;
   overflow: hidden;
-  border-color: rgba(96, 61, 39, 0.62);
+  border: 5px solid rgba(66, 42, 28, 0.78);
+  border-color: rgba(66, 42, 28, 0.78);
+  border-radius: 18px;
   background:
-    linear-gradient(90deg, rgba(96, 61, 39, 0.48) 0 2px, transparent 2px 16%, rgba(96, 61, 39, 0.38) 16% 17%, transparent 17% 33%, rgba(96, 61, 39, 0.38) 33% 34%, transparent 34% 50%, rgba(96, 61, 39, 0.38) 50% 51%, transparent 51% 67%, rgba(96, 61, 39, 0.38) 67% 68%, transparent 68% 84%, rgba(96, 61, 39, 0.38) 84% 85%, transparent 85%),
-    linear-gradient(180deg, rgba(255, 234, 161, 0.42) 0 14px, rgba(185, 211, 163, 0.34) 14px 28px, rgba(158, 220, 245, 0.28) 28px 42px, transparent 42px),
+    radial-gradient(circle at 84% 18%, rgba(255, 234, 161, 0.42) 0 8%, transparent 9%),
+    linear-gradient(90deg, rgba(66, 42, 28, 0.58) 0 2px, transparent 2px 16%, rgba(66, 42, 28, 0.48) 16% 17%, transparent 17% 33%, rgba(66, 42, 28, 0.48) 33% 34%, transparent 34% 50%, rgba(66, 42, 28, 0.48) 50% 51%, transparent 51% 67%, rgba(66, 42, 28, 0.48) 67% 68%, transparent 68% 84%, rgba(66, 42, 28, 0.48) 84% 85%, transparent 85%),
+    linear-gradient(180deg, rgba(255, 234, 161, 0.62) 0 18px, rgba(223, 120, 146, 0.42) 18px 36px, rgba(145, 129, 201, 0.36) 36px 54px, rgba(158, 220, 245, 0.3) 54px 72px, transparent 72px),
     linear-gradient(90deg, rgba(96, 61, 39, 0.08) 1px, transparent 1px) 0 0 / 18px 100%,
     linear-gradient(180deg, rgba(255, 248, 234, 0.95), rgba(245, 239, 216, 0.96));
   box-shadow:
@@ -4549,10 +4563,10 @@ body {
   position: absolute;
   left: 16px;
   right: 16px;
-  height: 12px;
+  height: 16px;
   background:
-    linear-gradient(90deg, var(--leaf) 0 12%, rgba(96, 61, 39, 0.58) 12% 14%, var(--rose) 14% 27%, rgba(96, 61, 39, 0.58) 27% 29%, var(--violet) 29% 43%, rgba(96, 61, 39, 0.58) 43% 45%, var(--gold) 45% 60%, rgba(96, 61, 39, 0.58) 60% 62%, var(--water) 62% 76%, rgba(96, 61, 39, 0.58) 76% 78%, var(--leaf-dark) 78%);
-  border: 2px solid rgba(96, 61, 39, 0.45);
+    linear-gradient(90deg, var(--leaf) 0 12%, rgba(66, 42, 28, 0.72) 12% 14%, var(--rose) 14% 27%, rgba(66, 42, 28, 0.72) 27% 29%, var(--violet) 29% 43%, rgba(66, 42, 28, 0.72) 43% 45%, var(--gold) 45% 60%, rgba(66, 42, 28, 0.72) 60% 62%, var(--water) 62% 76%, rgba(66, 42, 28, 0.72) 76% 78%, var(--leaf-dark) 78%);
+  border: 3px solid rgba(66, 42, 28, 0.66);
   border-radius: 999px;
   opacity: 0.9;
 }
@@ -4566,13 +4580,17 @@ body {
 }
 
 .title-card h1 {
-  margin: 8px 0 10px;
-  font-size: clamp(2.8rem, 10vw, 5.2rem);
-  line-height: 0.9;
-  color: #415d3b;
+  margin: 12px 0 12px;
+  font-family: "Lucida Calligraphy", "Brush Script MT", "Palatino Linotype", "Book Antiqua", Georgia, cursive;
+  font-size: clamp(3.8rem, 11vw, 6.8rem);
+  font-weight: 400;
+  line-height: 0.78;
+  color: #365334;
+  letter-spacing: 0;
   text-shadow:
-    0 3px 0 #f1d992,
-    0 0 18px rgba(255, 234, 161, 0.38);
+    0 3px 0 #f5d77f,
+    0 0 14px rgba(255, 234, 161, 0.66),
+    0 0 28px rgba(145, 129, 201, 0.22);
 }
 
 .title-card p,
@@ -4586,12 +4604,16 @@ body {
 }
 
 .title-emblem {
-  width: 58px;
-  height: 58px;
-  border-radius: 16px;
+  width: 76px;
+  height: 76px;
+  border-width: 5px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 50%, #fff8ea 0 12%, rgba(66, 42, 28, 0.72) 13% 16%, transparent 17%),
+    conic-gradient(from 18deg, #ffe578 0 16%, #df7892 16% 32%, #9181c9 32% 48%, #81c7e2 48% 64%, #b9d3a3 64% 82%, #edbf53 82% 100%);
   box-shadow:
-    0 4px 0 rgba(96, 61, 39, 0.48),
-    0 0 22px rgba(255, 234, 161, 0.32);
+    0 6px 0 rgba(66, 42, 28, 0.62),
+    0 0 34px rgba(255, 234, 161, 0.58);
 }
 
 .title-actions {
@@ -4890,9 +4912,15 @@ body {
     right: 10px;
     top: 10px;
     width: auto;
-    height: min(48vh, 340px);
-    opacity: 0.72;
+    height: min(52vh, 360px);
+    opacity: 0.88;
     border-radius: 24px 24px 14px 14px;
+    border-width: 5px;
+    padding: 10px;
+    box-shadow:
+      0 12px 0 rgba(45, 30, 21, 0.32),
+      0 0 38px rgba(255, 234, 161, 0.3),
+      inset 0 0 0 3px rgba(255, 248, 234, 0.48);
   }
 
   .opening-asset-stage {
@@ -4926,7 +4954,7 @@ body {
   }
 
   .title-card h1 {
-    font-size: 3.2rem;
+    font-size: clamp(3.2rem, 18vw, 5rem);
   }
 
   .title-card {
@@ -4934,6 +4962,7 @@ body {
     justify-self: center;
     margin: 8px 0 0;
     width: calc(100% - 18px);
+    border-width: 4px;
   }
 
   .title-actions {
