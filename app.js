@@ -516,16 +516,6 @@ function renderTitleScreen() {
   return `
     <main class="opening-screen title-screen">
       <img class="opening-cover-art" src="assets/welcome/bloomhaven-welcome-stained-glass.png" alt="Bloomhaven flower farm framed by stained glass at sunrise" loading="eager">
-      <div class="opening-sky">
-        <span class="opening-sun"></span>
-        <span class="opening-cloud cloud-a"></span>
-        <span class="opening-cloud cloud-b"></span>
-        <span class="opening-butterfly butterfly-a"></span>
-        <span class="opening-butterfly butterfly-b"></span>
-      </div>
-      <div class="opening-stained-window" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
       <section class="title-card">
         <span class="stained-emblem title-emblem"></span>
         <p class="eyebrow">A cozy flower mystery</p>
@@ -537,7 +527,6 @@ function renderTitleScreen() {
           <button data-action="settings">Settings</button>
         </div>
       </section>
-      <div class="opening-flowerbed">${renderOpeningFlowers(18)}</div>
     </main>
   `;
 }
