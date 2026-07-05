@@ -4259,9 +4259,10 @@ body {
 
 .opening-stained-window {
   position: absolute;
-  left: clamp(16px, 4vw, 64px);
+  left: auto;
+  right: clamp(16px, 6vw, 96px);
   top: clamp(18px, 6vh, 72px);
-  width: min(520px, 64vw);
+  width: min(520px, 44vw);
   height: min(72vh, 560px);
   z-index: 2;
   display: grid;
@@ -4279,7 +4280,7 @@ body {
     0 14px 0 rgba(75, 48, 31, 0.16),
     inset 0 0 0 3px rgba(255, 248, 234, 0.34),
     inset 0 0 36px rgba(255, 248, 234, 0.2);
-  opacity: 0.9;
+  opacity: 1;
   pointer-events: none;
 }
 
@@ -4319,8 +4320,7 @@ body {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.42), transparent 42%),
     var(--pane);
-  mix-blend-mode: screen;
-  opacity: 0.8;
+  opacity: 0.92;
 }
 
 .opening-stained-window span:before {
@@ -4534,6 +4534,8 @@ body {
   overflow: hidden;
   border-color: rgba(96, 61, 39, 0.62);
   background:
+    linear-gradient(90deg, rgba(96, 61, 39, 0.48) 0 2px, transparent 2px 16%, rgba(96, 61, 39, 0.38) 16% 17%, transparent 17% 33%, rgba(96, 61, 39, 0.38) 33% 34%, transparent 34% 50%, rgba(96, 61, 39, 0.38) 50% 51%, transparent 51% 67%, rgba(96, 61, 39, 0.38) 67% 68%, transparent 68% 84%, rgba(96, 61, 39, 0.38) 84% 85%, transparent 85%),
+    linear-gradient(180deg, rgba(255, 234, 161, 0.42) 0 14px, rgba(185, 211, 163, 0.34) 14px 28px, rgba(158, 220, 245, 0.28) 28px 42px, transparent 42px),
     linear-gradient(90deg, rgba(96, 61, 39, 0.08) 1px, transparent 1px) 0 0 / 18px 100%,
     linear-gradient(180deg, rgba(255, 248, 234, 0.95), rgba(245, 239, 216, 0.96));
   box-shadow:
@@ -4545,21 +4547,22 @@ body {
 .title-card:after {
   content: "";
   position: absolute;
-  left: 18px;
-  right: 18px;
-  height: 7px;
+  left: 16px;
+  right: 16px;
+  height: 12px;
   background:
-    linear-gradient(90deg, var(--leaf) 0 12%, transparent 12% 17%, var(--rose) 17% 28%, transparent 28% 34%, var(--violet) 34% 45%, transparent 45% 54%, var(--gold) 54% 68%, transparent 68% 74%, var(--leaf-dark) 74%);
+    linear-gradient(90deg, var(--leaf) 0 12%, rgba(96, 61, 39, 0.58) 12% 14%, var(--rose) 14% 27%, rgba(96, 61, 39, 0.58) 27% 29%, var(--violet) 29% 43%, rgba(96, 61, 39, 0.58) 43% 45%, var(--gold) 45% 60%, rgba(96, 61, 39, 0.58) 60% 62%, var(--water) 62% 76%, rgba(96, 61, 39, 0.58) 76% 78%, var(--leaf-dark) 78%);
+  border: 2px solid rgba(96, 61, 39, 0.45);
   border-radius: 999px;
-  opacity: 0.74;
+  opacity: 0.9;
 }
 
 .title-card:before {
-  top: 12px;
+  top: 14px;
 }
 
 .title-card:after {
-  bottom: 12px;
+  bottom: 14px;
 }
 
 .title-card h1 {
