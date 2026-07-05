@@ -515,7 +515,7 @@ function hasSavedGame() {
 function renderTitleScreen() {
   return `
     <main class="opening-screen title-screen">
-      <img class="opening-cover-art" src="assets/welcome/bloomhaven-welcome-storybook.png" alt="Bloomhaven flower farm at sunrise" loading="eager">
+      <img class="opening-cover-art" src="assets/welcome/bloomhaven-welcome-stained-glass.png" alt="Bloomhaven flower farm framed by stained glass at sunrise" loading="eager">
       <div class="opening-sky">
         <span class="opening-sun"></span>
         <span class="opening-cloud cloud-a"></span>
