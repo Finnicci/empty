@@ -523,6 +523,9 @@ function renderTitleScreen() {
         <span class="opening-butterfly butterfly-a"></span>
         <span class="opening-butterfly butterfly-b"></span>
       </div>
+      <div class="opening-stained-window" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
       <section class="title-card">
         <span class="stained-emblem title-emblem"></span>
         <p class="eyebrow">A cozy flower mystery</p>
